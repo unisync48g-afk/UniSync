@@ -239,6 +239,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Google Sheets webhook (Apps Script Web App URL)
+// Replace PASTE_YOUR_WEB_APP_URL_HERE with your actual URL from Apps Script deployment.
+const SHEET_WEBHOOK_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnQQtwLQb4NCouheP0RdpEVwtrguwZg4-4gof3rKplkvY-0u91h0cXJN11FSeJEqK2QUiXa6Xv4RFhlCssErgl7C1XHoBhxfugtg2RZpGLhAnSdz3t9SzyFAj_rqJcgetC8HRAGwdyjGKUqalFno0Yo1kgcBnvthiSIvR31qKRcwXm5VMTU0W23DztwER9FzdMh1w9_y0yAaxxVrspktljIzP2ZNAMsOPsHAeP5OEkVAID2TMWSIpwHBeqJAgiOq1OcYvegYw1w7MeB6gACagNbbC0BBHg&lib=Mb6nOnnP5tvjpOgaOM-MsXxynwnuI8UvQ';
+const SHEET_SECRET = 'unisync-48g';
+
 const RESOURCE_TYPES = ['Notes','Slides','Question Bank','Previous Questions','Lab Report','Book','Syllabus','PDF (Drive)','Reference Link','Other'];
 const EVENT_TYPES = ['Class','Exam','Assignment','Quiz','Midterm','Final','Clearance','Seminar','Holiday','Other'];
 const NOTICE_CATS = ['General','Exam','Assignment','Clearance','Emergency'];
@@ -424,16 +429,17 @@ function viewAuth(){
         ${mode === 'login' ? 'Sign in' : 'Create account'}
       </button>
 
+      ${t !== 'admin' ? `
       <div style="text-align:center;margin-top:16px">
         <a onclick="toggleAuthMode()" style="cursor:pointer;font-size:13px">
           ${mode === 'login' ? 'New here? Create an account →' : '← Already have an account? Sign in'}
         </a>
-      </div>
+      </div>` : ''}
     </div>
   </div>`;
 }
 
-function setAuthTab(t){ S.authTab = t; S.authError = ''; render(); }
+function setAuthTab(t){ S.authTab = t; S.authError = ''; if (t === 'admin') S.authMode = 'login'; render(); }
 function toggleAuthMode(){ S.authMode = S.authMode === 'login' ? 'register' : 'login'; S.authError = ''; render(); }
 
 async function doAuth(){
@@ -1560,6 +1566,37 @@ async function savePresentation(){
   closeModal();
 }
 
+async function syncToSheet(sub){
+  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
+  const p = DB.presentations.find(x => x.id === sub.presentation_id) || {};
+  const payload = {
+    token: SHEET_SECRET,
+    submissionId: sub.id,
+    presentation: p.title || '',
+    course: p.course || '',
+    submittedAt: sub.submitted_at || new Date().toISOString(),
+    status: sub.updated_at && sub.updated_at !== sub.submitted_at ? 'Updated' : 'Submitted',
+    submitterId: (S.profile && S.profile.student_id) || '',
+    link: sub.link,
+    teamName: sub.team_name || '',
+    leaderName: sub.leader_name,
+    leaderId: sub.leader_id,
+    members: sub.members || []
+  };
+  try {
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    return true;
+  } catch(e) {
+    console.warn('Sheet sync failed', e);
+    return false;
+  }
+}
+
 async function submitPresentation(pid, existingId){
   const p = DB.presentations.find(x => x.id === pid);
   if (!p){ toast('Presentation not found', 'err'); return; }
@@ -1596,18 +1633,23 @@ async function submitPresentation(pid, existingId){
     updated_at: new Date().toISOString()
   };
 
+  let saved = null;
   if (existingId){
-    const { error } = await sb.from('submissions').update(payload).eq('id', existingId);
+    const { data, error } = await sb.from('submissions').update(payload).eq('id', existingId).select().single();
     if (error){ toast(error.message, 'err'); return; }
+    saved = data;
     toast('Submission updated');
   } else {
     payload.submitted_at = new Date().toISOString();
-    const { error } = await sb.from('submissions').insert(payload);
+    const { data, error } = await sb.from('submissions').insert(payload).select().single();
     if (error){ toast(error.message, 'err'); return; }
+    saved = data;
     await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id),
       'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations');
     toast('Submission saved');
   }
+
+  if (saved) syncToSheet(saved);
   memberDraft = [];
   closeModal();
 }
