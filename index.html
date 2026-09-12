@@ -233,7 +233,6 @@ select.inp{cursor:pointer}
    UniSync — Supabase edition
    ========================================================= */
 
-// ⚠️ REPLACE THESE WITH YOUR OWN VALUES
 const SUPABASE_URL = 'https://jqnazghhbdppeltpfhop.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbmF6Z2hoYmRwcGVsdHBmaG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMjQ1NTksImV4cCI6MjEwNDgwMDU1OX0.Zmf1QeRSIRG2XAkBmspkGeC7hkGlBrO8qbt9IV8hQyA';
 
@@ -308,6 +307,7 @@ let DB = {
 let toastTimer = null;
 let channels = [];
 let memberDraft = [];
+let submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
 
 async function fetchAll(){
   const [p, r, n, a, e, g, pr, s, nt, ci] = await Promise.all([
@@ -1056,7 +1056,10 @@ function viewPresentations(u){
             <div><div class="tiny muted">Members</div><div class="small">${(mySub.members||[]).map(m=>esc(m.name)+' ('+esc(m.id)+')').join(', ')||'—'}</div></div>
           </div>
           <div class="divider"></div>
-          ${!closed ? `<button class="btn primary sm" onclick="openModal('submission',{presentationId:'${p.id}',submissionId:'${mySub.id}'})">Update submission</button>` : `<span class="tag red">Deadline passed</span>`}
+          <div class="row wrap" style="gap:8px">
+            ${!closed ? `<button class="btn primary sm" onclick="openModal('submission',{presentationId:'${p.id}',submissionId:'${mySub.id}'})">Update submission</button>` : `<span class="tag red">Deadline passed</span>`}
+            <button class="btn danger sm" onclick="deleteSubmission('${mySub.id}')">Remove submission</button>
+          </div>
         ` : `
           ${closed ? `<div class="empty" style="padding:26px"><span class="big">⏰</span>Deadline passed.</div>`
             : `<button class="btn primary" onclick="openModal('submission',{presentationId:'${p.id}'})">Open submission form</button>`}
@@ -1100,9 +1103,10 @@ function viewPresentations(u){
 }
 
 async function deleteSubmission(id){
-  if (!confirm('Delete this submission?')) return;
-  await sb.from('submissions').delete().eq('id', id);
-  toast('Submission deleted');
+  if (!confirm('Remove this submission? You can submit again if the deadline has not passed.')) return;
+  const { error } = await sb.from('submissions').delete().eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Submission removed');
 }
 
 async function remindNonSubmitters(pid){
@@ -1396,6 +1400,12 @@ function viewModal(u){
       const existing = m.submissionId ? DB.submissions.find(s => s.id === m.submissionId) : null;
       if (!m._init){
         memberDraft = existing ? JSON.parse(JSON.stringify(existing.members||[])) : [];
+        submissionDraft = {
+          link: existing?.link || '',
+          teamName: existing?.team_name || '',
+          leaderName: existing?.leader_name || u.name,
+          leaderId: existing?.leader_id || u.student_id
+        };
         m._init = true;
       }
       const max = p?.max_team_size || 6;
@@ -1405,14 +1415,18 @@ function viewModal(u){
           <div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div>
         </div>
         <label class="f"><span>Presentation link <span class="req">*</span></span>
-          <input class="inp" id="sb_link" value="${esc(existing?.link||'')}" placeholder="https://…" data-fk="sb_link"></label>
+          <input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" placeholder="https://…" data-fk="sb_link"
+                 oninput="submissionDraft.link=this.value"></label>
         <label class="f"><span>Team name</span>
-          <input class="inp" id="sb_team" value="${esc(existing?.team_name||'')}" data-fk="sb_team"></label>
+          <input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team"
+                 oninput="submissionDraft.teamName=this.value"></label>
         <div class="frow">
           <label class="f"><span>Leader name <span class="req">*</span></span>
-            <input class="inp" id="sb_ln" value="${esc(existing?.leader_name||u.name)}" data-fk="sb_ln"></label>
+            <input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln"
+                   oninput="submissionDraft.leaderName=this.value"></label>
           <label class="f"><span>Leader ID <span class="req">*</span></span>
-            <input class="inp" id="sb_li" value="${esc(existing?.leader_id||u.student_id)}" data-fk="sb_li"></label>
+            <input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li"
+                   oninput="submissionDraft.leaderId=this.value"></label>
         </div>
         <div class="divider"></div>
         <div class="row" style="margin-bottom:10px">
@@ -1606,10 +1620,10 @@ async function submitPresentation(pid, existingId){
   const p = DB.presentations.find(x => x.id === pid);
   if (!p){ toast('Presentation not found', 'err'); return; }
 
-  const link = $('#sb_link').value.trim();
-  const teamName = $('#sb_team').value.trim();
-  const leaderName = $('#sb_ln').value.trim();
-  const leaderId = $('#sb_li').value.trim();
+  const link = (submissionDraft.link || '').trim();
+  const teamName = (submissionDraft.teamName || '').trim();
+  const leaderName = (submissionDraft.leaderName || '').trim();
+  const leaderId = (submissionDraft.leaderId || '').trim();
 
   if (!link || !/^https?:\/\/\S+\.\S+/i.test(link)){ toast('Enter a valid URL', 'err'); return; }
   if (!leaderName || !leaderId){ toast('Leader name and ID required', 'err'); return; }
@@ -1656,6 +1670,7 @@ async function submitPresentation(pid, existingId){
 
   if (saved) syncToSheet(saved);
   memberDraft = [];
+  submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
   closeModal();
 }
 
