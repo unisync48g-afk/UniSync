@@ -41,8 +41,7 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .topbar{height:58px;border-bottom:1px solid var(--line);background:rgba(14,17,22,.86);
   backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
 .topbar .class-chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;
-  padding:5px 12px;font-size:12px;color:var(--muted);white-space:nowrap}
-.topbar .class-chip b{color:var(--txt);font-weight:600}
+  padding:5px 12px;font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px;white-space:nowrap}
 .searchbox{flex:1;max-width:420px;position:relative}
 .searchbox input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
   padding:8px 12px 8px 34px;color:var(--txt);outline:none}
@@ -125,15 +124,13 @@ select.inp{cursor:pointer}
 .auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;
   background:radial-gradient(900px 500px at 20% 0%,rgba(91,140,255,.14),transparent 60%),
              radial-gradient(700px 500px at 90% 100%,rgba(139,92,246,.13),transparent 60%)}
-.auth{width:100%;max-width:440px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;
+.auth{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;
   box-shadow:0 24px 70px rgba(0,0,0,.5)}
 .auth h1{margin:0 0 4px;font-size:22px;font-weight:680;letter-spacing:-.3px}
 .auth p.sub{margin:0 0 20px;color:var(--muted);font-size:13px}
 .tabs{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:18px}
 .tabs button{flex:1;background:none;border:none;padding:8px 4px;border-radius:8px;color:var(--muted);cursor:pointer;font-weight:600;font-size:12.5px}
 .tabs button.active{background:var(--accent);color:#fff}
-.demo-box{margin-top:16px;padding:12px;border-radius:10px;background:#12161d;border:1px dashed var(--line);font-size:12px;color:var(--muted)}
-.demo-box code{background:#1d2230;padding:1px 5px;border-radius:5px;color:#9dbaff}
 
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
 .stat .n{font-size:24px;font-weight:700;letter-spacing:-.5px}
@@ -185,6 +182,7 @@ select.inp{cursor:pointer}
   .nav-item .lbl{display:none}
   .nav-item .ico{font-size:17px}
   .content{padding:16px}
+  .topbar .class-chip{font-size:11px;padding:4px 10px}
 }
 
 .file-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;
@@ -231,6 +229,7 @@ select.inp{cursor:pointer}
 <script>
 /* =========================================================
    UniSync — Supabase edition
+   Section-based multi-tenant with dept/batch/section
    ========================================================= */
 
 const SUPABASE_URL = 'https://jqnazghhbdppeltpfhop.supabase.co';
@@ -291,6 +290,7 @@ const isDrivePdf = r => r && r.type === 'PDF (Drive)';
 const isAdmin = u => u && u.role === 'admin';
 const isCR = u => u && u.role === 'cr';
 const canManage = u => isAdmin(u) || isCR(u);
+const classLabel = u => `${(u?.dept||'—').toUpperCase()}-${u?.batch||'—'}-${(u?.section||'—').toUpperCase()}`;
 
 let S = {
   route: 'dashboard', user: null, profile: null, modal: null, toast: null,
@@ -310,6 +310,12 @@ let memberDraft = [];
 let submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
 
 async function fetchAll(){
+  const me = S.profile;
+  const isGlobal = me && me.role === 'admin';
+  const dept = (me?.dept || '').toUpperCase();
+  const batch = me?.batch;
+  const section = (me?.section || '').toUpperCase();
+
   const [p, r, n, a, e, g, pr, s, nt, ci] = await Promise.all([
     sb.from('profiles').select('*').order('name'),
     sb.from('resources').select('*').order('uploaded_at', {ascending:false}),
@@ -322,13 +328,29 @@ async function fetchAll(){
     sb.from('notifications').select('*').order('created_at', {ascending:false}),
     sb.from('class_info').select('*').eq('id', 1).maybeSingle()
   ]);
-  if (p.data) DB.profiles = p.data;
-  if (r.data) DB.resources = r.data;
-  if (n.data) DB.notices = n.data;
+
+  const inScope = (row) => {
+    if (isGlobal) return true;
+    // Legacy rows with no scope → treat as global so old data isn't hidden
+    if (!row.batch && !row.section && !row.dept) return true;
+    return (row.dept || '').toUpperCase() === dept
+        && row.batch === batch
+        && (row.section || '').toUpperCase() === section;
+  };
+
+  if (p.data) {
+    DB.profiles = p.data;
+    if (S.profile) {
+      const fresh = p.data.find(x => x.id === S.profile.id);
+      if (fresh) S.profile = fresh;
+    }
+  }
+  if (r.data) DB.resources = r.data.filter(inScope);
+  if (n.data) DB.notices = n.data.filter(inScope);
   if (a.data) DB.notice_acks = a.data;
-  if (e.data) DB.events = e.data;
-  if (g.data) DB.groups = g.data;
-  if (pr.data) DB.presentations = pr.data;
+  if (e.data) DB.events = e.data.filter(inScope);
+  if (g.data) DB.groups = g.data.filter(inScope);
+  if (pr.data) DB.presentations = pr.data.filter(inScope);
   if (s.data) DB.submissions = s.data;
   if (nt.data) DB.notifications = nt.data;
   if (ci.data) DB.class_info = ci.data;
@@ -367,7 +389,16 @@ async function notify(userIds, title, body, link){
   await sb.from('notifications').insert(rows);
 }
 async function notifyClass(exceptId, title, body, link){
-  const ids = DB.profiles.filter(p => p.id !== exceptId).map(p => p.id);
+  const me = S.profile;
+  if (!me) return;
+  const myDept = (me.dept || '').toUpperCase();
+  const mySec = (me.section || '').toUpperCase();
+  const ids = DB.profiles.filter(p =>
+    p.id !== exceptId &&
+    (p.dept || '').toUpperCase() === myDept &&
+    p.batch === me.batch &&
+    (p.section || '').toUpperCase() === mySec
+  ).map(p => p.id);
   await notify(ids, title, body, link);
 }
 
@@ -411,7 +442,18 @@ function viewAuth(){
           <input class="inp" id="li_name" placeholder="Your full name" data-fk="li_name">
         </label>
         <label class="f"><span>Student ID <span class="req">*</span></span>
-          <input class="inp" id="li_sid" placeholder="2021001" data-fk="li_sid">
+          <input class="inp" id="li_sid" placeholder="e.g. 2021001" data-fk="li_sid">
+        </label>
+        <div class="frow">
+          <label class="f"><span>Department <span class="req">*</span></span>
+            <input class="inp" id="rg_dept" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="rg_dept">
+          </label>
+          <label class="f"><span>Batch <span class="req">*</span></span>
+            <input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch">
+          </label>
+        </div>
+        <label class="f"><span>Section <span class="req">*</span></span>
+          <input class="inp" id="rg_section" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="rg_section">
         </label>
       ` : ''}
 
@@ -448,11 +490,15 @@ async function doAuth(){
   if (S.authMode === 'register'){
     const name = ($('#li_name')?.value || '').trim();
     const sid = ($('#li_sid')?.value || '').trim();
+    const dept = ($('#rg_dept')?.value || '').trim().toUpperCase();
+    const batch = ($('#rg_batch')?.value || '').trim();
+    const section = ($('#rg_section')?.value || '').trim().toUpperCase();
     if (!name || !sid){ S.authError = 'Name and Student ID are required.'; render(); return; }
+    if (!dept || !batch || !section){ S.authError = 'Department, batch and section are required.'; render(); return; }
     if (pw.length < 6){ S.authError = 'Password must be at least 6 characters.'; render(); return; }
     const { error } = await sb.auth.signUp({
       email, password: pw,
-      options: { data: { name, student_id: sid } }
+      options: { data: { name, student_id: sid, dept, batch, section } }
     });
     if (error){ S.authError = error.message; render(); return; }
     toast('Account created! You can now sign in.');
@@ -493,7 +539,7 @@ function viewSidebar(u){
   let html = `<aside class="sidebar">
     <div class="brand">
       <div class="logo">US</div>
-      <div><h1>UniSync</h1><small>${esc(DB.class_info.name)}</small></div>
+      <div><h1>UniSync</h1><small>${esc(classLabel(u))}</small></div>
     </div>
     <nav class="nav">`;
   sections.forEach(sec => {
@@ -524,7 +570,7 @@ function viewTopbar(u){
   const unread = unreadCount();
   const q = S.route === 'search' ? S.search : '';
   return `<header class="topbar">
-    <div class="class-chip">${esc(DB.class_info.dept)} · Batch <b>${esc(DB.class_info.batch)}</b> · Sec <b>${esc(DB.class_info.section)}</b></div>
+    <div class="class-chip">${esc(classLabel(u))}</div>
     <div class="searchbox">
       <span class="si">🔍</span>
       <input id="globalSearch" placeholder="Search resources, notices, events, members…" value="${esc(q)}"
@@ -609,22 +655,22 @@ function viewDashboard(u){
 
   const stat = (n,l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
 
-  let greeting = isAdmin(u) ? 'You are the Administrator. Only you can appoint or remove CRs.'
-    : isCR(u) ? 'You are a Class Representative — manage schedules, notices and submissions.'
-    : 'Here is what is happening in your class today.';
+  let greeting = isAdmin(u) ? 'You are the Administrator. You can see all sections.'
+    : isCR(u) ? `You are a CR for ${classLabel(u)}. Your posts go to your section only.`
+    : `Showing content for ${classLabel(u)}.`;
 
   let stats;
   if (isAdmin(u)){
     stats = `<div class="grid g4" style="margin-bottom:18px">
       ${stat(DB.profiles.filter(x=>x.role==='student').length,'Students')}
       ${stat(DB.profiles.filter(x=>x.role==='cr').length,'CRs')}
-      ${stat(DB.resources.length,'Resources')}
+      ${stat(DB.notices.length,'Notices')}
       ${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}
     </div>`;
   } else if (isCR(u)){
     stats = `<div class="grid g4" style="margin-bottom:18px">
-      ${stat(DB.profiles.length,'Class members')}
-      ${stat(DB.resources.length,'Resources')}
+      ${stat(DB.notices.length,'Notices in section')}
+      ${stat(DB.resources.length,'Resources in section')}
       ${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}
       ${stat(DB.submissions.length,'Submissions')}
     </div>`;
@@ -741,7 +787,7 @@ function viewResources(u){
 
   return `
     <div class="page-head">
-      <div><h2>Resources & Notes</h2><p>Shared study materials. Anyone can upload.</p></div>
+      <div><h2>Resources & Notes</h2><p>Shared study materials for ${esc(classLabel(u))}. Anyone can upload.</p></div>
       <div class="actions"><button class="btn primary" onclick="openModal('resource')">+ Upload resource</button></div>
     </div>
 
@@ -761,7 +807,7 @@ function viewResources(u){
     </div>
 
     ${list.length ? `<div class="grid g2">${list.map(r => resourceCard(r, u)).join('')}</div>`
-      : `<div class="empty"><span class="big">📚</span>No resources match.</div>`}
+      : `<div class="empty"><span class="big">📚</span>No resources in this section yet.</div>`}
   `;
 }
 
@@ -821,7 +867,7 @@ function viewNotices(u){
 
   return `
     <div class="page-head">
-      <div><h2>Notices & Announcements</h2><p>${canManage(u) ? 'Post announcements.' : 'Only your CR can post here.'}</p></div>
+      <div><h2>Notices & Announcements</h2><p>${canManage(u) ? `Your posts go to ${esc(classLabel(u))} only.` : `Notices for ${esc(classLabel(u))}.`}</p></div>
       ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('notice')">+ New notice</button></div>` : ''}
     </div>
 
@@ -840,6 +886,7 @@ function viewNotices(u){
               <div class="row wrap tiny muted" style="gap:6px">
                 <span class="tag blue">${esc(n.category)}</span>
                 ${n.priority!=='Normal'?`<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>`:''}
+                ${n.dept?`<span class="tag">${esc((n.dept||'').toUpperCase())}-${esc(n.batch||'')}-${esc((n.section||'').toUpperCase())}</span>`:''}
                 <span>by ${esc(nameOf(n.created_by))} · ${fmtDateTime(n.created_at)}</span>
               </div>
             </div>
@@ -848,13 +895,13 @@ function viewNotices(u){
           <div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(n.body)}</div>
           <div class="divider"></div>
           <div class="row wrap">
-            <span class="tiny muted">${ackCount} of ${DB.profiles.length} acknowledged</span>
+            <span class="tiny muted">${ackCount} acknowledged</span>
             ${!canManage(u) ? (acked
               ? `<span class="tag green" style="margin-left:auto">✓ Acknowledged</span>`
               : `<button class="btn sm primary" style="margin-left:auto" onclick="ackNotice('${n.id}')">Acknowledge</button>`) : ''}
           </div>
         </div>`;
-      }).join('') || `<div class="empty"><span class="big">📢</span>No notices.</div>`}
+      }).join('') || `<div class="empty"><span class="big">📢</span>No notices for this section yet.</div>`}
     </div>
   `;
 }
@@ -894,7 +941,7 @@ function viewCalendar(u){
 
   return `
     <div class="page-head">
-      <div><h2>Class Calendar</h2><p>Routine, exams, deadlines, quizzes and other events.</p></div>
+      <div><h2>Class Calendar</h2><p>Routine, exams, deadlines for ${esc(classLabel(u))}.</p></div>
       ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('event')">+ Add event</button></div>` : ''}
     </div>
 
@@ -948,7 +995,7 @@ function viewGroups(u){
 
   return `
     <div class="page-head">
-      <div><h2>Class Groups</h2><p>WhatsApp, Messenger and Telegram group links.</p></div>
+      <div><h2>Class Groups</h2><p>WhatsApp, Messenger and Telegram links for ${esc(classLabel(u))}.</p></div>
       ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('group')">+ Add group</button></div>` : ''}
     </div>
 
@@ -981,7 +1028,7 @@ function viewGroups(u){
           </a>
         </div>
       </div>`;
-    }).join('')}</div>` : `<div class="empty"><span class="big">💬</span>No groups yet.</div>`}
+    }).join('')}</div>` : `<div class="empty"><span class="big">💬</span>No groups in this section yet.</div>`}
   `;
 }
 
@@ -993,7 +1040,7 @@ async function deleteGroup(id){
 
 function viewPresentations(u){
   if (!DB.presentations.length){
-    return `<div class="page-head"><div><h2>Presentation Submissions</h2><p>No events yet.</p></div>
+    return `<div class="page-head"><div><h2>Presentation Submissions</h2><p>No events yet for ${esc(classLabel(u))}.</p></div>
       ${canManage(u)?`<div class="actions"><button class="btn primary" onclick="openModal('presentation')">+ New presentation</button></div>`:''}</div>
       <div class="empty"><span class="big">🎤</span>No presentation events.</div>`;
   }
@@ -1010,7 +1057,15 @@ function viewPresentations(u){
     coveredIds.add(s.leader_id);
     (s.members||[]).forEach(m => coveredIds.add(String(m.id).trim()));
   });
-  const notSubmitted = DB.profiles.filter(x => x.role !== 'admin' && !coveredIds.has(x.student_id));
+  const myDept = (u.dept||'').toUpperCase();
+  const mySec = (u.section||'').toUpperCase();
+  const notSubmitted = DB.profiles.filter(x =>
+    x.role !== 'admin' &&
+    (x.dept||'').toUpperCase() === myDept &&
+    x.batch === u.batch &&
+    (x.section||'').toUpperCase() === mySec &&
+    !coveredIds.has(x.student_id)
+  );
   const mySub = subs.find(s => s.leader_id === u.student_id ||
     (s.members||[]).some(m => String(m.id).trim() === u.student_id));
 
@@ -1057,7 +1112,7 @@ function viewPresentations(u){
           </div>
           <div class="divider"></div>
           <div class="row wrap" style="gap:8px">
-            ${!closed ? `<button class="btn primary sm" onclick="openModal('submission',{presentationId:'${p.id}',submissionId:'${mySub.id}'})">Update submission</button>` : `<span class="tag red">Deadline passed</span>`}
+            ${!closed ? `<button class="btn primary sm" onclick="openModal('submission',{presentationId:'${p.id}',submissionId:'${mySub.id}'})">Update submission</button>` : `<span class="tag red">Deadline passed — editing closed</span>`}
             <button class="btn danger sm" onclick="deleteSubmission('${mySub.id}')">Remove submission</button>
           </div>
         ` : `
@@ -1093,7 +1148,7 @@ function viewPresentations(u){
           </table>
         </div>` : `<div class="empty"><span class="big">📭</span>No submissions.</div>`}
         <div class="divider"></div>
-        <b class="small">Not submitted (${notSubmitted.length})</b>
+        <b class="small">Not submitted in this section (${notSubmitted.length})</b>
         <div class="row wrap" style="margin-top:8px">
           ${notSubmitted.map(m=>`<span class="tag">${esc(m.name)} · ${esc(m.student_id)}</span>`).join('') || `<span class="small muted">Everyone submitted 🎉</span>`}
         </div>
@@ -1116,7 +1171,16 @@ async function remindNonSubmitters(pid){
     covered.add(s.leader_id);
     (s.members||[]).forEach(m=>covered.add(String(m.id).trim()));
   });
-  const targets = DB.profiles.filter(x=>x.role!=='admin' && !covered.has(x.student_id)).map(x=>x.id);
+  const me = S.profile;
+  const myDept = (me.dept||'').toUpperCase();
+  const mySec = (me.section||'').toUpperCase();
+  const targets = DB.profiles.filter(x =>
+    x.role !== 'admin' &&
+    (x.dept||'').toUpperCase() === myDept &&
+    x.batch === me.batch &&
+    (x.section||'').toUpperCase() === mySec &&
+    !covered.has(x.student_id)
+  ).map(x=>x.id);
   if (!targets.length){ toast('Everyone submitted'); return; }
   await notify(targets, 'Presentation reminder', `You haven't submitted for "${p.title}". Deadline: ${fmtDate(p.deadline)}.`, 'presentations');
   toast(`Reminder sent to ${targets.length} student(s)`);
@@ -1146,13 +1210,22 @@ function exportSubmissions(pid){
 }
 
 function viewMembers(u){
-  const sorted = [...DB.profiles].sort((a,b) => {
+  const me = S.profile;
+  const myDept = (me.dept||'').toUpperCase();
+  const mySec = (me.section||'').toUpperCase();
+  const visible = me.role === 'admin'
+    ? DB.profiles
+    : DB.profiles.filter(p =>
+        p.role === 'admin' ||
+        ((p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec)
+      );
+  const sorted = [...visible].sort((a,b) => {
     const rank = x => x.role === 'admin' ? 0 : x.role === 'cr' ? 1 : 2;
     return rank(a) - rank(b) || a.name.localeCompare(b.name);
   });
   return `
     <div class="page-head">
-      <div><h2>Class Members</h2><p>${DB.profiles.filter(x=>x.role!=='admin').length} members</p></div>
+      <div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members in ${esc(classLabel(me))}</p></div>
       ${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage CRs</button></div>` : ''}
     </div>
     <div class="grid g3">
@@ -1163,6 +1236,7 @@ function viewMembers(u){
             <div style="flex:1;min-width:0">
               <div style="font-weight:600">${esc(m.name)}</div>
               <div class="tiny muted">${esc(m.student_id)} · ${esc(m.email||'')}</div>
+              <div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div>
             </div>
             ${roleBadge(m)}
           </div>
@@ -1183,6 +1257,7 @@ function viewManageCRs(u){
         <div><div style="font-weight:600;font-size:13px">${esc(m.name)}</div><div class="tiny muted">${esc(m.email||'')}</div></div>
       </div></td>
       <td class="small">${esc(m.student_id)}</td>
+      <td class="small">${esc(classLabel(m))}</td>
       <td>${roleBadge(m)}</td>
       <td style="text-align:right">
         ${m.role === 'student' ? `<button class="btn sm primary" onclick="appointCR('${m.id}')">Appoint as CR</button>` : ''}
@@ -1199,7 +1274,7 @@ function viewManageCRs(u){
     </div>
     <div class="tbl-wrap">
       <table class="tbl">
-        <thead><tr><th>Member</th><th>Student ID</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead>
+        <thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead>
         <tbody>${[...admins, ...crs, ...students].map(rowFor).join('')}</tbody>
       </table>
     </div>
@@ -1209,7 +1284,7 @@ function viewManageCRs(u){
 async function appointCR(id){
   if (!confirm('Appoint as Class Representative?')) return;
   await sb.from('profiles').update({ role: 'cr' }).eq('id', id);
-  await notify(id, 'You are now a CR', 'You can manage notices, calendar, groups and submissions.', 'dashboard');
+  await notify(id, 'You are now a CR', 'Your posts will go to your own section only.', 'dashboard');
   toast('CR appointed');
 }
 async function demoteCR(id){
@@ -1264,7 +1339,11 @@ function viewSearch(u){
   const res = DB.resources.filter(r => [r.title,r.course,r.topic,r.teacher].join(' ').toLowerCase().includes(q));
   const not = DB.notices.filter(n => (n.title + ' ' + n.body).toLowerCase().includes(q));
   const evs = DB.events.filter(e => [e.title,e.course,e.location,e.type].join(' ').toLowerCase().includes(q));
-  const mem = DB.profiles.filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
+  const myDept = (u.dept||'').toUpperCase();
+  const mySec = (u.section||'').toUpperCase();
+  const mem = DB.profiles.filter(m =>
+    isAdmin(u) || ((m.dept||'').toUpperCase() === myDept && m.batch === u.batch && (m.section||'').toUpperCase() === mySec)
+  ).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
   const grs = DB.groups.filter(g => (g.name + ' ' + (g.description||'')).toLowerCase().includes(q));
   const total = res.length + not.length + evs.length + mem.length + grs.length;
   const block = (title, items, renderer) => items.length ? `
@@ -1280,7 +1359,7 @@ function viewSearch(u){
     ${block('Notices', not, n => `<div class="list-item" onclick="go('notices')" style="cursor:pointer"><div class="lead"><div class="t">${esc(n.title)}</div></div></div>`)}
     ${block('Events', evs, e => `<div class="list-item" onclick="go('calendar')" style="cursor:pointer"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)}</div></div></div>`)}
     ${block('Groups', grs, g => `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="lead"><div class="t">${esc(g.name)}</div></div></a>`)}
-    ${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)}</div></div></div>`)}
+    ${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(classLabel(m))}</div></div></div>`)}
   `;
 }
 
@@ -1310,10 +1389,27 @@ function viewModal(u){
         <label class="f"><span>Full name</span><input class="inp" id="pf_name" value="${esc(u.name)}" data-fk="pf_name"></label>
         <label class="f"><span>Email</span><input class="inp" id="pf_email" value="${esc(u.email||'')}" data-fk="pf_email"></label>
       </div>
+      <div class="frow">
+        <label class="f"><span>Department</span>
+          <input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept">
+        </label>
+        <label class="f"><span>Batch</span>
+          <input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch">
+        </label>
+      </div>
+      <label class="f"><span>Section</span>
+        <input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section">
+      </label>
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px">
+        <div class="tiny muted">Changing your department, batch or section switches your view to that group's notices, calendar, resources, groups and presentations. You will no longer see your previous section's content.</div>
+      </div>
     `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
         <button class="btn primary" onclick="saveProfile()">Save changes</button>`);
 
     case 'resource': return modalShell('Upload resource', `
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
+        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
+      </div>
       <label class="f"><span>Title <span class="req">*</span></span>
         <input class="inp" id="r_title" placeholder="e.g. Data Structures Notes" data-fk="r_title"></label>
       <div class="frow">
@@ -1331,6 +1427,9 @@ function viewModal(u){
         <button class="btn primary" onclick="saveResource()">Upload</button>`);
 
     case 'notice': return modalShell('New notice', `
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
+        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b> only. Only students of your section will see this.</div>
+      </div>
       <label class="f"><span>Title <span class="req">*</span></span>
         <input class="inp" id="n_title" data-fk="n_title"></label>
       <label class="f"><span>Body <span class="req">*</span></span>
@@ -1350,6 +1449,9 @@ function viewModal(u){
         <button class="btn primary" onclick="saveNotice()">Publish</button>`);
 
     case 'event': return modalShell('Add event', `
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
+        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
+      </div>
       <label class="f"><span>Title <span class="req">*</span></span>
         <input class="inp" id="e_title" placeholder="Data Structures Midterm" data-fk="e_title"></label>
       <div class="frow">
@@ -1371,8 +1473,11 @@ function viewModal(u){
         <button class="btn primary" onclick="saveEvent()">Add event</button>`);
 
     case 'group': return modalShell('Add group', `
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
+        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
+      </div>
       <label class="f"><span>Group name <span class="req">*</span></span>
-        <input class="inp" id="g_name" placeholder="SE121 WhatsApp Group" data-fk="g_name"></label>
+        <input class="inp" id="g_name" placeholder="e.g. SWE-48-G WhatsApp" data-fk="g_name"></label>
       <label class="f"><span>Platform</span>
         <select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}">${PLATFORM_META[p].name}</option>`).join('')}</select></label>
       <label class="f"><span>Group link <span class="req">*</span></span>
@@ -1383,6 +1488,9 @@ function viewModal(u){
         <button class="btn primary" onclick="saveGroup()">Add</button>`);
 
     case 'presentation': return modalShell('New presentation event', `
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
+        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
+      </div>
       <label class="f"><span>Title <span class="req">*</span></span>
         <input class="inp" id="p_title" placeholder="Database Project Presentation" data-fk="p_title"></label>
       <div class="frow">
@@ -1468,10 +1576,21 @@ function removeMemberRow(i){
 async function saveProfile(){
   const name = $('#pf_name').value.trim();
   const email = $('#pf_email').value.trim();
+  const dept = ($('#pf_dept')?.value || '').trim().toUpperCase();
+  const batch = ($('#pf_batch')?.value || '').trim();
+  const section = ($('#pf_section')?.value || '').trim().toUpperCase();
   if (!name){ toast('Name required', 'err'); return; }
-  await sb.from('profiles').update({ name, email }).eq('id', S.profile.id);
+  const updates = { name, email };
+  if (dept) updates.dept = dept;
+  if (batch) updates.batch = batch;
+  if (section) updates.section = section;
+  const { error } = await sb.from('profiles').update(updates).eq('id', S.profile.id);
+  if (error){ toast(error.message, 'err'); return; }
+  Object.assign(S.profile, updates);
+  await fetchAll();
   toast('Profile updated');
   closeModal();
+  render();
 }
 
 async function saveResource(){
@@ -1492,6 +1611,7 @@ async function saveResource(){
     filePath = path; fileName = file.name;
   }
 
+  const me = S.profile;
   const { error } = await sb.from('resources').insert({
     title,
     course: $('#r_course').value.trim(),
@@ -1500,7 +1620,10 @@ async function saveResource(){
     file_path: filePath,
     file_name: fileName,
     tags: $('#r_tags').value.split(',').map(t=>t.trim()).filter(Boolean),
-    uploaded_by: S.profile.id
+    dept: (me.dept||'').toUpperCase(),
+    batch: me.batch,
+    section: (me.section||'').toUpperCase(),
+    uploaded_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
   toast('Resource uploaded');
@@ -1511,16 +1634,20 @@ async function saveNotice(){
   const title = $('#n_title').value.trim();
   const body = $('#n_body').value.trim();
   if (!title || !body){ toast('Title and body required', 'err'); return; }
+  const me = S.profile;
   const { error } = await sb.from('notices').insert({
     title, body,
     category: $('#n_cat').value,
     priority: $('#n_pri').value,
     expires_at: $('#n_exp').value || null,
     pinned: $('#n_pin').value === 'yes',
-    created_by: S.profile.id
+    dept: (me.dept||'').toUpperCase(),
+    batch: me.batch,
+    section: (me.section||'').toUpperCase(),
+    created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(S.profile.id, 'New notice', title, 'notices');
+  await notifyClass(me.id, 'New notice', title, 'notices');
   toast('Notice published');
   closeModal();
 }
@@ -1529,6 +1656,7 @@ async function saveEvent(){
   const title = $('#e_title').value.trim();
   const date = $('#e_date').value;
   if (!title || !date){ toast('Title and date required', 'err'); return; }
+  const me = S.profile;
   const { error } = await sb.from('events').insert({
     title, date,
     type: $('#e_type').value,
@@ -1537,10 +1665,13 @@ async function saveEvent(){
     start_time: $('#e_st').value || '09:00',
     end_time: $('#e_et').value || '10:00',
     description: $('#e_desc').value.trim(),
-    created_by: S.profile.id
+    dept: (me.dept||'').toUpperCase(),
+    batch: me.batch,
+    section: (me.section||'').toUpperCase(),
+    created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(S.profile.id, 'New event scheduled', `${title} — ${fmtDate(date)}`, 'calendar');
+  await notifyClass(me.id, 'New event scheduled', `${title} — ${fmtDate(date)}`, 'calendar');
   toast('Event added');
   closeModal();
 }
@@ -1550,14 +1681,18 @@ async function saveGroup(){
   const link = $('#g_link').value.trim();
   if (!name || !link){ toast('Name and link required', 'err'); return; }
   if (!/^https?:\/\//i.test(link)){ toast('Link must start with http:// or https://', 'err'); return; }
+  const me = S.profile;
   const { error } = await sb.from('groups').insert({
     name, link,
     platform: $('#g_platform').value,
     description: $('#g_desc').value.trim(),
-    created_by: S.profile.id
+    dept: (me.dept||'').toUpperCase(),
+    batch: me.batch,
+    section: (me.section||'').toUpperCase(),
+    created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(S.profile.id, 'New class group added', name, 'groups');
+  await notifyClass(me.id, 'New class group added', name, 'groups');
   toast('Group added');
   closeModal();
 }
@@ -1566,24 +1701,25 @@ async function savePresentation(){
   const title = $('#p_title').value.trim();
   const deadline = $('#p_deadline').value;
   if (!title || !deadline){ toast('Title and deadline required', 'err'); return; }
+  const me = S.profile;
   const { error } = await sb.from('presentations').insert({
     title, deadline,
     course: $('#p_course').value.trim(),
     max_team_size: parseInt($('#p_max').value) || 4,
     instructions: $('#p_instr').value.trim(),
-    created_by: S.profile.id
+    dept: (me.dept||'').toUpperCase(),
+    batch: me.batch,
+    section: (me.section||'').toUpperCase(),
+    created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(S.profile.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
+  await notifyClass(me.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
   toast('Presentation created');
   closeModal();
 }
 
 async function syncToSheet(sub){
-  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) {
-    console.warn('Sheet sync skipped: SHEET_WEBHOOK_URL not set');
-    return false;
-  }
+  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
   const p = DB.presentations.find(x => x.id === sub.presentation_id) || {};
   const payload = {
     token: SHEET_SECRET,
@@ -1599,7 +1735,6 @@ async function syncToSheet(sub){
     leaderId: sub.leader_id,
     members: sub.members || []
   };
-  console.log('Sending to sheet:', payload);
   try {
     await fetch(SHEET_WEBHOOK_URL, {
       method: 'POST',
@@ -1608,10 +1743,9 @@ async function syncToSheet(sub){
       body: JSON.stringify(payload),
       keepalive: true
     });
-    console.log('Sheet sync request sent');
     return true;
   } catch(e) {
-    console.error('Sheet sync failed', e);
+    console.warn('Sheet sync failed', e);
     return false;
   }
 }
@@ -1720,7 +1854,10 @@ async function loadProfile(){
     id: S.user.id,
     name: meta.name || 'New User',
     student_id: meta.student_id || 'unknown_' + S.user.id.slice(0,8),
-    email: S.user.email
+    email: S.user.email,
+    dept: (meta.dept || 'CSE').toUpperCase(),
+    batch: meta.batch || '—',
+    section: (meta.section || '—').toUpperCase()
   }).select().maybeSingle();
   if (!error && data){
     S.profile = data;
