@@ -240,7 +240,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Google Sheets webhook (Apps Script Web App URL)
-// Replace PASTE_YOUR_WEB_APP_URL_HERE with your actual URL from Apps Script deployment.
 const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxMRIAEOuEVNUR_nhQAuRKh5ivZh4cFQj5I9eiLOYyw71NelezUf0s-p8vLa_aQHvGnfQ/exec';
 const SHEET_SECRET = 'unisync-48g';
 
@@ -1567,7 +1566,10 @@ async function savePresentation(){
 }
 
 async function syncToSheet(sub){
-  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
+  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) {
+    console.warn('Sheet sync skipped: SHEET_WEBHOOK_URL not set');
+    return false;
+  }
   const p = DB.presentations.find(x => x.id === sub.presentation_id) || {};
   const payload = {
     token: SHEET_SECRET,
@@ -1583,16 +1585,19 @@ async function syncToSheet(sub){
     leaderId: sub.leader_id,
     members: sub.members || []
   };
+  console.log('Sending to sheet:', payload);
   try {
     await fetch(SHEET_WEBHOOK_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      keepalive: true
     });
+    console.log('Sheet sync request sent');
     return true;
   } catch(e) {
-    console.warn('Sheet sync failed', e);
+    console.error('Sheet sync failed', e);
     return false;
   }
 }
