@@ -20,7 +20,6 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:#2c3342;border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
-
 .layout{display:flex;min-height:100vh}
 .sidebar{width:236px;flex:0 0 236px;background:var(--panel);border-right:1px solid var(--line);
   display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
@@ -36,7 +35,6 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .nav-item.active{background:linear-gradient(90deg,rgba(91,140,255,.18),rgba(139,92,246,.10));color:#fff}
 .nav-item .ico{width:18px;text-align:center;font-size:15px;flex:0 0 18px}
 .nav-sep{padding:14px 14px 6px;font-size:10.5px;letter-spacing:.9px;text-transform:uppercase;color:#5b6478;font-weight:700}
-
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{height:58px;border-bottom:1px solid var(--line);background:rgba(14,17,22,.86);
   backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
@@ -54,7 +52,6 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .icon-btn .dot{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-weight:700}
 .avatar{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:#fff;font-size:13px;cursor:pointer;flex:0 0 36px}
 .content{padding:22px;max-width:1220px;width:100%;margin:0 auto;flex:1}
-
 .page-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;flex-wrap:wrap}
 .page-head h2{margin:0 0 3px;font-size:20px;font-weight:650;letter-spacing:-.2px}
 .page-head p{margin:0;color:var(--muted);font-size:13px}
@@ -92,7 +89,6 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .tag.red{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.32);color:#ff9d9d}
 .tag.purple{background:rgba(139,92,246,.14);border-color:rgba(139,92,246,.35);color:#c3adff}
 .tag.admin{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#f7c76a}
-
 label.f{display:block;margin-bottom:12px}
 label.f > span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:550}
 label.f > span .req{color:var(--danger)}
@@ -104,7 +100,6 @@ select.inp{cursor:pointer}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:620px){.frow{grid-template-columns:1fr}}
 .err{color:#ff9d9d;font-size:12px;margin-top:5px}
-
 .overlay{position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(3px);
   display:flex;align-items:flex-start;justify-content:center;padding:44px 16px;z-index:100;overflow-y:auto}
 .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:620px;
@@ -120,7 +115,6 @@ select.inp{cursor:pointer}
   z-index:200;box-shadow:0 12px 32px rgba(0,0,0,.5);font-weight:550;animation:pop .18s}
 .toast.ok{border-color:rgba(34,197,94,.45)}
 .toast.err{border-color:rgba(239,68,68,.45)}
-
 .auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;
   background:radial-gradient(900px 500px at 20% 0%,rgba(91,140,255,.14),transparent 60%),
              radial-gradient(700px 500px at 90% 100%,rgba(139,92,246,.13),transparent 60%)}
@@ -131,7 +125,6 @@ select.inp{cursor:pointer}
 .tabs{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:18px}
 .tabs button{flex:1;background:none;border:none;padding:8px 4px;border-radius:8px;color:var(--muted);cursor:pointer;font-weight:600;font-size:12.5px}
 .tabs button.active{background:var(--accent);color:#fff}
-
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
 .stat .n{font-size:24px;font-weight:700;letter-spacing:-.5px}
 .stat .l{color:var(--muted);font-size:12px;margin-top:2px}
@@ -141,7 +134,6 @@ select.inp{cursor:pointer}
 .list-item .lead{flex:1;min-width:0}
 .list-item .t{font-weight:580;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dotc{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
-
 .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .cal-head div{text-align:center;font-size:11.5px;color:var(--muted);font-weight:600;padding:4px 0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
@@ -155,7 +147,6 @@ select.inp{cursor:pointer}
 .cal-ev{font-size:10.5px;padding:2px 5px;border-radius:5px;margin-bottom:3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:550}
 @media(max-width:760px){.cal-cell{min-height:64px;padding:5px}.cal-ev{font-size:9px}}
-
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11.5px;text-transform:uppercase;
   letter-spacing:.6px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
@@ -163,14 +154,11 @@ select.inp{cursor:pointer}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tbody tr:hover{background:#12161d}
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
-
 .stars span{cursor:pointer;color:#4a5266;font-size:15px;transition:.1s}
 .stars span.on{color:#f5b942}
 .stars span:hover{transform:scale(1.12)}
-
 .member-box{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:10px;background:var(--panel2)}
 .member-box .mb-head{display:flex;align-items:center;margin-bottom:8px;font-size:12px;color:var(--muted);font-weight:600}
-
 @media(max-width:900px){
   .layout{flex-direction:column}
   .sidebar{width:100%;flex:none;height:auto;position:static;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line)}
@@ -184,7 +172,6 @@ select.inp{cursor:pointer}
   .content{padding:16px}
   .topbar .class-chip{font-size:11px;padding:4px 10px}
 }
-
 .file-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;
   background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.14s}
 .file-card:hover{border-color:#3a4256;transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.28)}
@@ -199,7 +186,6 @@ select.inp{cursor:pointer}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .file-meta{font-size:11.5px;color:var(--muted)}
 .file-open{color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap}
-
 .group-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;
   display:flex;flex-direction:column;gap:12px;transition:.14s}
 .group-card:hover{border-color:#3a4256}
@@ -227,14 +213,8 @@ select.inp{cursor:pointer}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* =========================================================
-   UniSync — Supabase edition
-   Section-based multi-tenant with dept/batch/section
-   ========================================================= */
-
 const SUPABASE_URL = 'https://jqnazghhbdppeltpfhop.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbmF6Z2hoYmRwcGVsdHBmaG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMjQ1NTksImV4cCI6MjEwNDgwMDU1OX0.Zmf1QeRSIRG2XAkBmspkGeC7hkGlBrO8qbt9IV8hQyA';
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzhUXtO95ftrK7GtCxgEeDW0M3_1OlVOwYdDbI1BA2NL0QhrZxgM8EB5E9QBrvLIGl8/exec';
@@ -245,45 +225,25 @@ const EVENT_TYPES = ['Class','Exam','Assignment','Quiz','Midterm','Final','Clear
 const NOTICE_CATS = ['General','Exam','Assignment','Clearance','Emergency'];
 const PRIORITIES = ['Normal','Important','Urgent'];
 const GROUP_PLATFORMS = ['whatsapp','messenger','telegram','other'];
-
-const EVENT_COLORS = {
-  Class:'#5b8cff', Exam:'#ef4444', Assignment:'#f59e0b', Quiz:'#8b5cf6',
-  Midterm:'#ec4899', Final:'#dc2626', Clearance:'#14b8a6', Seminar:'#06b6d4',
-  Holiday:'#22c55e', Other:'#8b95a7'
-};
+const EVENT_COLORS = { Class:'#5b8cff', Exam:'#ef4444', Assignment:'#f59e0b', Quiz:'#8b5cf6', Midterm:'#ec4899', Final:'#dc2626', Clearance:'#14b8a6', Seminar:'#06b6d4', Holiday:'#22c55e', Other:'#8b95a7' };
 const PRIORITY_TAG = { Normal:'', Important:'amber', Urgent:'red' };
-
 const PLATFORM_META = {
-  whatsapp: { name:'WhatsApp', color:'#25D366',
-    svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' },
-  messenger: { name:'Messenger', color:'#0084FF',
-    svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.652V24l4.088-2.242c1.092.301 2.246.464 3.443.464 6.627 0 12-4.974 12-11.111C24 4.974 18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8l3.131 3.259L19.752 8l-6.561 6.963z"/></svg>' },
-  telegram: { name:'Telegram', color:'#229ED9',
-    svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>' },
-  other: { name:'Other', color:'#8b95a7',
-    svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' }
+  whatsapp: { name:'WhatsApp', color:'#25D366', svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' },
+  messenger: { name:'Messenger', color:'#0084FF', svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.652V24l4.088-2.242c1.092.301 2.246.464 3.443.464 6.627 0 12-4.974 12-11.111C24 4.974 18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8l3.131 3.259L19.752 8l-6.561 6.963z"/></svg>' },
+  telegram: { name:'Telegram', color:'#229ED9', svg:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>' },
+  other: { name:'Other', color:'#8b95a7', svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' }
 };
 const PDF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 
 const $  = (s, el=document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const initials = n => (n||'?').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
-const colorFor = s => {
-  let h = 0; for (let i=0;i<String(s).length;i++) h = String(s).charCodeAt(i) + ((h<<5)-h);
-  return `hsl(${Math.abs(h)%360},58%,48%)`;
-};
+const colorFor = s => { let h=0; for (let i=0;i<String(s).length;i++) h=String(s).charCodeAt(i)+((h<<5)-h); return `hsl(${Math.abs(h)%360},58%,48%)`; };
 const iso = (off=0) => { const d=new Date(); d.setDate(d.getDate()+off); return d.toISOString().slice(0,10); };
-const fmtDate = ds => { if(!ds) return '—'; const d = new Date(ds + (ds.length===10 ? 'T00:00:00' : '')); return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); };
+const fmtDate = ds => { if(!ds) return '—'; const d=new Date(ds+(ds.length===10?'T00:00:00':'')); return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); };
 const fmtDateTime = ds => { if(!ds) return '—'; return new Date(ds).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); };
-const daysUntil = ds => Math.ceil((new Date(ds+'T00:00:00') - new Date(new Date().toDateString()))/86400000);
-const countdown = ds => {
-  const d = daysUntil(ds);
-  if (d < 0) return { text:`${-d}d overdue`, cls:'red' };
-  if (d === 0) return { text:'Today', cls:'red' };
-  if (d === 1) return { text:'Tomorrow', cls:'amber' };
-  if (d <= 7) return { text:`${d} days`, cls:'amber' };
-  return { text:`${d} days`, cls:'' };
-};
+const daysUntil = ds => Math.ceil((new Date(ds+'T00:00:00')-new Date(new Date().toDateString()))/86400000);
+const countdown = ds => { const d=daysUntil(ds); if(d<0)return{text:`${-d}d overdue`,cls:'red'}; if(d===0)return{text:'Today',cls:'red'}; if(d===1)return{text:'Tomorrow',cls:'amber'}; if(d<=7)return{text:`${d} days`,cls:'amber'}; return{text:`${d} days`,cls:''}; };
 const sortByDate = (a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time);
 const isDrivePdf = r => r && r.type === 'PDF (Drive)';
 const isAdmin = u => u && u.role === 'admin';
@@ -291,18 +251,8 @@ const isCR = u => u && u.role === 'cr';
 const canManage = u => isAdmin(u) || isCR(u);
 const classLabel = u => `${(u?.dept||'—').toUpperCase()}-${u?.batch||'—'}-${(u?.section||'—').toUpperCase()}`;
 
-let S = {
-  route: 'dashboard', user: null, profile: null, modal: null, toast: null,
-  search: '', resFilter: { q:'', course:'', type:'' }, noticeFilter: 'All',
-  calYear: null, calMonth: null, selectedPresentation: null,
-  authTab: 'student', authError: '', authMode: 'login', loading: true
-};
-
-let DB = {
-  profiles: [], resources: [], notices: [], notice_acks: [], events: [],
-  groups: [], presentations: [], submissions: [], notifications: [], class_info: null
-};
-
+let S = { route:'dashboard', user:null, profile:null, modal:null, toast:null, search:'', resFilter:{q:'',course:'',type:''}, noticeFilter:'All', calYear:null, calMonth:null, selectedPresentation:null, authTab:'student', authError:'', authMode:'login', loading:true };
+let DB = { profiles:[], resources:[], notices:[], notice_acks:[], events:[], groups:[], presentations:[], submissions:[], notifications:[], class_info:null };
 let toastTimer = null;
 let channels = [];
 let memberDraft = [];
@@ -311,10 +261,9 @@ let submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
 async function fetchAll(){
   const me = S.profile;
   const isGlobal = me && me.role === 'admin';
-  const dept = (me?.dept || '').toUpperCase();
+  const dept = (me?.dept||'').toUpperCase();
   const batch = me?.batch;
-  const section = (me?.section || '').toUpperCase();
-
+  const section = (me?.section||'').toUpperCase();
   const [p, r, n, a, e, g, pr, s, nt, ci] = await Promise.all([
     sb.from('profiles').select('*').order('name'),
     sb.from('resources').select('*').order('uploaded_at', {ascending:false}),
@@ -327,21 +276,14 @@ async function fetchAll(){
     sb.from('notifications').select('*').order('created_at', {ascending:false}),
     sb.from('class_info').select('*').eq('id', 1).maybeSingle()
   ]);
-
   const inScope = (row) => {
     if (isGlobal) return true;
     if (!row.batch && !row.section && !row.dept) return true;
-    return (row.dept || '').toUpperCase() === dept
-        && row.batch === batch
-        && (row.section || '').toUpperCase() === section;
+    return (row.dept||'').toUpperCase() === dept && row.batch === batch && (row.section||'').toUpperCase() === section;
   };
-
-  if (p.data) {
-    DB.profiles = p.data;
-    if (S.profile) {
-      const fresh = p.data.find(x => x.id === S.profile.id);
-      if (fresh) S.profile = fresh;
-    }
+  if (p.data){
+    DB.profiles = p.data.filter(x => !x.disabled);
+    if (S.profile){ const fresh = DB.profiles.find(x => x.id === S.profile.id); if (fresh) S.profile = fresh; }
   }
   if (r.data) DB.resources = r.data.filter(inScope);
   if (n.data) DB.notices = n.data.filter(inScope);
@@ -374,15 +316,10 @@ function subscribeRealtime(){
   });
 }
 
-function toast(msg, type='ok'){
-  S.toast = { msg, type };
-  render();
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { S.toast = null; render(); }, 2800);
-}
-function openModal(type, props={}){ S.modal = { type, ...props }; render(); }
-function closeModal(){ S.modal = null; render(); }
-function go(route){ S.route = route; S.modal = null; window.scrollTo(0,0); render(); }
+function toast(msg, type='ok'){ S.toast={msg,type}; render(); clearTimeout(toastTimer); toastTimer=setTimeout(()=>{S.toast=null;render();},2800); }
+function openModal(type, props={}){ S.modal={type,...props}; render(); }
+function closeModal(){ S.modal=null; render(); }
+function go(route){ S.route=route; S.modal=null; window.scrollTo(0,0); render(); }
 
 async function notify(userIds, title, body, link){
   const ids = Array.isArray(userIds) ? userIds : [userIds];
@@ -391,134 +328,77 @@ async function notify(userIds, title, body, link){
   await sb.from('notifications').insert(rows);
 }
 async function notifyClass(exceptId, title, body, link){
-  const me = S.profile;
-  if (!me) return;
-  const myDept = (me.dept || '').toUpperCase();
-  const mySec = (me.section || '').toUpperCase();
-  const ids = DB.profiles.filter(p =>
-    p.id !== exceptId &&
-    (p.dept || '').toUpperCase() === myDept &&
-    p.batch === me.batch &&
-    (p.section || '').toUpperCase() === mySec
-  ).map(p => p.id);
+  const me = S.profile; if (!me) return;
+  const myDept = (me.dept||'').toUpperCase();
+  const mySec = (me.section||'').toUpperCase();
+  const ids = DB.profiles.filter(p => p.id !== exceptId && (p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec).map(p => p.id);
   await notify(ids, title, body, link);
 }
 
 function viewAuth(){
-  const t = S.authTab;
-  const mode = S.authMode;
-  const roleMeta = {
-    student: { label:'Student', icon:'🎓', color:'var(--accent)', title:'Student Access' },
-    cr:      { label:'CR',      icon:'⭐', color:'#8b5cf6',      title:'Class Representative' },
-    admin:   { label:'Admin',   icon:'🛡', color:'#f59e0b',      title:'Administrator' }
-  };
+  const t = S.authTab, mode = S.authMode;
+  const roleMeta = { student:{label:'Student',icon:'🎓',color:'var(--accent)',title:'Student Access'}, cr:{label:'CR',icon:'⭐',color:'#8b5cf6',title:'Class Representative'}, admin:{label:'Admin',icon:'🛡',color:'#f59e0b',title:'Administrator'} };
   const meta = roleMeta[t];
-
   return `
-  <div class="auth-wrap">
-    <div class="auth">
-      <div class="row" style="margin-bottom:16px">
-        <div class="logo" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff">US</div>
-        <div>
-          <h1 style="margin:0;font-size:19px">UniSync</h1>
-          <p class="sub" style="margin:0">Your class, synced.</p>
-        </div>
-      </div>
-
-      <div class="tabs">
-        <button class="${t==='student'?'active':''}" onclick="setAuthTab('student')">Student</button>
-        <button class="${t==='cr'?'active':''}" onclick="setAuthTab('cr')">CR</button>
-        <button class="${t==='admin'?'active':''}" onclick="setAuthTab('admin')">Admin</button>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-        <div style="width:54px;height:54px;flex:0 0 54px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:${meta.color}22;border:1px solid ${meta.color}55">${meta.icon}</div>
-        <div>
-          <div style="font-weight:650;font-size:15px">${meta.title}</div>
-          <div class="small muted">${mode === 'login' ? 'Sign in to continue' : 'Create your account'}</div>
-        </div>
-      </div>
-
-      ${mode === 'register' ? `
-        <label class="f"><span>Full name <span class="req">*</span></span>
-          <input class="inp" id="li_name" placeholder="Your full name" data-fk="li_name">
-        </label>
-        <label class="f"><span>Student ID <span class="req">*</span></span>
-          <input class="inp" id="li_sid" placeholder="e.g. 2021001" data-fk="li_sid">
-        </label>
-        <div class="frow">
-          <label class="f"><span>Department <span class="req">*</span></span>
-            <input class="inp" id="rg_dept" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="rg_dept">
-          </label>
-          <label class="f"><span>Batch <span class="req">*</span></span>
-            <input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch">
-          </label>
-        </div>
-        <label class="f"><span>Section <span class="req">*</span></span>
-          <input class="inp" id="rg_section" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="rg_section">
-        </label>
-      ` : ''}
-
-      <label class="f"><span>Email <span class="req">*</span></span>
-        <input class="inp" id="li_email" type="email" placeholder="you@uni.edu" data-fk="li_email">
-      </label>
-      <label class="f"><span>Password <span class="req">*</span></span>
-        <input class="inp" id="li_pw" type="password" placeholder="••••••" data-fk="li_pw" onkeydown="if(event.key==='Enter')doAuth()">
-      </label>
-
-      ${S.authError ? `<div class="err" style="margin-bottom:10px">${esc(S.authError)}</div>` : ''}
-
-      <button class="btn primary" style="width:100%;justify-content:center" onclick="doAuth()">
-        ${mode === 'login' ? 'Sign in' : 'Create account'}
-      </button>
-
-      ${t !== 'admin' ? `
-      <div style="text-align:center;margin-top:16px">
-        <a onclick="toggleAuthMode()" style="cursor:pointer;font-size:13px">
-          ${mode === 'login' ? 'New here? Create an account →' : '← Already have an account? Sign in'}
-        </a>
-      </div>` : ''}
+  <div class="auth-wrap"><div class="auth">
+    <div class="row" style="margin-bottom:16px">
+      <div class="logo" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff">US</div>
+      <div><h1 style="margin:0;font-size:19px">UniSync</h1><p class="sub" style="margin:0">Your class, synced.</p></div>
     </div>
-  </div>`;
+    <div class="tabs">
+      <button class="${t==='student'?'active':''}" onclick="setAuthTab('student')">Student</button>
+      <button class="${t==='cr'?'active':''}" onclick="setAuthTab('cr')">CR</button>
+      <button class="${t==='admin'?'active':''}" onclick="setAuthTab('admin')">Admin</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div style="width:54px;height:54px;flex:0 0 54px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:${meta.color}22;border:1px solid ${meta.color}55">${meta.icon}</div>
+      <div><div style="font-weight:650;font-size:15px">${meta.title}</div><div class="small muted">${mode==='login'?'Sign in to continue':'Create your account'}</div></div>
+    </div>
+    ${mode==='register' ? `
+      <label class="f"><span>Full name <span class="req">*</span></span><input class="inp" id="li_name" placeholder="Your full name" data-fk="li_name"></label>
+      <label class="f"><span>Student ID <span class="req">*</span></span><input class="inp" id="li_sid" placeholder="e.g. 2021001" data-fk="li_sid"></label>
+      <div class="frow">
+        <label class="f"><span>Department <span class="req">*</span></span><input class="inp" id="rg_dept" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="rg_dept"></label>
+        <label class="f"><span>Batch <span class="req">*</span></span><input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch"></label>
+      </div>
+      <label class="f"><span>Section <span class="req">*</span></span><input class="inp" id="rg_section" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="rg_section"></label>
+    ` : ''}
+    <label class="f"><span>Email <span class="req">*</span></span><input class="inp" id="li_email" type="email" placeholder="you@uni.edu" data-fk="li_email"></label>
+    <label class="f"><span>Password <span class="req">*</span></span><input class="inp" id="li_pw" type="password" placeholder="••••••" data-fk="li_pw" onkeydown="if(event.key==='Enter')doAuth()"></label>
+    ${S.authError ? `<div class="err" style="margin-bottom:10px">${esc(S.authError)}</div>` : ''}
+    <button class="btn primary" style="width:100%;justify-content:center" onclick="doAuth()">${mode==='login'?'Sign in':'Create account'}</button>
+    ${t !== 'admin' ? `<div style="text-align:center;margin-top:16px"><a onclick="toggleAuthMode()" style="cursor:pointer;font-size:13px">${mode==='login'?'New here? Create an account →':'← Already have an account? Sign in'}</a></div>` : ''}
+  </div></div>`;
 }
 
-function setAuthTab(t){ S.authTab = t; S.authError = ''; if (t === 'admin') S.authMode = 'login'; render(); }
-function toggleAuthMode(){ S.authMode = S.authMode === 'login' ? 'register' : 'login'; S.authError = ''; render(); }
+function setAuthTab(t){ S.authTab=t; S.authError=''; if(t==='admin')S.authMode='login'; render(); }
+function toggleAuthMode(){ S.authMode=S.authMode==='login'?'register':'login'; S.authError=''; render(); }
 
 async function doAuth(){
-  const email = ($('#li_email')?.value || '').trim();
-  const pw = ($('#li_pw')?.value || '');
-  if (!email || !pw){ S.authError = 'Email and password are required.'; render(); return; }
+  const email = ($('#li_email')?.value||'').trim();
+  const pw = ($('#li_pw')?.value||'');
+  if (!email || !pw){ S.authError='Email and password are required.'; render(); return; }
   if (S.authMode === 'register'){
-    const name = ($('#li_name')?.value || '').trim();
-    const sid = ($('#li_sid')?.value || '').trim();
-    const dept = ($('#rg_dept')?.value || '').trim().toUpperCase();
-    const batch = ($('#rg_batch')?.value || '').trim();
-    const section = ($('#rg_section')?.value || '').trim().toUpperCase();
-    if (!name || !sid){ S.authError = 'Name and Student ID are required.'; render(); return; }
-    if (!dept || !batch || !section){ S.authError = 'Department, batch and section are required.'; render(); return; }
-    if (pw.length < 6){ S.authError = 'Password must be at least 6 characters.'; render(); return; }
-    const { error } = await sb.auth.signUp({
-      email, password: pw,
-      options: { data: { name, student_id: sid, dept, batch, section } }
-    });
-    if (error){ S.authError = error.message; render(); return; }
+    const name = ($('#li_name')?.value||'').trim();
+    const sid = ($('#li_sid')?.value||'').trim();
+    const dept = ($('#rg_dept')?.value||'').trim().toUpperCase();
+    const batch = ($('#rg_batch')?.value||'').trim();
+    const section = ($('#rg_section')?.value||'').trim().toUpperCase();
+    if (!name || !sid){ S.authError='Name and Student ID are required.'; render(); return; }
+    if (!dept || !batch || !section){ S.authError='Department, batch and section are required.'; render(); return; }
+    if (pw.length < 6){ S.authError='Password must be at least 6 characters.'; render(); return; }
+    const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { name, student_id: sid, dept, batch, section } } });
+    if (error){ S.authError=error.message; render(); return; }
     toast('Account created! You can now sign in.');
-    S.authMode = 'login'; S.authError = ''; render();
+    S.authMode='login'; S.authError=''; render();
     return;
   }
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if (error){ S.authError = error.message; render(); return; }
-  S.authError = '';
+  if (error){ S.authError=error.message; render(); return; }
+  S.authError='';
 }
 
-async function logout(){
-  channels.forEach(c => sb.removeChannel(c));
-  channels = [];
-  await sb.auth.signOut();
-  S.user = null; S.profile = null; S.route = 'dashboard';
-  render();
-}
+async function logout(){ channels.forEach(c=>sb.removeChannel(c)); channels=[]; await sb.auth.signOut(); S.user=null; S.profile=null; S.route='dashboard'; render(); }
 
 const NAV = [
   { id:'dashboard',    ico:'▦',  label:'Dashboard',    section:'Main' },
@@ -531,58 +411,34 @@ const NAV = [
   { id:'manage-crs',   ico:'🛡', label:'Manage CRs',   section:'Admin', adminOnly:true }
 ];
 
-function unreadCount(){
-  if (!S.profile) return 0;
-  return DB.notifications.filter(n => n.user_id === S.profile.id && !n.read).length;
-}
+function unreadCount(){ if(!S.profile) return 0; return DB.notifications.filter(n=>n.user_id===S.profile.id && !n.read).length; }
 
 function viewSidebar(u){
   const sections = ['Main','Class','Admin'];
   let html = `<aside class="sidebar">
-    <div class="brand">
-      <div class="logo">US</div>
-      <div><h1>UniSync</h1><small>${esc(classLabel(u))}</small></div>
-    </div>
+    <div class="brand"><div class="logo">US</div><div><h1>UniSync</h1><small>${esc(classLabel(u))}</small></div></div>
     <nav class="nav">`;
   sections.forEach(sec => {
-    const items = NAV.filter(n => {
-      if (n.section !== sec) return false;
-      if (n.adminOnly) return isAdmin(u);
-      return true;
-    });
+    const items = NAV.filter(n => { if (n.section !== sec) return false; if (n.adminOnly) return isAdmin(u); return true; });
     if (!items.length) return;
     html += `<div class="nav-sep">${sec}</div>`;
-    items.forEach(n => {
-      html += `<button class="nav-item ${S.route===n.id?'active':''}" onclick="go('${n.id}')" title="${n.label}">
-        <span class="ico">${n.ico}</span><span class="lbl">${n.label}</span>
-      </button>`;
-    });
+    items.forEach(n => { html += `<button class="nav-item ${S.route===n.id?'active':''}" onclick="go('${n.id}')" title="${n.label}"><span class="ico">${n.ico}</span><span class="lbl">${n.label}</span></button>`; });
   });
   html += `</nav></aside>`;
   return html;
 }
 
-function roleBadge(u){
-  if (isAdmin(u)) return '<span class="tag admin">Admin</span>';
-  if (isCR(u))    return '<span class="tag purple">CR</span>';
-  return '<span class="tag">Student</span>';
-}
+function roleBadge(u){ if(isAdmin(u))return '<span class="tag admin">Admin</span>'; if(isCR(u))return '<span class="tag purple">CR</span>'; return '<span class="tag">Student</span>'; }
 
 function viewTopbar(u){
   const unread = unreadCount();
   const q = S.route === 'search' ? S.search : '';
   return `<header class="topbar">
     <div class="class-chip">${esc(classLabel(u))}</div>
-    <div class="searchbox">
-      <span class="si">🔍</span>
-      <input id="globalSearch" placeholder="Search resources, notices, events, members…" value="${esc(q)}"
-             data-fk="globalSearch" oninput="doSearch(this.value)">
-    </div>
+    <div class="searchbox"><span class="si">🔍</span><input id="globalSearch" placeholder="Search resources, notices, events, members…" value="${esc(q)}" data-fk="globalSearch" oninput="doSearch(this.value)"></div>
     <div class="topbar-right">
       ${roleBadge(u)}
-      <button class="icon-btn" onclick="go('notifications')" title="Notifications">🔔
-        ${unread ? `<span class="dot">${unread}</span>` : ''}
-      </button>
+      <button class="icon-btn" onclick="go('notifications')" title="Notifications">🔔${unread?`<span class="dot">${unread}</span>`:''}</button>
       <div class="avatar" style="background:${colorFor(u.id)}" onclick="openModal('profile')" title="${esc(u.name)}">${esc(initials(u.name))}</div>
       <button class="icon-btn" onclick="logout()" title="Sign out">⎋</button>
     </div>
@@ -591,36 +447,35 @@ function viewTopbar(u){
 
 function render(){
   const app = document.getElementById('app');
-
+  let modalInputState = null;
+  if (S.modal){
+    const modalEl = document.querySelector('.modal');
+    if (modalEl){
+      modalInputState = {};
+      modalEl.querySelectorAll('input, select, textarea').forEach(el => { if (el.id) modalInputState[el.id] = el.value; });
+      const body = modalEl.querySelector('.modal-body');
+      if (body) modalInputState.__scrollTop = body.scrollTop;
+    }
+  }
   if (S.loading){
-    app.innerHTML = `<div style="display:grid;place-items:center;min-height:100vh">
-      <div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">⏳</div><div class="muted">Loading…</div></div>
-    </div>`;
+    app.innerHTML = `<div style="display:grid;place-items:center;min-height:100vh"><div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">⏳</div><div class="muted">Loading…</div></div></div>`;
     return;
   }
-
-  if (!S.profile){
-    app.innerHTML = viewAuth();
-    return;
-  }
-
+  if (!S.profile){ app.innerHTML = viewAuth(); return; }
   const u = S.profile;
   const a = document.activeElement;
   let fk=null, ss=null, se=null;
-  if (a && a.dataset && a.dataset.fk){ fk = a.dataset.fk; ss = a.selectionStart; se = a.selectionEnd; }
-
-  app.innerHTML = `
-    <div class="layout">
-      ${viewSidebar(u)}
-      <main class="main">
-        ${viewTopbar(u)}
-        <div class="content">${viewRoute(u)}</div>
-      </main>
-    </div>
-    ${S.modal ? viewModal(u) : ''}
-    ${S.toast ? `<div class="toast ${S.toast.type==='err'?'err':'ok'}">${esc(S.toast.msg)}</div>` : ''}
-  `;
-
+  if (a && a.dataset && a.dataset.fk){ fk=a.dataset.fk; ss=a.selectionStart; se=a.selectionEnd; }
+  app.innerHTML = `<div class="layout">${viewSidebar(u)}<main class="main">${viewTopbar(u)}<div class="content">${viewRoute(u)}</div></main></div>${S.modal?viewModal(u):''}${S.toast?`<div class="toast ${S.toast.type==='err'?'err':'ok'}">${esc(S.toast.msg)}</div>`:''}`;
+  if (modalInputState){
+    Object.keys(modalInputState).forEach(id => {
+      if (id === '__scrollTop') return;
+      const el = document.getElementById(id);
+      if (el) el.value = modalInputState[id];
+    });
+    const body = document.querySelector('.modal .modal-body');
+    if (body && modalInputState.__scrollTop != null) body.scrollTop = modalInputState.__scrollTop;
+  }
   if (fk){
     const el = document.querySelector(`[data-fk="${fk}"]`);
     if (el){ el.focus(); try { el.setSelectionRange(ss, se); } catch(e){} }
@@ -646,185 +501,64 @@ function viewRoute(u){
 function nameOf(id){ const u = DB.profiles.find(x=>x.id===id); return u ? u.name : 'Unknown'; }
 
 function viewDashboard(u){
-  const today = iso(0);
-  const in7 = iso(7);
-  const upcoming = DB.events.filter(e => e.date >= today && e.date <= in7).sort(sortByDate);
-  const todays = DB.events.filter(e => e.date === today).sort(sortByDate);
-  const notices = DB.notices.filter(n => !n.expires_at || n.expires_at >= today).slice(0,4);
+  const today = iso(0), in7 = iso(7);
+  const upcoming = DB.events.filter(e=>e.date>=today && e.date<=in7).sort(sortByDate);
+  const todays = DB.events.filter(e=>e.date===today).sort(sortByDate);
+  const notices = DB.notices.filter(n=>!n.expires_at || n.expires_at>=today).slice(0,4);
   const recentRes = DB.resources.slice(0,4);
-  const mySubs = DB.submissions.filter(s => s.submitted_by === u.id);
+  const mySubs = DB.submissions.filter(s=>s.submitted_by===u.id);
   const recentGroups = DB.groups.slice(0,3);
-
   const stat = (n,l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
-
   let greeting = isAdmin(u) ? 'You are the Administrator. You can see all sections.'
     : isCR(u) ? `You are a CR for ${classLabel(u)}. Your posts go to your section only.`
     : `Showing content for ${classLabel(u)}.`;
-
   let stats;
-  if (isAdmin(u)){
-    stats = `<div class="grid g4" style="margin-bottom:18px">
-      ${stat(DB.profiles.filter(x=>x.role==='student').length,'Students')}
-      ${stat(DB.profiles.filter(x=>x.role==='cr').length,'CRs')}
-      ${stat(DB.notices.length,'Notices')}
-      ${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}
-    </div>`;
-  } else if (isCR(u)){
-    stats = `<div class="grid g4" style="margin-bottom:18px">
-      ${stat(DB.notices.length,'Notices in section')}
-      ${stat(DB.resources.length,'Resources in section')}
-      ${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}
-      ${stat(DB.submissions.length,'Submissions')}
-    </div>`;
-  } else {
-    stats = `<div class="grid g4" style="margin-bottom:18px">
-      ${stat(todays.length,'Classes today')}
-      ${stat(upcoming.filter(e=>['Assignment','Quiz','Exam','Midterm','Final'].includes(e.type)).length,'Deadlines this week')}
-      ${stat(notices.length,'Active notices')}
-      ${stat(mySubs.length,'My submissions')}
-    </div>`;
-  }
-
-  const evRow = e => {
-    const c = countdown(e.date);
-    return `<div class="list-item">
-      <div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div>
-      <div class="lead">
-        <div class="t">${esc(e.title)}</div>
-        <div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div>
-      </div>
-      <span class="tag ${c.cls}">${c.text}</span>
-    </div>`;
-  };
-
+  if (isAdmin(u)){ stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.profiles.filter(x=>x.role==='student').length,'Students')}${stat(DB.profiles.filter(x=>x.role==='cr').length,'CRs')}${stat(DB.notices.length,'Notices')}${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}</div>`; }
+  else if (isCR(u)){ stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.notices.length,'Notices in section')}${stat(DB.resources.length,'Resources in section')}${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}${stat(DB.submissions.length,'Submissions')}</div>`; }
+  else { stats = `<div class="grid g4" style="margin-bottom:18px">${stat(todays.length,'Classes today')}${stat(upcoming.filter(e=>['Assignment','Quiz','Exam','Midterm','Final'].includes(e.type)).length,'Deadlines this week')}${stat(notices.length,'Active notices')}${stat(mySubs.length,'My submissions')}</div>`; }
+  const evRow = e => { const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span></div>`; };
   return `
     <div class="page-head">
       <div><h2>Hello, ${esc(u.name.split(' ')[0])} 👋</h2><p>${greeting}</p></div>
       <div class="actions">
-        ${canManage(u) ? `
-          <button class="btn" onclick="openModal('event')">+ Event</button>
-          <button class="btn" onclick="openModal('notice')">+ Notice</button>
-          <button class="btn primary" onclick="openModal('presentation')">+ Presentation</button>
-        ` : `<button class="btn primary" onclick="go('presentations')">Submit presentation</button>`}
+        ${canManage(u) ? `<button class="btn" onclick="openModal('event')">+ Event</button><button class="btn" onclick="openModal('notice')">+ Notice</button><button class="btn primary" onclick="openModal('presentation')">+ Presentation</button>` : `<button class="btn primary" onclick="go('presentations')">Submit presentation</button>`}
         ${isAdmin(u) ? `<button class="btn" onclick="go('manage-crs')">Manage CRs</button>` : ''}
       </div>
     </div>
-
     ${stats}
-
     <div class="grid g2">
-      <div class="card">
-        <div class="row" style="margin-bottom:12px">
-          <b style="font-size:14.5px">${todays.length ? "Today's schedule" : 'Upcoming this week'}</b>
-          <button class="btn ghost sm" style="margin-left:auto" onclick="go('calendar')">View calendar →</button>
-        </div>
-        <div class="stack">
-          ${(todays.length ? todays : upcoming).slice(0,5).map(evRow).join('') || `<div class="empty"><span class="big">🗓</span>Nothing scheduled.</div>`}
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="margin-bottom:12px">
-          <b style="font-size:14.5px">Latest notices</b>
-          <button class="btn ghost sm" style="margin-left:auto" onclick="go('notices')">All →</button>
-        </div>
-        <div class="stack">
-          ${notices.map(n => `
-            <div class="list-item" onclick="go('notices')" style="cursor:pointer">
-              <div class="lead">
-                <div class="t">${n.pinned?'📌 ':''}${esc(n.title)}</div>
-                <div class="tiny muted">${esc(n.category)} · ${fmtDate(n.created_at?.slice(0,10))}</div>
-              </div>
-              ${n.priority!=='Normal' ? `<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>` : ''}
-            </div>`).join('') || `<div class="empty"><span class="big">📢</span>No notices yet.</div>`}
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="margin-bottom:12px">
-          <b style="font-size:14.5px">Recently shared</b>
-          <button class="btn ghost sm" style="margin-left:auto" onclick="go('resources')">All →</button>
-        </div>
-        <div class="stack">
-          ${recentRes.map(r => `
-            <div class="list-item">
-              <div class="lead">
-                <div class="t">${esc(r.title)}</div>
-                <div class="tiny muted">${esc(r.course||'—')} · ${esc(r.type)}</div>
-              </div>
-              <button class="btn sm" onclick="openResource('${r.id}')">Open</button>
-            </div>`).join('') || `<div class="empty"><span class="big">📚</span>No resources yet.</div>`}
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="row" style="margin-bottom:12px">
-          <b style="font-size:14.5px">Class groups</b>
-          <button class="btn ghost sm" style="margin-left:auto" onclick="go('groups')">All →</button>
-        </div>
-        <div class="stack">
-          ${recentGroups.map(g => {
-            const meta = PLATFORM_META[g.platform] || PLATFORM_META.other;
-            return `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
-              <div class="platform-badge" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:${meta.color}">${meta.svg}</div>
-              <div class="lead"><div class="t">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div>
-            </a>`;
-          }).join('') || `<div class="empty" style="padding:24px"><span class="big">💬</span>No groups.</div>`}
-        </div>
-      </div>
-    </div>
-  `;
+      <div class="card"><div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">${todays.length?"Today's schedule":'Upcoming this week'}</b><button class="btn ghost sm" style="margin-left:auto" onclick="go('calendar')">View calendar →</button></div><div class="stack">${(todays.length?todays:upcoming).slice(0,5).map(evRow).join('') || `<div class="empty"><span class="big">🗓</span>Nothing scheduled.</div>`}</div></div>
+      <div class="card"><div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">Latest notices</b><button class="btn ghost sm" style="margin-left:auto" onclick="go('notices')">All →</button></div><div class="stack">${notices.map(n => `<div class="list-item" onclick="go('notices')" style="cursor:pointer"><div class="lead"><div class="t">${n.pinned?'📌 ':''}${esc(n.title)}</div><div class="tiny muted">${esc(n.category)} · ${fmtDate(n.created_at?.slice(0,10))}</div></div>${n.priority!=='Normal'?`<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>`:''}</div>`).join('') || `<div class="empty"><span class="big">📢</span>No notices yet.</div>`}</div></div>
+      <div class="card"><div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">Recently shared</b><button class="btn ghost sm" style="margin-left:auto" onclick="go('resources')">All →</button></div><div class="stack">${recentRes.map(r => `<div class="list-item"><div class="lead"><div class="t">${esc(r.title)}</div><div class="tiny muted">${esc(r.course||'—')} · ${esc(r.type)}</div></div><button class="btn sm" onclick="openResource('${r.id}')">Open</button></div>`).join('') || `<div class="empty"><span class="big">📚</span>No resources yet.</div>`}</div></div>
+      <div class="card"><div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">Class groups</b><button class="btn ghost sm" style="margin-left:auto" onclick="go('groups')">All →</button></div><div class="stack">${recentGroups.map(g => { const meta = PLATFORM_META[g.platform] || PLATFORM_META.other; return `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="platform-badge" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:${meta.color}">${meta.svg}</div><div class="lead"><div class="t">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div></a>`; }).join('') || `<div class="empty" style="padding:24px"><span class="big">💬</span>No groups.</div>`}</div></div>
+    </div>`;
 }
 
 function viewResources(u){
   const f = S.resFilter;
   const courses = [...new Set(DB.resources.map(r=>r.course).filter(Boolean))].sort();
   let list = [...DB.resources];
-  if (f.q){
-    const q = f.q.toLowerCase();
-    list = list.filter(r => [r.title,r.course,r.topic,r.teacher,(r.tags||[]).join(' ')].join(' ').toLowerCase().includes(q));
-  }
+  if (f.q){ const q = f.q.toLowerCase(); list = list.filter(r => [r.title,r.course,r.topic,r.teacher,(r.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)); }
   if (f.course) list = list.filter(r => r.course === f.course);
   if (f.type) list = list.filter(r => r.type === f.type);
-
   return `
-    <div class="page-head">
-      <div><h2>Resources & Notes</h2><p>Shared study materials for ${esc(classLabel(u))}. Anyone can upload.</p></div>
-      <div class="actions"><button class="btn primary" onclick="openModal('resource')">+ Upload resource</button></div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="row wrap">
-        <input class="inp" style="flex:2;min-width:200px" placeholder="Search…" value="${esc(f.q)}" data-fk="resq"
-               oninput="S.resFilter.q=this.value;render()">
-        <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.course=this.value;render()">
-          <option value="">All courses</option>
-          ${courses.map(c=>`<option ${f.course===c?'selected':''}>${esc(c)}</option>`).join('')}
-        </select>
-        <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.type=this.value;render()">
-          <option value="">All types</option>
-          ${RESOURCE_TYPES.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-
-    ${list.length ? `<div class="grid g2">${list.map(r => resourceCard(r, u)).join('')}</div>`
-      : `<div class="empty"><span class="big">📚</span>No resources in this section yet.</div>`}
-  `;
+    <div class="page-head"><div><h2>Resources & Notes</h2><p>Shared study materials for ${esc(classLabel(u))}. Anyone can upload.</p></div><div class="actions"><button class="btn primary" onclick="openModal('resource')">+ Upload resource</button></div></div>
+    <div class="card" style="margin-bottom:16px"><div class="row wrap">
+      <input class="inp" style="flex:2;min-width:200px" placeholder="Search…" value="${esc(f.q)}" data-fk="resq" oninput="S.resFilter.q=this.value;render()">
+      <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.course=this.value;render()"><option value="">All courses</option>${courses.map(c=>`<option ${f.course===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+      <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.type=this.value;render()"><option value="">All types</option>${RESOURCE_TYPES.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select>
+    </div></div>
+    ${list.length ? `<div class="grid g2">${list.map(r => resourceCard(r, u)).join('')}</div>` : `<div class="empty"><span class="big">📚</span>No resources in this section yet.</div>`}`;
 }
 
 function resourceCard(r, u){
   const canDelete = canManage(u) || r.uploaded_by === u.id;
   if (isDrivePdf(r)){
-    const cleanName = (r.title || '').replace(/\.pdf$/i,'');
+    const cleanName = (r.title||'').replace(/\.pdf$/i,'');
     return `<div class="card" style="padding:12px">
       <div class="file-card" onclick="openResource('${r.id}')" style="background:var(--panel2)">
         <div class="file-icon">${PDF_ICON}</div>
-        <div class="file-body">
-          <div class="file-name">${esc(cleanName)}</div>
-          <div class="file-meta">PDF · Drive ${r.course ? ' · ' + esc(r.course) : ''}</div>
-          <div class="file-meta" style="margin-top:3px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div>
-        </div>
+        <div class="file-body"><div class="file-name">${esc(cleanName)}</div><div class="file-meta">PDF · Drive ${r.course?' · '+esc(r.course):''}</div><div class="file-meta" style="margin-top:3px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div></div>
         <div class="file-open">Open in Drive ↗</div>
       </div>
       ${canDelete ? `<div class="row" style="margin-top:8px"><button class="btn danger sm" style="margin-left:auto" onclick="deleteResource('${r.id}')">Delete</button></div>` : ''}
@@ -832,15 +566,9 @@ function resourceCard(r, u){
   }
   return `<div class="card">
     <div style="font-weight:620;font-size:14.5px;margin-bottom:4px">${esc(r.title)}</div>
-    <div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">
-      ${r.course?`<span class="tag blue">${esc(r.course)}</span>`:''}
-      <span class="tag">${esc(r.type)}</span>
-    </div>
+    <div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">${r.course?`<span class="tag blue">${esc(r.course)}</span>`:''}<span class="tag">${esc(r.type)}</span></div>
     <div class="tiny muted" style="margin-bottom:10px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div>
-    <div class="row">
-      <button class="btn primary sm" onclick="openResource('${r.id}')">Open</button>
-      ${canDelete ? `<button class="btn danger sm" style="margin-left:auto" onclick="deleteResource('${r.id}')">Delete</button>` : ''}
-    </div>
+    <div class="row"><button class="btn primary sm" onclick="openResource('${r.id}')">Open</button>${canDelete ? `<button class="btn danger sm" style="margin-left:auto" onclick="deleteResource('${r.id}')">Delete</button>` : ''}</div>
   </div>`;
 }
 
@@ -848,10 +576,8 @@ async function openResource(id){
   const r = DB.resources.find(x=>x.id===id); if (!r) return;
   await sb.from('resources').update({ downloads: (r.downloads||0)+1 }).eq('id', id);
   if (r.link) window.open(r.link, '_blank', 'noopener');
-  else if (r.file_path){
-    const { data } = sb.storage.from('resources').getPublicUrl(r.file_path);
-    window.open(data.publicUrl, '_blank', 'noopener');
-  } else toast('No link attached', 'err');
+  else if (r.file_path){ const { data } = sb.storage.from('resources').getPublicUrl(r.file_path); window.open(data.publicUrl, '_blank', 'noopener'); }
+  else toast('No link attached', 'err');
 }
 async function deleteResource(id){
   const r = DB.resources.find(x=>x.id===id); if (!r) return;
@@ -866,60 +592,29 @@ function viewNotices(u){
   let list = DB.notices.filter(n => !n.expires_at || n.expires_at >= today || canManage(u));
   if (S.noticeFilter !== 'All') list = list.filter(n => n.category === S.noticeFilter);
   list.sort((a,b) => (b.pinned - a.pinned) || (b.created_at||'').localeCompare(a.created_at||''));
-
   return `
-    <div class="page-head">
-      <div><h2>Notices & Announcements</h2><p>${canManage(u) ? `Your posts go to ${esc(classLabel(u))} only.` : `Notices for ${esc(classLabel(u))}.`}</p></div>
-      ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('notice')">+ New notice</button></div>` : ''}
-    </div>
-
-    <div class="row wrap" style="margin-bottom:16px">
-      ${['All',...NOTICE_CATS].map(c => `<button class="btn sm ${S.noticeFilter===c?'primary':''}" onclick="S.noticeFilter='${c}';render()">${c}</button>`).join('')}
-    </div>
-
-    <div class="stack">
-      ${list.map(n => {
-        const acked = DB.notice_acks.some(a => a.notice_id === n.id && a.user_id === u.id);
-        const ackCount = DB.notice_acks.filter(a => a.notice_id === n.id).length;
-        return `<div class="card" style="border-left:3px solid ${n.priority==='Urgent'?'var(--danger)':n.priority==='Important'?'var(--warn)':'var(--line)'}">
-          <div class="row" style="align-items:flex-start;margin-bottom:8px">
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:640;font-size:15px;margin-bottom:5px">${n.pinned?'📌 ':''}${esc(n.title)}</div>
-              <div class="row wrap tiny muted" style="gap:6px">
-                <span class="tag blue">${esc(n.category)}</span>
-                ${n.priority!=='Normal'?`<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>`:''}
-                ${n.dept?`<span class="tag">${esc((n.dept||'').toUpperCase())}-${esc(n.batch||'')}-${esc((n.section||'').toUpperCase())}</span>`:''}
-                <span>by ${esc(nameOf(n.created_by))} · ${fmtDateTime(n.created_at)}</span>
-              </div>
-            </div>
-            ${canManage(u) ? `<div class="row" style="gap:4px">
-              <button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('notice',{id:'${n.id}'})">✎</button>
-              <button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteNotice('${n.id}')">🗑</button>
-            </div>` : ''}
+    <div class="page-head"><div><h2>Notices & Announcements</h2><p>${canManage(u) ? `Your posts go to ${esc(classLabel(u))} only.` : `Notices for ${esc(classLabel(u))}.`}</p></div>${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('notice')">+ New notice</button></div>` : ''}</div>
+    <div class="row wrap" style="margin-bottom:16px">${['All',...NOTICE_CATS].map(c => `<button class="btn sm ${S.noticeFilter===c?'primary':''}" onclick="S.noticeFilter='${c}';render()">${c}</button>`).join('')}</div>
+    <div class="stack">${list.map(n => {
+      const acked = DB.notice_acks.some(a => a.notice_id === n.id && a.user_id === u.id);
+      const ackCount = DB.notice_acks.filter(a => a.notice_id === n.id).length;
+      return `<div class="card" style="border-left:3px solid ${n.priority==='Urgent'?'var(--danger)':n.priority==='Important'?'var(--warn)':'var(--line)'}">
+        <div class="row" style="align-items:flex-start;margin-bottom:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:640;font-size:15px;margin-bottom:5px">${n.pinned?'📌 ':''}${esc(n.title)}</div>
+            <div class="row wrap tiny muted" style="gap:6px"><span class="tag blue">${esc(n.category)}</span>${n.priority!=='Normal'?`<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>`:''}${n.dept?`<span class="tag">${esc((n.dept||'').toUpperCase())}-${esc(n.batch||'')}-${esc((n.section||'').toUpperCase())}</span>`:''}<span>by ${esc(nameOf(n.created_by))} · ${fmtDateTime(n.created_at)}</span></div>
           </div>
-          <div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(n.body)}</div>
-          <div class="divider"></div>
-          <div class="row wrap">
-            <span class="tiny muted">${ackCount} acknowledged</span>
-            ${!canManage(u) ? (acked
-              ? `<span class="tag green" style="margin-left:auto">✓ Acknowledged</span>`
-              : `<button class="btn sm primary" style="margin-left:auto" onclick="ackNotice('${n.id}')">Acknowledge</button>`) : ''}
-          </div>
-        </div>`;
-      }).join('') || `<div class="empty"><span class="big">📢</span>No notices for this section yet.</div>`}
-    </div>
-  `;
+          ${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('notice',{id:'${n.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteNotice('${n.id}')">🗑</button></div>` : ''}
+        </div>
+        <div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(n.body)}</div>
+        <div class="divider"></div>
+        <div class="row wrap"><span class="tiny muted">${ackCount} acknowledged</span>${!canManage(u) ? (acked ? `<span class="tag green" style="margin-left:auto">✓ Acknowledged</span>` : `<button class="btn sm primary" style="margin-left:auto" onclick="ackNotice('${n.id}')">Acknowledge</button>`) : ''}</div>
+      </div>`;
+    }).join('') || `<div class="empty"><span class="big">📢</span>No notices for this section yet.</div>`}</div>`;
 }
 
-async function ackNotice(id){
-  await sb.from('notice_acks').insert({ notice_id: id, user_id: S.profile.id });
-  toast('Acknowledged');
-}
-async function deleteNotice(id){
-  if (!confirm('Delete this notice?')) return;
-  await sb.from('notices').delete().eq('id', id);
-  toast('Notice deleted');
-}
+async function ackNotice(id){ await sb.from('notice_acks').insert({ notice_id: id, user_id: S.profile.id }); toast('Acknowledged'); }
+async function deleteNotice(id){ if (!confirm('Delete this notice?')) return; await sb.from('notices').delete().eq('id', id); toast('Notice deleted'); }
 
 function viewCalendar(u){
   const now = new Date();
@@ -929,186 +624,85 @@ function viewCalendar(u){
   const daysInMonth = new Date(y, m+1, 0).getDate();
   const todayStr = iso(0);
   const monthName = new Date(y, m, 1).toLocaleDateString(undefined,{month:'long',year:'numeric'});
-
   let cells = '';
   for (let i=0;i<firstDow;i++) cells += `<div class="cal-cell blank"></div>`;
   for (let d=1; d<=daysInMonth; d++){
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const evs = DB.events.filter(e=>e.date===ds).sort(sortByDate);
-    cells += `<div class="cal-cell ${ds===todayStr?'today':''}" onclick="openModal('day',{date:'${ds}'})">
-      <div class="dn">${d}</div>
-      ${evs.slice(0,3).map(e=>`<div class="cal-ev" style="background:${(EVENT_COLORS[e.type]||'#888')}22;color:${EVENT_COLORS[e.type]||'#888'};border-left:2px solid ${EVENT_COLORS[e.type]||'#888'}">${esc(e.title)}</div>`).join('')}
-    </div>`;
+    cells += `<div class="cal-cell ${ds===todayStr?'today':''}" onclick="openModal('day',{date:'${ds}'})"><div class="dn">${d}</div>${evs.slice(0,3).map(e=>`<div class="cal-ev" style="background:${(EVENT_COLORS[e.type]||'#888')}22;color:${EVENT_COLORS[e.type]||'#888'};border-left:2px solid ${EVENT_COLORS[e.type]||'#888'}">${esc(e.title)}</div>`).join('')}</div>`;
   }
-
   const upcoming = DB.events.filter(e => e.date >= todayStr).sort(sortByDate).slice(0,8);
   const legend = EVENT_TYPES.map(t=>`<span class="row tiny" style="gap:5px"><span class="dotc" style="background:${EVENT_COLORS[t]}"></span>${t}</span>`).join('');
-
   return `
-    <div class="page-head">
-      <div><h2>Class Calendar</h2><p>Routine, exams, deadlines for ${esc(classLabel(u))}.</p></div>
-      ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('event')">+ Add event</button></div>` : ''}
-    </div>
-
+    <div class="page-head"><div><h2>Class Calendar</h2><p>Routine, exams, deadlines for ${esc(classLabel(u))}.</p></div>${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('event')">+ Add event</button></div>` : ''}</div>
     <div class="card" style="margin-bottom:16px">
-      <div class="row" style="margin-bottom:14px">
-        <button class="btn sm" onclick="calMove(-1)">‹</button>
-        <b style="font-size:15px;min-width:170px;text-align:center">${monthName}</b>
-        <button class="btn sm" onclick="calMove(1)">›</button>
-        <button class="btn ghost sm" onclick="calToday()">Today</button>
-        <div class="row wrap" style="margin-left:auto;gap:12px">${legend}</div>
-      </div>
+      <div class="row" style="margin-bottom:14px"><button class="btn sm" onclick="calMove(-1)">‹</button><b style="font-size:15px;min-width:170px;text-align:center">${monthName}</b><button class="btn sm" onclick="calMove(1)">›</button><button class="btn ghost sm" onclick="calToday()">Today</button><div class="row wrap" style="margin-left:auto;gap:12px">${legend}</div></div>
       <div class="cal-head">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div>${d}</div>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
     </div>
-
-    <div class="card">
-      <b style="font-size:14.5px">Upcoming events</b>
-      <div class="stack" style="margin-top:12px">
-        ${upcoming.map(e=>{
-          const c = countdown(e.date);
-          return `<div class="list-item">
-            <div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div>
-            <div class="lead">
-              <div class="t">${esc(e.title)}</div>
-              <div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div>
-            </div>
-            <span class="tag ${c.cls}">${c.text}</span>
-            ${canManage(u)?`<button class="icon-btn" style="width:30px;height:30px;font-size:12px" onclick="deleteEvent('${e.id}')">🗑</button>`:''}
-          </div>`;
-        }).join('') || `<div class="empty"><span class="big">🗓</span>No upcoming events.</div>`}
-      </div>
-    </div>
-  `;
+    <div class="card"><b style="font-size:14.5px">Upcoming events</b><div class="stack" style="margin-top:12px">${upcoming.map(e=>{ const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span>${canManage(u)?`<button class="icon-btn" style="width:30px;height:30px;font-size:12px" onclick="deleteEvent('${e.id}')">🗑</button>`:''}</div>`; }).join('') || `<div class="empty"><span class="big">🗓</span>No upcoming events.</div>`}</div></div>`;
 }
 
-function calMove(delta){
-  let m = S.calMonth + delta, y = S.calYear;
-  if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; }
-  S.calMonth = m; S.calYear = y; render();
-}
+function calMove(delta){ let m = S.calMonth + delta, y = S.calYear; if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; } S.calMonth = m; S.calYear = y; render(); }
 function calToday(){ const n = new Date(); S.calYear = n.getFullYear(); S.calMonth = n.getMonth(); render(); }
-async function deleteEvent(id){
-  if (!confirm('Delete this event?')) return;
-  await sb.from('events').delete().eq('id', id);
-  toast('Event deleted');
-}
+async function deleteEvent(id){ if (!confirm('Delete this event?')) return; await sb.from('events').delete().eq('id', id); toast('Event deleted'); }
 
 function viewGroups(u){
   const list = [...DB.groups];
   const counts = GROUP_PLATFORMS.reduce((acc,p)=>{ acc[p] = DB.groups.filter(g=>g.platform===p).length; return acc; }, {});
-
   return `
-    <div class="page-head">
-      <div><h2>Class Groups</h2><p>WhatsApp, Messenger and Telegram links for ${esc(classLabel(u))}.</p></div>
-      ${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('group')">+ Add group</button></div>` : ''}
-    </div>
-
-    <div class="row wrap" style="margin-bottom:16px">
-      ${GROUP_PLATFORMS.map(p => {
-        const meta = PLATFORM_META[p]; const n = counts[p];
-        if (!n) return '';
-        return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 14px;min-width:170px">
-          <div class="platform-badge" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:${meta.color}">${meta.svg}</div>
-          <div><div style="font-weight:600;font-size:13px">${meta.name}</div><div class="tiny muted">${n} group${n!==1?'s':''}</div></div>
-        </div>`;
-      }).join('') || `<div class="card small muted">No groups yet.</div>`}
-    </div>
-
+    <div class="page-head"><div><h2>Class Groups</h2><p>WhatsApp, Messenger and Telegram links for ${esc(classLabel(u))}.</p></div>${canManage(u) ? `<div class="actions"><button class="btn primary" onclick="openModal('group')">+ Add group</button></div>` : ''}</div>
+    <div class="row wrap" style="margin-bottom:16px">${GROUP_PLATFORMS.map(p => { const meta = PLATFORM_META[p]; const n = counts[p]; if (!n) return ''; return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 14px;min-width:170px"><div class="platform-badge" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:${meta.color}">${meta.svg}</div><div><div style="font-weight:600;font-size:13px">${meta.name}</div><div class="tiny muted">${n} group${n!==1?'s':''}</div></div></div>`; }).join('') || `<div class="card small muted">No groups yet.</div>`}</div>
     ${list.length ? `<div class="grid g3">${list.map(g => {
       const meta = PLATFORM_META[g.platform] || PLATFORM_META.other;
       return `<div class="group-card">
         <div class="group-head">
           <div class="platform-badge" style="background:${meta.color}">${meta.svg}</div>
-          <div style="flex:1;min-width:0">
-            <div class="group-name">${esc(g.name)}</div>
-            <div class="tiny muted">${meta.name}</div>
-          </div>
-          ${canManage(u) ? `<button class="icon-btn" style="width:30px;height:30px;font-size:12px" onclick="deleteGroup('${g.id}')">🗑</button>` : ''}
+          <div style="flex:1;min-width:0"><div class="group-name">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div>
+          ${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('group',{id:'${g.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteGroup('${g.id}')">🗑</button></div>` : ''}
         </div>
         ${g.description ? `<div class="group-desc">${esc(g.description)}</div>` : ''}
-        <div class="group-foot">
-          <a class="open-link" href="${esc(g.link)}" target="_blank" rel="noopener" style="background:${meta.color}">
-            ${meta.svg.replace('width="22" height="22"','width="14" height="14"')} Open ${meta.name}
-          </a>
-        </div>
+        <div class="group-foot"><a class="open-link" href="${esc(g.link)}" target="_blank" rel="noopener" style="background:${meta.color}">${meta.svg.replace('width="22" height="22"','width="14" height="14"')} Open ${meta.name}</a></div>
       </div>`;
-    }).join('')}</div>` : `<div class="empty"><span class="big">💬</span>No groups in this section yet.</div>`}
-  `;
+    }).join('')}</div>` : `<div class="empty"><span class="big">💬</span>No groups in this section yet.</div>`}`;
 }
 
-async function deleteGroup(id){
-  if (!confirm('Remove this group?')) return;
-  await sb.from('groups').delete().eq('id', id);
-  toast('Group removed');
-}
+async function deleteGroup(id){ if (!confirm('Remove this group?')) return; await sb.from('groups').delete().eq('id', id); toast('Group removed'); }
 
 function viewPresentations(u){
   if (!DB.presentations.length){
-    return `<div class="page-head"><div><h2>Presentation Submissions</h2><p>No events yet for ${esc(classLabel(u))}.</p></div>
-      ${canManage(u)?`<div class="actions"><button class="btn primary" onclick="openModal('presentation')">+ New presentation</button></div>`:''}</div>
-      <div class="empty"><span class="big">🎤</span>No presentation events.</div>`;
+    return `<div class="page-head"><div><h2>Presentation Submissions</h2><p>No events yet for ${esc(classLabel(u))}.</p></div>${canManage(u)?`<div class="actions"><button class="btn primary" onclick="openModal('presentation')">+ New presentation</button></div>`:''}</div><div class="empty"><span class="big">🎤</span>No presentation events.</div>`;
   }
-
-  const selId = S.selectedPresentation && DB.presentations.some(p=>p.id===S.selectedPresentation)
-    ? S.selectedPresentation : DB.presentations[0].id;
+  const selId = S.selectedPresentation && DB.presentations.some(p=>p.id===S.selectedPresentation) ? S.selectedPresentation : DB.presentations[0].id;
   const p = DB.presentations.find(x=>x.id===selId);
   const subs = DB.submissions.filter(s => s.presentation_id === p.id);
   const c = countdown(p.deadline);
   const closed = daysUntil(p.deadline) < 0;
-
   const coveredIds = new Set();
-  subs.forEach(s => {
-    coveredIds.add(s.leader_id);
-    (s.members||[]).forEach(m => coveredIds.add(String(m.id).trim()));
-  });
+  subs.forEach(s => { coveredIds.add(s.leader_id); (s.members||[]).forEach(m => coveredIds.add(String(m.id).trim())); });
   const myDept = (u.dept||'').toUpperCase();
   const mySec = (u.section||'').toUpperCase();
-  const notSubmitted = DB.profiles.filter(x =>
-    x.role !== 'admin' &&
-    (x.dept||'').toUpperCase() === myDept &&
-    x.batch === u.batch &&
-    (x.section||'').toUpperCase() === mySec &&
-    !coveredIds.has(x.student_id)
-  );
-  const mySub = subs.find(s => s.leader_id === u.student_id ||
-    (s.members||[]).some(m => String(m.id).trim() === u.student_id));
-
+  const notSubmitted = DB.profiles.filter(x => x.role !== 'admin' && (x.dept||'').toUpperCase() === myDept && x.batch === u.batch && (x.section||'').toUpperCase() === mySec && !coveredIds.has(x.student_id));
+  const mySub = subs.find(s => s.leader_id === u.student_id || (s.members||[]).some(m => String(m.id).trim() === u.student_id));
   return `
     <div class="page-head">
       <div><h2>Presentation Submissions</h2><p>Submit your presentation link with team details.</p></div>
       <div class="actions">
-        ${DB.presentations.length > 1 ? `
-          <select class="inp" style="min-width:220px" onchange="S.selectedPresentation=this.value;render()">
-            ${DB.presentations.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.title)}</option>`).join('')}
-          </select>` : ''}
+        ${DB.presentations.length > 1 ? `<select class="inp" style="min-width:220px" onchange="S.selectedPresentation=this.value;render()">${DB.presentations.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select>` : ''}
         ${canManage(u) ? `<button class="btn primary" onclick="openModal('presentation')">+ New</button>` : ''}
         ${canManage(u) ? `<button class="btn danger" onclick="deletePresentation('${p.id}')">🗑 Delete</button>` : ''}
       </div>
     </div>
-
     <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)">
       <div class="row wrap" style="align-items:flex-start">
-        <div style="flex:1;min-width:220px">
-          <div style="font-weight:650;font-size:16px;margin-bottom:5px">${esc(p.title)}</div>
-          <div class="row wrap tiny muted" style="gap:8px">
-            ${p.course?`<span class="tag blue">${esc(p.course)}</span>`:''}
-            <span class="tag ${c.cls}">Deadline: ${fmtDate(p.deadline)} (${c.text})</span>
-            ${p.max_team_size?`<span class="tag">Max ${p.max_team_size} members</span>`:''}
-            ${closed?`<span class="tag red">Closed</span>`:''}
-          </div>
-        </div>
+        <div style="flex:1;min-width:220px"><div style="font-weight:650;font-size:16px;margin-bottom:5px">${esc(p.title)}</div><div class="row wrap tiny muted" style="gap:8px">${p.course?`<span class="tag blue">${esc(p.course)}</span>`:''}<span class="tag ${c.cls}">Deadline: ${fmtDate(p.deadline)} (${c.text})</span>${p.max_team_size?`<span class="tag">Max ${p.max_team_size} members</span>`:''}${closed?`<span class="tag red">Closed</span>`:''}</div></div>
         <div style="text-align:right"><div style="font-size:22px;font-weight:700">${subs.length}</div><div class="tiny muted">submissions</div></div>
       </div>
       ${p.instructions?`<div class="divider"></div><div class="small muted" style="white-space:pre-wrap">${esc(p.instructions)}</div>`:''}
     </div>
-
     ${!canManage(u) ? `
       <div class="card" style="margin-bottom:16px">
-        <div class="row" style="margin-bottom:12px">
-          <b style="font-size:14.5px">${mySub ? 'Your submission' : 'Submit your presentation'}</b>
-          ${mySub ? `<span class="tag green" style="margin-left:auto">✓ Submitted</span>` : ''}
-        </div>
+        <div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">${mySub ? 'Your submission' : 'Submit your presentation'}</b>${mySub ? `<span class="tag green" style="margin-left:auto">✓ Submitted</span>` : ''}</div>
         ${mySub ? `
           <div class="grid g2">
             <div><div class="tiny muted">Link</div><a href="${esc(mySub.link)}" target="_blank" rel="noopener" class="small" style="word-break:break-all">${esc(mySub.link)}</a></div>
@@ -1121,46 +715,18 @@ function viewPresentations(u){
             ${!closed ? `<button class="btn primary sm" onclick="openModal('submission',{presentationId:'${p.id}',submissionId:'${mySub.id}'})">Update submission</button>` : `<span class="tag red">Deadline passed — editing closed</span>`}
             <button class="btn danger sm" onclick="deleteSubmission('${mySub.id}')">Remove submission</button>
           </div>
-        ` : `
-          ${closed ? `<div class="empty" style="padding:26px"><span class="big">⏰</span>Deadline passed.</div>`
-            : `<button class="btn primary" onclick="openModal('submission',{presentationId:'${p.id}'})">Open submission form</button>`}
-        `}
+        ` : (closed ? `<div class="empty" style="padding:26px"><span class="big">⏰</span>Deadline passed.</div>` : `<button class="btn primary" onclick="openModal('submission',{presentationId:'${p.id}'})">Open submission form</button>`)}
       </div>
     ` : ''}
-
     ${canManage(u) ? `
       <div class="card">
-        <div class="row wrap" style="margin-bottom:14px">
-          <b style="font-size:14.5px">All submissions (${subs.length})</b>
-          <div class="row" style="margin-left:auto;gap:8px">
-            <button class="btn sm" onclick="exportSubmissions('${p.id}')">⬇ Export CSV</button>
-            <button class="btn sm" onclick="remindNonSubmitters('${p.id}')">🔔 Remind ${notSubmitted.length}</button>
-          </div>
-        </div>
-        ${subs.length ? `
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead><tr><th>Team</th><th>Leader</th><th>Members</th><th>Link</th><th>Submitted</th><th></th></tr></thead>
-            <tbody>
-              ${subs.map(s => `<tr>
-                <td>${esc(s.team_name||'—')}</td>
-                <td>${esc(s.leader_name)}<div class="tiny muted">${esc(s.leader_id)}</div></td>
-                <td>${(s.members||[]).map(m=>`<div class="tiny">${esc(m.name)} (${esc(m.id)})</div>`).join('')||'—'}</td>
-                <td><a href="${esc(s.link)}" target="_blank" rel="noopener" class="tiny">Open ↗</a></td>
-                <td class="tiny">${fmtDateTime(s.submitted_at)}</td>
-                <td><button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="deleteSubmission('${s.id}')">🗑</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>` : `<div class="empty"><span class="big">📭</span>No submissions.</div>`}
+        <div class="row wrap" style="margin-bottom:14px"><b style="font-size:14.5px">All submissions (${subs.length})</b><div class="row" style="margin-left:auto;gap:8px"><button class="btn sm" onclick="exportSubmissions('${p.id}')">⬇ Export CSV</button><button class="btn sm" onclick="remindNonSubmitters('${p.id}')">🔔 Remind ${notSubmitted.length}</button></div></div>
+        ${subs.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Team</th><th>Leader</th><th>Members</th><th>Link</th><th>Submitted</th><th></th></tr></thead><tbody>${subs.map(s => `<tr><td>${esc(s.team_name||'—')}</td><td>${esc(s.leader_name)}<div class="tiny muted">${esc(s.leader_id)}</div></td><td>${(s.members||[]).map(m=>`<div class="tiny">${esc(m.name)} (${esc(m.id)})</div>`).join('')||'—'}</td><td><a href="${esc(s.link)}" target="_blank" rel="noopener" class="tiny">Open ↗</a></td><td class="tiny">${fmtDateTime(s.submitted_at)}</td><td><button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="deleteSubmission('${s.id}')">🗑</button></td></tr>`).join('')}</tbody></table></div>` : `<div class="empty"><span class="big">📭</span>No submissions.</div>`}
         <div class="divider"></div>
         <b class="small">Not submitted in this section (${notSubmitted.length})</b>
-        <div class="row wrap" style="margin-top:8px">
-          ${notSubmitted.map(m=>`<span class="tag">${esc(m.name)} · ${esc(m.student_id)}</span>`).join('') || `<span class="small muted">Everyone submitted 🎉</span>`}
-        </div>
+        <div class="row wrap" style="margin-top:8px">${notSubmitted.map(m=>`<span class="tag">${esc(m.name)} · ${esc(m.student_id)}</span>`).join('') || `<span class="small muted">Everyone submitted 🎉</span>`}</div>
       </div>
-    ` : ''}
-  `;
+    ` : ''}`;
 }
 
 async function deletePresentation(id){
@@ -1169,20 +735,11 @@ async function deletePresentation(id){
   const subCount = DB.submissions.filter(s => s.presentation_id === id).length;
   const msg = `Delete "${p.title}"?\n\nThis will permanently delete:\n• The presentation event\n• ${subCount} submission${subCount!==1?'s':''}\n• The tab in Google Sheet\n\nThis cannot be undone.`;
   if (!confirm(msg)) return;
-
-  // 1. Delete all submissions first (cascade would handle, but be explicit)
   await sb.from('submissions').delete().eq('presentation_id', id);
-
-  // 2. Delete presentation row
   const { error } = await sb.from('presentations').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
-
-  // 3. Sync delete to Google Sheet
   syncDeleteToSheet(p.title);
-
-  // 4. Reset selection
   S.selectedPresentation = null;
-
   toast('Presentation deleted');
   render();
 }
@@ -1190,22 +747,9 @@ async function deletePresentation(id){
 async function syncDeleteToSheet(presentationTitle){
   if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
   try {
-    await fetch(SHEET_WEBHOOK_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        token: SHEET_SECRET,
-        action: 'deletePresentation',
-        presentation: presentationTitle
-      }),
-      keepalive: true
-    });
+    await fetch(SHEET_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ token: SHEET_SECRET, action: 'deletePresentation', presentation: presentationTitle }), keepalive: true });
     return true;
-  } catch(e) {
-    console.warn('Sheet delete failed', e);
-    return false;
-  }
+  } catch(e) { console.warn('Sheet delete failed', e); return false; }
 }
 
 async function deleteSubmission(id){
@@ -1218,20 +762,11 @@ async function deleteSubmission(id){
 async function remindNonSubmitters(pid){
   const p = DB.presentations.find(x=>x.id===pid); if (!p) return;
   const covered = new Set();
-  DB.submissions.filter(s=>s.presentation_id===pid).forEach(s=>{
-    covered.add(s.leader_id);
-    (s.members||[]).forEach(m=>covered.add(String(m.id).trim()));
-  });
+  DB.submissions.filter(s=>s.presentation_id===pid).forEach(s=>{ covered.add(s.leader_id); (s.members||[]).forEach(m=>covered.add(String(m.id).trim())); });
   const me = S.profile;
   const myDept = (me.dept||'').toUpperCase();
   const mySec = (me.section||'').toUpperCase();
-  const targets = DB.profiles.filter(x =>
-    x.role !== 'admin' &&
-    (x.dept||'').toUpperCase() === myDept &&
-    x.batch === me.batch &&
-    (x.section||'').toUpperCase() === mySec &&
-    !covered.has(x.student_id)
-  ).map(x=>x.id);
+  const targets = DB.profiles.filter(x => x.role !== 'admin' && (x.dept||'').toUpperCase() === myDept && x.batch === me.batch && (x.section||'').toUpperCase() === mySec && !covered.has(x.student_id)).map(x=>x.id);
   if (!targets.length){ toast('Everyone submitted'); return; }
   await notify(targets, 'Presentation reminder', `You haven't submitted for "${p.title}". Deadline: ${fmtDate(p.deadline)}.`, 'presentations');
   toast(`Reminder sent to ${targets.length} student(s)`);
@@ -1243,14 +778,7 @@ function exportSubmissions(pid){
   const maxMembers = Math.max(0, ...subs.map(s => (s.members||[]).length));
   const headers = ['Team','Leader Name','Leader ID','Link','Submitted'];
   for (let i=1;i<=maxMembers;i++) headers.push(`Member ${i} Name`, `Member ${i} ID`);
-  const rows = subs.map(s => {
-    const row = [s.team_name||'', s.leader_name, s.leader_id, s.link, s.submitted_at];
-    for (let i=0;i<maxMembers;i++){
-      const m = (s.members||[])[i];
-      row.push(m ? m.name : '', m ? m.id : '');
-    }
-    return row;
-  });
+  const rows = subs.map(s => { const row = [s.team_name||'', s.leader_name, s.leader_id, s.link, s.submitted_at]; for (let i=0;i<maxMembers;i++){ const m = (s.members||[])[i]; row.push(m ? m.name : '', m ? m.id : ''); } return row; });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -1264,36 +792,11 @@ function viewMembers(u){
   const me = S.profile;
   const myDept = (me.dept||'').toUpperCase();
   const mySec = (me.section||'').toUpperCase();
-  const visible = me.role === 'admin'
-    ? DB.profiles
-    : DB.profiles.filter(p =>
-        p.role === 'admin' ||
-        ((p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec)
-      );
-  const sorted = [...visible].sort((a,b) => {
-    const rank = x => x.role === 'admin' ? 0 : x.role === 'cr' ? 1 : 2;
-    return rank(a) - rank(b) || a.name.localeCompare(b.name);
-  });
+  const visible = me.role === 'admin' ? DB.profiles : DB.profiles.filter(p => p.role === 'admin' || ((p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec));
+  const sorted = [...visible].sort((a,b) => { const rank = x => x.role === 'admin' ? 0 : x.role === 'cr' ? 1 : 2; return rank(a) - rank(b) || a.name.localeCompare(b.name); });
   return `
-    <div class="page-head">
-      <div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members in ${esc(classLabel(me))}</p></div>
-      ${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage CRs</button></div>` : ''}
-    </div>
-    <div class="grid g3">
-      ${sorted.map(m => `
-        <div class="card">
-          <div class="row">
-            <div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:600">${esc(m.name)}</div>
-              <div class="tiny muted">${esc(m.student_id)} · ${esc(m.email||'')}</div>
-              <div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div>
-            </div>
-            ${roleBadge(m)}
-          </div>
-        </div>`).join('')}
-    </div>
-  `;
+    <div class="page-head"><div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members in ${esc(classLabel(me))}</p></div>${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage CRs</button></div>` : ''}</div>
+    <div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(m.email||'')}</div><div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div></div>${roleBadge(m)}</div></div>`).join('')}</div>`;
 }
 
 function viewManageCRs(u){
@@ -1303,86 +806,45 @@ function viewManageCRs(u){
   const admins = DB.profiles.filter(x => x.role === 'admin');
   const rowFor = m => `
     <tr>
-      <td><div class="row">
-        <div class="avatar" style="width:30px;height:30px;flex:0 0 30px;border-radius:9px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div>
-        <div><div style="font-weight:600;font-size:13px">${esc(m.name)}</div><div class="tiny muted">${esc(m.email||'')}</div></div>
-      </div></td>
+      <td><div class="row"><div class="avatar" style="width:30px;height:30px;flex:0 0 30px;border-radius:9px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div><div style="font-weight:600;font-size:13px">${esc(m.name)}</div><div class="tiny muted">${esc(m.email||'')}</div></div></div></td>
       <td class="small">${esc(m.student_id)}</td>
       <td class="small">${esc(classLabel(m))}</td>
       <td>${roleBadge(m)}</td>
-      <td style="text-align:right">
+      <td style="text-align:right;white-space:nowrap">
         ${m.role === 'student' ? `<button class="btn sm primary" onclick="appointCR('${m.id}')">Appoint as CR</button>` : ''}
         ${m.role === 'cr' ? `<button class="btn sm" onclick="demoteCR('${m.id}')">Demote to Student</button>` : ''}
+        ${m.role !== 'admin' ? `<button class="btn sm danger" style="margin-left:6px" onclick="removeMember('${m.id}')">Remove</button>` : ''}
       </td>
     </tr>`;
-
   return `
-    <div class="page-head"><div><h2>Manage Class Representatives</h2><p>Only the admin can appoint or remove CRs.</p></div></div>
-    <div class="grid g3" style="margin-bottom:18px">
-      <div class="stat"><div class="n">${students.length}</div><div class="l">Students</div></div>
-      <div class="stat"><div class="n">${crs.length}</div><div class="l">Class Representatives</div></div>
-      <div class="stat"><div class="n">${admins.length}</div><div class="l">Administrators</div></div>
-    </div>
-    <div class="tbl-wrap">
-      <table class="tbl">
-        <thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead>
-        <tbody>${[...admins, ...crs, ...students].map(rowFor).join('')}</tbody>
-      </table>
-    </div>
-  `;
+    <div class="page-head"><div><h2>Manage Class Representatives</h2><p>Only the admin can appoint, demote or remove members.</p></div></div>
+    <div class="grid g3" style="margin-bottom:18px">${`<div class="stat"><div class="n">${students.length}</div><div class="l">Students</div></div><div class="stat"><div class="n">${crs.length}</div><div class="l">Class Representatives</div></div><div class="stat"><div class="n">${admins.length}</div><div class="l">Administrators</div></div>`}</div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead><tbody>${[...admins, ...crs, ...students].map(rowFor).join('')}</tbody></table></div>`;
 }
 
-async function appointCR(id){
-  if (!confirm('Appoint as Class Representative?')) return;
-  await sb.from('profiles').update({ role: 'cr' }).eq('id', id);
-  await notify(id, 'You are now a CR', 'Your posts will go to your own section only.', 'dashboard');
-  toast('CR appointed');
-}
-async function demoteCR(id){
-  if (!confirm('Demote back to Student?')) return;
-  await sb.from('profiles').update({ role: 'student' }).eq('id', id);
-  await notify(id, 'Role changed', 'You are now a Student.', 'dashboard');
-  toast('CR demoted');
+async function appointCR(id){ if (!confirm('Appoint as Class Representative?')) return; await sb.from('profiles').update({ role: 'cr' }).eq('id', id); await notify(id, 'You are now a CR', 'Your posts will go to your own section only.', 'dashboard'); toast('CR appointed'); }
+async function demoteCR(id){ if (!confirm('Demote back to Student?')) return; await sb.from('profiles').update({ role: 'student' }).eq('id', id); await notify(id, 'Role changed', 'You are now a Student.', 'dashboard'); toast('CR demoted'); }
+
+async function removeMember(id){
+  const m = DB.profiles.find(x=>x.id===id);
+  if (!m) return;
+  if (m.role === 'admin'){ toast('Cannot remove admin', 'err'); return; }
+  if (!confirm(`Remove ${m.name} from UniSync?\n\nThey will be logged out and won't be able to sign in again. Their content (notices, resources) will remain.`)) return;
+  const { error } = await sb.from('profiles').update({ disabled: true }).eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Member removed');
 }
 
 function viewNotifications(u){
   const mine = DB.notifications.filter(n=>n.user_id===u.id);
   return `
-    <div class="page-head">
-      <div><h2>Notifications</h2><p>${mine.filter(n=>!n.read).length} unread</p></div>
-      <div class="actions">
-        <button class="btn" onclick="markAllRead()">Mark all read</button>
-        <button class="btn danger" onclick="clearNotifications()">Clear all</button>
-      </div>
-    </div>
-    <div class="stack">
-      ${mine.map(n => `
-        <div class="list-item" style="${n.read?'':'border-color:rgba(91,140,255,.35)'}">
-          <div class="dotc" style="background:${n.read?'#3a4256':'var(--accent)'}"></div>
-          <div class="lead">
-            <div class="t">${esc(n.title)}</div>
-            <div class="tiny muted">${esc(n.body||'')}</div>
-            <div class="tiny muted" style="margin-top:3px">${fmtDateTime(n.created_at)}</div>
-          </div>
-          ${n.link?`<button class="btn sm" onclick="go('${n.link}')">Open</button>`:''}
-        </div>`).join('') || `<div class="empty"><span class="big">🔔</span>No notifications.</div>`}
-    </div>
-  `;
+    <div class="page-head"><div><h2>Notifications</h2><p>${mine.filter(n=>!n.read).length} unread</p></div><div class="actions"><button class="btn" onclick="markAllRead()">Mark all read</button><button class="btn danger" onclick="clearNotifications()">Clear all</button></div></div>
+    <div class="stack">${mine.map(n => `<div class="list-item" style="${n.read?'':'border-color:rgba(91,140,255,.35)'}"><div class="dotc" style="background:${n.read?'#3a4256':'var(--accent)'}"></div><div class="lead"><div class="t">${esc(n.title)}</div><div class="tiny muted">${esc(n.body||'')}</div><div class="tiny muted" style="margin-top:3px">${fmtDateTime(n.created_at)}</div></div>${n.link?`<button class="btn sm" onclick="go('${n.link}')">Open</button>`:''}</div>`).join('') || `<div class="empty"><span class="big">🔔</span>No notifications.</div>`}</div>`;
 }
-async function markAllRead(){
-  await sb.from('notifications').update({ read: true }).eq('user_id', S.profile.id).eq('read', false);
-}
-async function clearNotifications(){
-  await sb.from('notifications').delete().eq('user_id', S.profile.id);
-  toast('Cleared');
-}
+async function markAllRead(){ await sb.from('notifications').update({ read: true }).eq('user_id', S.profile.id).eq('read', false); }
+async function clearNotifications(){ await sb.from('notifications').delete().eq('user_id', S.profile.id); toast('Cleared'); }
 
-function doSearch(q){
-  S.search = q;
-  if (q.trim() && S.route !== 'search') S.route = 'search';
-  if (!q.trim() && S.route === 'search') S.route = 'dashboard';
-  render();
-}
+function doSearch(q){ S.search = q; if (q.trim() && S.route !== 'search') S.route = 'search'; if (!q.trim() && S.route === 'search') S.route = 'dashboard'; render(); }
 
 function viewSearch(u){
   const q = S.search.trim().toLowerCase();
@@ -1392,17 +854,10 @@ function viewSearch(u){
   const evs = DB.events.filter(e => [e.title,e.course,e.location,e.type].join(' ').toLowerCase().includes(q));
   const myDept = (u.dept||'').toUpperCase();
   const mySec = (u.section||'').toUpperCase();
-  const mem = DB.profiles.filter(m =>
-    isAdmin(u) || ((m.dept||'').toUpperCase() === myDept && m.batch === u.batch && (m.section||'').toUpperCase() === mySec)
-  ).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
+  const mem = DB.profiles.filter(m => isAdmin(u) || ((m.dept||'').toUpperCase() === myDept && m.batch === u.batch && (m.section||'').toUpperCase() === mySec)).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
   const grs = DB.groups.filter(g => (g.name + ' ' + (g.description||'')).toLowerCase().includes(q));
   const total = res.length + not.length + evs.length + mem.length + grs.length;
-  const block = (title, items, renderer) => items.length ? `
-    <div class="card" style="margin-bottom:14px">
-      <b style="font-size:14px">${title} <span class="muted">(${items.length})</span></b>
-      <div class="stack" style="margin-top:10px">${items.map(renderer).join('')}</div>
-    </div>` : '';
-
+  const block = (title, items, renderer) => items.length ? `<div class="card" style="margin-bottom:14px"><b style="font-size:14px">${title} <span class="muted">(${items.length})</span></b><div class="stack" style="margin-top:10px">${items.map(renderer).join('')}</div></div>` : '';
   return `
     <div class="page-head"><div><h2>Search</h2><p>${total} result${total!==1?'s':''} for "${esc(S.search)}"</p></div></div>
     ${total ? '' : `<div class="empty"><span class="big">🔍</span>Nothing found.</div>`}
@@ -1410,209 +865,91 @@ function viewSearch(u){
     ${block('Notices', not, n => `<div class="list-item" onclick="go('notices')" style="cursor:pointer"><div class="lead"><div class="t">${esc(n.title)}</div></div></div>`)}
     ${block('Events', evs, e => `<div class="list-item" onclick="go('calendar')" style="cursor:pointer"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)}</div></div></div>`)}
     ${block('Groups', grs, g => `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="lead"><div class="t">${esc(g.name)}</div></div></a>`)}
-    ${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(classLabel(m))}</div></div></div>`)}
-  `;
+    ${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(classLabel(m))}</div></div></div>`)}`;
 }
 
 function modalShell(title, bodyHtml, footHtml){
-  return `<div class="overlay" onclick="if(event.target===this)closeModal()">
-    <div class="modal">
-      <div class="modal-head"><h3>${title}</h3><button class="x" onclick="closeModal()">×</button></div>
-      <div class="modal-body">${bodyHtml}</div>
-      <div class="modal-foot">${footHtml}</div>
-    </div>
-  </div>`;
+  return `<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h3>${title}</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body">${bodyHtml}</div><div class="modal-foot">${footHtml}</div></div></div>`;
 }
 
 function viewModal(u){
   const m = S.modal;
   switch(m.type){
     case 'profile': return modalShell('My profile', `
-      <div class="row" style="margin-bottom:16px">
-        <div class="avatar" style="width:54px;height:54px;border-radius:14px;font-size:20px;background:${colorFor(u.id)}">${esc(initials(u.name))}</div>
-        <div>
-          <div style="font-weight:650;font-size:16px">${esc(u.name)}</div>
-          <div class="small muted">${esc(u.student_id)} · ${esc(u.email||'')}</div>
-          <div style="margin-top:5px">${roleBadge(u)}</div>
-        </div>
-      </div>
-      <div class="frow">
-        <label class="f"><span>Full name</span><input class="inp" id="pf_name" value="${esc(u.name)}" data-fk="pf_name"></label>
-        <label class="f"><span>Email</span><input class="inp" id="pf_email" value="${esc(u.email||'')}" data-fk="pf_email"></label>
-      </div>
-      <div class="frow">
-        <label class="f"><span>Department</span>
-          <input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept">
-        </label>
-        <label class="f"><span>Batch</span>
-          <input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch">
-        </label>
-      </div>
-      <label class="f"><span>Section</span>
-        <input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section">
-      </label>
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px">
-        <div class="tiny muted">Changing your department, batch or section switches your view to that group's notices, calendar, resources, groups and presentations.</div>
-      </div>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="saveProfile()">Save changes</button>`);
+      <div class="row" style="margin-bottom:16px"><div class="avatar" style="width:54px;height:54px;border-radius:14px;font-size:20px;background:${colorFor(u.id)}">${esc(initials(u.name))}</div><div><div style="font-weight:650;font-size:16px">${esc(u.name)}</div><div class="small muted">${esc(u.student_id)} · ${esc(u.email||'')}</div><div style="margin-top:5px">${roleBadge(u)}</div></div></div>
+      <div class="frow"><label class="f"><span>Full name</span><input class="inp" id="pf_name" value="${esc(u.name)}" data-fk="pf_name"></label><label class="f"><span>Email</span><input class="inp" id="pf_email" value="${esc(u.email||'')}" data-fk="pf_email"></label></div>
+      <div class="frow"><label class="f"><span>Department</span><input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept"></label><label class="f"><span>Batch</span><input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch"></label></div>
+      <label class="f"><span>Section</span><input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section"></label>
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px"><div class="tiny muted">Changing your department, batch or section switches your view to that group's content.</div></div>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveProfile()">Save changes</button>`);
 
     case 'resource': return modalShell('Upload resource', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
-        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
-      </div>
-      <label class="f"><span>Title <span class="req">*</span></span>
-        <input class="inp" id="r_title" placeholder="e.g. Data Structures Notes" data-fk="r_title"></label>
-      <div class="frow">
-        <label class="f"><span>Course</span><input class="inp" id="r_course" placeholder="CSE 2201" data-fk="r_course"></label>
-        <label class="f"><span>Type</span>
-          <select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${t==='PDF (Drive)'?'selected':''}>${t}</option>`).join('')}</select></label>
-      </div>
-      <label class="f"><span>Link (Google Drive / Docs / any URL)</span>
-        <input class="inp" id="r_link" placeholder="https://drive.google.com/…" data-fk="r_link"></label>
-      <label class="f"><span>Or upload a file (max 5 MB)</span>
-        <input class="inp" type="file" id="r_file"></label>
-      <label class="f"><span>Tags (comma separated)</span>
-        <input class="inp" id="r_tags" placeholder="midterm, important" data-fk="r_tags"></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="saveResource()">Upload</button>`);
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="r_title" placeholder="e.g. Data Structures Notes" data-fk="r_title"></label>
+      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="r_course" placeholder="CSE 2201" data-fk="r_course"></label><label class="f"><span>Type</span><select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${t==='PDF (Drive)'?'selected':''}>${t}</option>`).join('')}</select></label></div>
+      <label class="f"><span>Link (Google Drive / Docs / any URL)</span><input class="inp" id="r_link" placeholder="https://drive.google.com/…" data-fk="r_link"></label>
+      <label class="f"><span>Or upload a file (max 5 MB)</span><input class="inp" type="file" id="r_file"></label>
+      <label class="f"><span>Tags (comma separated)</span><input class="inp" id="r_tags" placeholder="midterm, important" data-fk="r_tags"></label>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResource()">Upload</button>`);
 
     case 'notice': {
       const n = m.id ? DB.notices.find(x=>x.id===m.id) : null;
       return modalShell(n ? 'Edit notice' : 'New notice', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
-        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b> only.</div>
-      </div>
-      <label class="f"><span>Title <span class="req">*</span></span>
-        <input class="inp" id="n_title" value="${esc(n?.title||'')}" data-fk="n_title"></label>
-      <label class="f"><span>Body <span class="req">*</span></span>
-        <textarea class="inp" id="n_body" style="min-height:130px" data-fk="n_body">${esc(n?.body||'')}</textarea></label>
-      <div class="frow">
-        <label class="f"><span>Category</span>
-          <select class="inp" id="n_cat">${NOTICE_CATS.map(c=>`<option ${n?.category===c?'selected':''}>${c}</option>`).join('')}</select></label>
-        <label class="f"><span>Priority</span>
-          <select class="inp" id="n_pri">${PRIORITIES.map(p=>`<option ${n?.priority===p?'selected':''}>${p}</option>`).join('')}</select></label>
-      </div>
-      <div class="frow">
-        <label class="f"><span>Expires on</span><input class="inp" type="date" id="n_exp" value="${esc(n?.expires_at||'')}"></label>
-        <label class="f"><span>Pin</span>
-          <select class="inp" id="n_pin">
-            <option value="no" ${n&&!n.pinned?'selected':''}>No</option>
-            <option value="yes" ${n?.pinned?'selected':''}>Yes</option>
-          </select></label>
-      </div>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="saveNotice('${n?n.id:''}')">${n?'Save changes':'Publish'}</button>`);
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b> only.</div></div>
+        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="n_title" value="${esc(n?.title||'')}" data-fk="n_title"></label>
+        <label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="n_body" style="min-height:130px" data-fk="n_body">${esc(n?.body||'')}</textarea></label>
+        <div class="frow"><label class="f"><span>Category</span><select class="inp" id="n_cat">${NOTICE_CATS.map(c=>`<option ${n?.category===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f"><span>Priority</span><select class="inp" id="n_pri">${PRIORITIES.map(p=>`<option ${n?.priority===p?'selected':''}>${p}</option>`).join('')}</select></label></div>
+        <div class="frow"><label class="f"><span>Expires on</span><input class="inp" type="date" id="n_exp" value="${esc(n?.expires_at||'')}"></label><label class="f"><span>Pin</span><select class="inp" id="n_pin"><option value="no" ${n&&!n.pinned?'selected':''}>No</option><option value="yes" ${n?.pinned?'selected':''}>Yes</option></select></label></div>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveNotice('${n?n.id:''}')">${n?'Save changes':'Publish'}</button>`);
     }
 
     case 'event': return modalShell('Add event', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
-        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
-      </div>
-      <label class="f"><span>Title <span class="req">*</span></span>
-        <input class="inp" id="e_title" placeholder="Data Structures Midterm" data-fk="e_title"></label>
-      <div class="frow">
-        <label class="f"><span>Type</span>
-          <select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></label>
-        <label class="f"><span>Course</span><input class="inp" id="e_course" placeholder="CSE 2201" data-fk="e_course"></label>
-      </div>
-      <div class="frow">
-        <label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${iso(0)}"></label>
-        <label class="f"><span>Location</span><input class="inp" id="e_loc" placeholder="Room 402" data-fk="e_loc"></label>
-      </div>
-      <div class="frow">
-        <label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="09:00"></label>
-        <label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="10:00"></label>
-      </div>
-      <label class="f"><span>Description</span>
-        <textarea class="inp" id="e_desc" data-fk="e_desc"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="saveEvent()">Add event</button>`);
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="e_title" placeholder="Data Structures Midterm" data-fk="e_title"></label>
+      <div class="frow"><label class="f"><span>Type</span><select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></label><label class="f"><span>Course</span><input class="inp" id="e_course" placeholder="CSE 2201" data-fk="e_course"></label></div>
+      <div class="frow"><label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${iso(0)}"></label><label class="f"><span>Location</span><input class="inp" id="e_loc" placeholder="Room 402" data-fk="e_loc"></label></div>
+      <div class="frow"><label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="09:00"></label><label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="10:00"></label></div>
+      <label class="f"><span>Description</span><textarea class="inp" id="e_desc" data-fk="e_desc"></textarea></label>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEvent()">Add event</button>`);
 
-    case 'group': return modalShell('Add group', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
-        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
-      </div>
-      <label class="f"><span>Group name <span class="req">*</span></span>
-        <input class="inp" id="g_name" placeholder="e.g. SWE-48-G WhatsApp" data-fk="g_name"></label>
-      <label class="f"><span>Platform</span>
-        <select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}">${PLATFORM_META[p].name}</option>`).join('')}</select></label>
-      <label class="f"><span>Group link <span class="req">*</span></span>
-        <input class="inp" id="g_link" placeholder="https://chat.whatsapp.com/…" data-fk="g_link"></label>
-      <label class="f"><span>Description</span>
-        <textarea class="inp" id="g_desc" data-fk="g_desc"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="saveGroup()">Add</button>`);
+    case 'group': {
+      const g = m.id ? DB.groups.find(x=>x.id===m.id) : null;
+      return modalShell(g ? 'Edit group' : 'Add group', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+        <label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="g_name" value="${esc(g?.name||'')}" placeholder="e.g. SWE-48-G WhatsApp" data-fk="g_name"></label>
+        <label class="f"><span>Platform</span><select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}" ${g?.platform===p?'selected':''}>${PLATFORM_META[p].name}</option>`).join('')}</select></label>
+        <label class="f"><span>Group link <span class="req">*</span></span><input class="inp" id="g_link" value="${esc(g?.link||'')}" placeholder="https://chat.whatsapp.com/…" data-fk="g_link"></label>
+        <label class="f"><span>Description</span><textarea class="inp" id="g_desc" data-fk="g_desc">${esc(g?.description||'')}</textarea></label>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveGroup('${g?g.id:''}')">${g?'Save changes':'Add'}</button>`);
+    }
 
     case 'presentation': return modalShell('New presentation event', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px">
-        <div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div>
-      </div>
-      <label class="f"><span>Title <span class="req">*</span></span>
-        <input class="inp" id="p_title" placeholder="Database Project Presentation" data-fk="p_title"></label>
-      <div class="frow">
-        <label class="f"><span>Course</span><input class="inp" id="p_course" placeholder="CSE 2205" data-fk="p_course"></label>
-        <label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label>
-      </div>
+      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="p_title" placeholder="Database Project Presentation" data-fk="p_title"></label>
+      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="p_course" placeholder="CSE 2205" data-fk="p_course"></label><label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label></div>
       <label class="f"><span>Max team size</span><input class="inp" type="number" id="p_max" min="1" max="12" value="4"></label>
-      <label class="f"><span>Instructions</span>
-        <textarea class="inp" id="p_instr" data-fk="p_instr"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn primary" onclick="savePresentation()">Create</button>`);
+      <label class="f"><span>Instructions</span><textarea class="inp" id="p_instr" data-fk="p_instr"></textarea></label>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePresentation()">Create</button>`);
 
     case 'submission': {
       const p = DB.presentations.find(x=>x.id===m.presentationId);
       const existing = m.submissionId ? DB.submissions.find(s => s.id === m.submissionId) : null;
       if (!m._init){
         memberDraft = existing ? JSON.parse(JSON.stringify(existing.members||[])) : [];
-        submissionDraft = {
-          link: existing?.link || '',
-          teamName: existing?.team_name || '',
-          leaderName: existing?.leader_name || u.name,
-          leaderId: existing?.leader_id || u.student_id
-        };
+        submissionDraft = { link: existing?.link || '', teamName: existing?.team_name || '', leaderName: existing?.leader_name || u.name, leaderId: existing?.leader_id || u.student_id };
         m._init = true;
       }
       const max = p?.max_team_size || 6;
       return modalShell(existing ? 'Update submission' : 'Submit presentation', `
-        <div class="card" style="background:var(--panel2);margin-bottom:16px;padding:12px">
-          <div style="font-weight:600;font-size:13.5px">${esc(p?.title||'Presentation')}</div>
-          <div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div>
-        </div>
-        <label class="f"><span>Presentation link <span class="req">*</span></span>
-          <input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" placeholder="https://…" data-fk="sb_link"
-                 oninput="submissionDraft.link=this.value"></label>
-        <label class="f"><span>Team name</span>
-          <input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team"
-                 oninput="submissionDraft.teamName=this.value"></label>
-        <div class="frow">
-          <label class="f"><span>Leader name <span class="req">*</span></span>
-            <input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln"
-                   oninput="submissionDraft.leaderName=this.value"></label>
-          <label class="f"><span>Leader ID <span class="req">*</span></span>
-            <input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li"
-                   oninput="submissionDraft.leaderId=this.value"></label>
-        </div>
+        <div class="card" style="background:var(--panel2);margin-bottom:16px;padding:12px"><div style="font-weight:600;font-size:13.5px">${esc(p?.title||'Presentation')}</div><div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div></div>
+        <label class="f"><span>Presentation link <span class="req">*</span></span><input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" placeholder="https://…" data-fk="sb_link" oninput="submissionDraft.link=this.value"></label>
+        <label class="f"><span>Team name</span><input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team" oninput="submissionDraft.teamName=this.value"></label>
+        <div class="frow"><label class="f"><span>Leader name <span class="req">*</span></span><input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln" oninput="submissionDraft.leaderName=this.value"></label><label class="f"><span>Leader ID <span class="req">*</span></span><input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li" oninput="submissionDraft.leaderId=this.value"></label></div>
         <div class="divider"></div>
-        <div class="row" style="margin-bottom:10px">
-          <div class="small" style="font-weight:600">Team members</div>
-          <span class="tag" style="margin-left:auto">${memberDraft.length}/${Math.max(0, max-1)}</span>
-        </div>
-        <div id="memberList">
-          ${memberDraft.map((mm,i)=>`
-            <div class="member-box">
-              <div class="mb-head">Member ${i+1}
-                <button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeMemberRow(${i})">Remove</button>
-              </div>
-              <div class="frow" style="gap:8px">
-                <input class="inp" placeholder="Name" value="${esc(mm.name||'')}" oninput="memberDraft[${i}].name=this.value">
-                <input class="inp" placeholder="ID" value="${esc(mm.id||'')}" oninput="memberDraft[${i}].id=this.value">
-              </div>
-            </div>`).join('') || `<div class="small muted" style="padding:8px 0">No members yet.</div>`}
-        </div>
+        <div class="row" style="margin-bottom:10px"><div class="small" style="font-weight:600">Team members</div><span class="tag" style="margin-left:auto">${memberDraft.length}/${Math.max(0, max-1)}</span></div>
+        <div id="memberList">${memberDraft.map((mm,i)=>`<div class="member-box"><div class="mb-head">Member ${i+1}<button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeMemberRow(${i})">Remove</button></div><div class="frow" style="gap:8px"><input class="inp" placeholder="Name" value="${esc(mm.name||'')}" oninput="memberDraft[${i}].name=this.value"><input class="inp" placeholder="ID" value="${esc(mm.id||'')}" oninput="memberDraft[${i}].id=this.value"></div></div>`).join('') || `<div class="small muted" style="padding:8px 0">No members yet.</div>`}</div>
         <button class="btn sm" onclick="addMemberRow()">+ Add member</button>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button>
-          <button class="btn primary" onclick="submitPresentation('${m.presentationId}','${m.submissionId||''}')">${existing?'Update':'Submit'}</button>`);
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitPresentation('${m.presentationId}','${m.submissionId||''}')">${existing?'Update':'Submit'}</button>`);
     }
   }
   return '';
@@ -1625,10 +962,7 @@ function addMemberRow(){
   memberDraft.push({ name:'', id:'' });
   render();
 }
-function removeMemberRow(i){
-  memberDraft.splice(i,1);
-  render();
-}
+function removeMemberRow(i){ memberDraft.splice(i,1); render(); }
 
 async function saveProfile(){
   const name = $('#pf_name').value.trim();
@@ -1655,10 +989,8 @@ async function saveResource(){
   const link = $('#r_link').value.trim();
   const fileInput = $('#r_file');
   const file = fileInput.files && fileInput.files[0];
-
   if (!title){ toast('Title required', 'err'); return; }
   if (!link && !file){ toast('Provide a link or file', 'err'); return; }
-
   let filePath = null, fileName = null;
   if (file){
     if (file.size > 5 * 1024 * 1024){ toast('File too large (max 5 MB)', 'err'); return; }
@@ -1667,20 +999,12 @@ async function saveResource(){
     if (upErr){ toast('Upload failed: ' + upErr.message, 'err'); return; }
     filePath = path; fileName = file.name;
   }
-
   const me = S.profile;
   const { error } = await sb.from('resources').insert({
-    title,
-    course: $('#r_course').value.trim(),
-    type: $('#r_type').value,
-    link: link || null,
-    file_path: filePath,
-    file_name: fileName,
+    title, course: $('#r_course').value.trim(), type: $('#r_type').value,
+    link: link || null, file_path: filePath, file_name: fileName,
     tags: $('#r_tags').value.split(',').map(t=>t.trim()).filter(Boolean),
-    dept: (me.dept||'').toUpperCase(),
-    batch: me.batch,
-    section: (me.section||'').toUpperCase(),
-    uploaded_by: me.id
+    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), uploaded_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
   toast('Resource uploaded');
@@ -1692,25 +1016,13 @@ async function saveNotice(id){
   const body = $('#n_body').value.trim();
   if (!title || !body){ toast('Title and body required', 'err'); return; }
   const me = S.profile;
-  const data = {
-    title, body,
-    category: $('#n_cat').value,
-    priority: $('#n_pri').value,
-    expires_at: $('#n_exp').value || null,
-    pinned: $('#n_pin').value === 'yes'
-  };
+  const data = { title, body, category: $('#n_cat').value, priority: $('#n_pri').value, expires_at: $('#n_exp').value || null, pinned: $('#n_pin').value === 'yes' };
   if (id){
     const { error } = await sb.from('notices').update(data).eq('id', id);
     if (error){ toast(error.message, 'err'); return; }
     toast('Notice updated');
   } else {
-    const { error } = await sb.from('notices').insert({
-      ...data,
-      dept: (me.dept||'').toUpperCase(),
-      batch: me.batch,
-      section: (me.section||'').toUpperCase(),
-      created_by: me.id
-    });
+    const { error } = await sb.from('notices').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
     if (error){ toast(error.message, 'err'); return; }
     await notifyClass(me.id, 'New notice', title, 'notices');
     toast('Notice published');
@@ -1724,17 +1036,9 @@ async function saveEvent(){
   if (!title || !date){ toast('Title and date required', 'err'); return; }
   const me = S.profile;
   const { error } = await sb.from('events').insert({
-    title, date,
-    type: $('#e_type').value,
-    course: $('#e_course').value.trim(),
-    location: $('#e_loc').value.trim(),
-    start_time: $('#e_st').value || '09:00',
-    end_time: $('#e_et').value || '10:00',
-    description: $('#e_desc').value.trim(),
-    dept: (me.dept||'').toUpperCase(),
-    batch: me.batch,
-    section: (me.section||'').toUpperCase(),
-    created_by: me.id
+    title, date, type: $('#e_type').value, course: $('#e_course').value.trim(), location: $('#e_loc').value.trim(),
+    start_time: $('#e_st').value || '09:00', end_time: $('#e_et').value || '10:00', description: $('#e_desc').value.trim(),
+    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
   await notifyClass(me.id, 'New event scheduled', `${title} — ${fmtDate(date)}`, 'calendar');
@@ -1742,24 +1046,23 @@ async function saveEvent(){
   closeModal();
 }
 
-async function saveGroup(){
+async function saveGroup(id){
   const name = $('#g_name').value.trim();
   const link = $('#g_link').value.trim();
   if (!name || !link){ toast('Name and link required', 'err'); return; }
   if (!/^https?:\/\//i.test(link)){ toast('Link must start with http:// or https://', 'err'); return; }
   const me = S.profile;
-  const { error } = await sb.from('groups').insert({
-    name, link,
-    platform: $('#g_platform').value,
-    description: $('#g_desc').value.trim(),
-    dept: (me.dept||'').toUpperCase(),
-    batch: me.batch,
-    section: (me.section||'').toUpperCase(),
-    created_by: me.id
-  });
-  if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(me.id, 'New class group added', name, 'groups');
-  toast('Group added');
+  const data = { name, link, platform: $('#g_platform').value, description: $('#g_desc').value.trim() };
+  if (id){
+    const { error } = await sb.from('groups').update(data).eq('id', id);
+    if (error){ toast(error.message, 'err'); return; }
+    toast('Group updated');
+  } else {
+    const { error } = await sb.from('groups').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
+    if (error){ toast(error.message, 'err'); return; }
+    await notifyClass(me.id, 'New class group added', name, 'groups');
+    toast('Group added');
+  }
   closeModal();
 }
 
@@ -1769,14 +1072,8 @@ async function savePresentation(){
   if (!title || !deadline){ toast('Title and deadline required', 'err'); return; }
   const me = S.profile;
   const { error } = await sb.from('presentations').insert({
-    title, deadline,
-    course: $('#p_course').value.trim(),
-    max_team_size: parseInt($('#p_max').value) || 4,
-    instructions: $('#p_instr').value.trim(),
-    dept: (me.dept||'').toUpperCase(),
-    batch: me.batch,
-    section: (me.section||'').toUpperCase(),
-    created_by: me.id
+    title, deadline, course: $('#p_course').value.trim(), max_team_size: parseInt($('#p_max').value) || 4, instructions: $('#p_instr').value.trim(),
+    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id
   });
   if (error){ toast(error.message, 'err'); return; }
   await notifyClass(me.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
@@ -1788,46 +1085,27 @@ async function syncToSheet(sub){
   if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
   const p = DB.presentations.find(x => x.id === sub.presentation_id) || {};
   const payload = {
-    token: SHEET_SECRET,
-    submissionId: sub.id,
-    presentation: p.title || '',
-    course: p.course || '',
+    token: SHEET_SECRET, submissionId: sub.id, presentation: p.title || '', course: p.course || '',
     submittedAt: sub.submitted_at || new Date().toISOString(),
     status: sub.updated_at && sub.updated_at !== sub.submitted_at ? 'Updated' : 'Submitted',
-    submitterId: (S.profile && S.profile.student_id) || '',
-    link: sub.link,
-    teamName: sub.team_name || '',
-    leaderName: sub.leader_name,
-    leaderId: sub.leader_id,
-    members: sub.members || []
+    submitterId: (S.profile && S.profile.student_id) || '', link: sub.link, teamName: sub.team_name || '',
+    leaderName: sub.leader_name, leaderId: sub.leader_id, members: sub.members || []
   };
   try {
-    await fetch(SHEET_WEBHOOK_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      keepalive: true
-    });
+    await fetch(SHEET_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), keepalive: true });
     return true;
-  } catch(e) {
-    console.warn('Sheet sync failed', e);
-    return false;
-  }
+  } catch(e) { console.warn('Sheet sync failed', e); return false; }
 }
 
 async function submitPresentation(pid, existingId){
   const p = DB.presentations.find(x => x.id === pid);
   if (!p){ toast('Presentation not found', 'err'); return; }
-
   const link = (submissionDraft.link || '').trim();
   const teamName = (submissionDraft.teamName || '').trim();
   const leaderName = (submissionDraft.leaderName || '').trim();
   const leaderId = (submissionDraft.leaderId || '').trim();
-
   if (!link || !/^https?:\/\/\S+\.\S+/i.test(link)){ toast('Enter a valid URL', 'err'); return; }
   if (!leaderName || !leaderId){ toast('Leader name and ID required', 'err'); return; }
-
   const members = [];
   const seen = new Set([leaderId]);
   for (let i=0;i<memberDraft.length;i++){
@@ -1839,35 +1117,22 @@ async function submitPresentation(pid, existingId){
     seen.add(mid);
     members.push({ name: nm, id: mid });
   }
-
   const max = p.max_team_size || 6;
   if (members.length + 1 > max){ toast(`Team size limit is ${max}`, 'err'); return; }
-
-  const payload = {
-    presentation_id: pid,
-    link, team_name: teamName || null,
-    leader_name: leaderName, leader_id: leaderId,
-    members,
-    submitted_by: S.profile.id,
-    updated_at: new Date().toISOString()
-  };
-
+  const payload = { presentation_id: pid, link, team_name: teamName || null, leader_name: leaderName, leader_id: leaderId, members, submitted_by: S.profile.id, updated_at: new Date().toISOString() };
   let saved = null;
   if (existingId){
     const { data, error } = await sb.from('submissions').update(payload).eq('id', existingId).select().single();
     if (error){ toast(error.message, 'err'); return; }
-    saved = data;
-    toast('Submission updated');
+    saved = data; toast('Submission updated');
   } else {
     payload.submitted_at = new Date().toISOString();
     const { data, error } = await sb.from('submissions').insert(payload).select().single();
     if (error){ toast(error.message, 'err'); return; }
     saved = data;
-    await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id),
-      'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations');
+    await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id), 'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations');
     toast('Submission saved');
   }
-
   if (saved) syncToSheet(saved);
   memberDraft = [];
   submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
@@ -1876,29 +1141,14 @@ async function submitPresentation(pid, existingId){
 
 (async function boot(){
   const { data: { session } } = await sb.auth.getSession();
-  if (session){
-    S.user = session.user;
-    await loadProfile();
-  }
+  if (session){ S.user = session.user; await loadProfile(); }
   S.loading = false;
-
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
-    if (session){
-      S.user = session.user;
-      await loadProfile();
-    } else {
-      S.user = null;
-      S.profile = null;
-      S.loading = false;
-      render();
-    }
+    if (session){ S.user = session.user; await loadProfile(); }
+    else { S.user = null; S.profile = null; S.loading = false; render(); }
   });
-
-  if (S.profile){
-    await fetchAll();
-    subscribeRealtime();
-  }
+  if (S.profile){ await fetchAll(); subscribeRealtime(); }
   render();
 })();
 
@@ -1907,6 +1157,11 @@ async function loadProfile(){
   for (let i=0; i<5; i++){
     const { data } = await sb.from('profiles').select('*').eq('id', S.user.id).maybeSingle();
     if (data){
+      if (data.disabled){
+        await sb.auth.signOut();
+        toast('Your account has been removed by admin', 'err');
+        return;
+      }
       S.profile = data;
       await fetchAll();
       subscribeRealtime();
@@ -1918,19 +1173,12 @@ async function loadProfile(){
   }
   const meta = S.user.user_metadata || {};
   const { data, error } = await sb.from('profiles').insert({
-    id: S.user.id,
-    name: meta.name || 'New User',
+    id: S.user.id, name: meta.name || 'New User',
     student_id: meta.student_id || 'unknown_' + S.user.id.slice(0,8),
-    email: S.user.email,
-    dept: (meta.dept || 'CSE').toUpperCase(),
-    batch: meta.batch || '—',
-    section: (meta.section || '—').toUpperCase()
+    email: S.user.email, dept: (meta.dept || 'CSE').toUpperCase(),
+    batch: meta.batch || '—', section: (meta.section || '—').toUpperCase()
   }).select().maybeSingle();
-  if (!error && data){
-    S.profile = data;
-    await fetchAll();
-    subscribeRealtime();
-  }
+  if (!error && data){ S.profile = data; await fetchAll(); subscribeRealtime(); }
   S.loading = false;
   render();
 }
