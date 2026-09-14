@@ -363,7 +363,6 @@ function subscribeRealtime(){
     const ch = sb.channel(`rt_${table}`)
       .on('postgres_changes', { event:'*', schema:'public', table }, async () => {
         await fetchAll();
-        // Don't clobber modal or active input
         if (S.modal) return;
         const a = document.activeElement;
         if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) return;
@@ -1084,6 +1083,7 @@ function viewPresentations(u){
             ${DB.presentations.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.title)}</option>`).join('')}
           </select>` : ''}
         ${canManage(u) ? `<button class="btn primary" onclick="openModal('presentation')">+ New</button>` : ''}
+        ${canManage(u) ? `<button class="btn danger" onclick="deletePresentation('${p.id}')">🗑 Delete</button>` : ''}
       </div>
     </div>
 
@@ -1161,6 +1161,51 @@ function viewPresentations(u){
       </div>
     ` : ''}
   `;
+}
+
+async function deletePresentation(id){
+  const p = DB.presentations.find(x=>x.id===id);
+  if (!p) return;
+  const subCount = DB.submissions.filter(s => s.presentation_id === id).length;
+  const msg = `Delete "${p.title}"?\n\nThis will permanently delete:\n• The presentation event\n• ${subCount} submission${subCount!==1?'s':''}\n• The tab in Google Sheet\n\nThis cannot be undone.`;
+  if (!confirm(msg)) return;
+
+  // 1. Delete all submissions first (cascade would handle, but be explicit)
+  await sb.from('submissions').delete().eq('presentation_id', id);
+
+  // 2. Delete presentation row
+  const { error } = await sb.from('presentations').delete().eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+
+  // 3. Sync delete to Google Sheet
+  syncDeleteToSheet(p.title);
+
+  // 4. Reset selection
+  S.selectedPresentation = null;
+
+  toast('Presentation deleted');
+  render();
+}
+
+async function syncDeleteToSheet(presentationTitle){
+  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
+  try {
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        token: SHEET_SECRET,
+        action: 'deletePresentation',
+        presentation: presentationTitle
+      }),
+      keepalive: true
+    });
+    return true;
+  } catch(e) {
+    console.warn('Sheet delete failed', e);
+    return false;
+  }
 }
 
 async function deleteSubmission(id){
