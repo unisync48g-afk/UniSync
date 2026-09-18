@@ -601,7 +601,6 @@ function viewResources(u){
     <div class="card" style="margin-bottom:16px"><div class="row wrap"><input class="inp" style="flex:2;min-width:200px" placeholder="Search…" value="${esc(f.q)}" data-fk="resq" oninput="S.resFilter.q=this.value;render()"><select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.course=this.value;render()"><option value="">All courses</option>${courses.map(c=>`<option ${f.course===c?'selected':''}>${esc(c)}</option>`).join('')}</select><select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.type=this.value;render()"><option value="">All types</option>${RESOURCE_TYPES.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div></div>
     ${list.length ? `<div class="grid g2">${list.map(r => resourceCard(r, u)).join('')}</div>` : `<div class="empty"><span class="big">📚</span>No resources in this section yet.</div>`}`;
 }
-
 function resourceCard(r, u){
   const canEdit = canManage(u) || r.uploaded_by === u.id;
   if (isDrivePdf(r)){
@@ -610,7 +609,6 @@ function resourceCard(r, u){
   }
   return `<div class="card"><div style="font-weight:620;font-size:14.5px;margin-bottom:4px">${esc(r.title)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">${r.course?`<span class="tag blue">${esc(r.course)}</span>`:''}<span class="tag">${esc(r.type)}</span></div><div class="tiny muted" style="margin-bottom:10px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div><div class="row"><button class="btn primary sm" onclick="openResource('${r.id}')">Open</button>${canEdit ? `<button class="btn sm" style="margin-left:auto" onclick="openModal('resource',{id:'${r.id}'})">✎ Edit</button><button class="btn danger sm" onclick="deleteResource('${r.id}')">Delete</button>` : ''}</div></div>`;
 }
-
 async function openResource(id){
   const r = DB.resources.find(x=>x.id===id); if (!r) return;
   await sb.from('resources').update({ downloads: (r.downloads||0)+1 }).eq('id', id);
@@ -765,18 +763,45 @@ function exportSubmissions(pid){
 }
 
 /* =========================================================
-   PRESENTATION GROUPS
+   PRESENTATION GROUPS  (with Invitation Flow)
    ========================================================= */
 function getMyGroup(u){ return DB.presentation_groups.find(g => g.leader_id === u.id || (g.members || []).includes(u.id)); }
 function getGroupMembers(g){ return [g.leader_id, ...(g.members || [])].filter(Boolean).map(id => profileOf(id)).filter(Boolean); }
-function getGroupPendingRequests(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && r.status === 'pending'); }
+function getGroupPendingRequests(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && (r.direction || 'request') === 'request' && r.status === 'pending'); }
+function getGroupPendingInvites(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && r.direction === 'invite' && r.status === 'pending'); }
+function getMyIncomingInvites(u){ return DB.group_join_requests.filter(r => r.user_id === u.id && r.direction === 'invite' && r.status === 'pending'); }
+function isInvitedToGroup(gid, uid){ return DB.group_join_requests.some(r => r.group_id === gid && r.user_id === uid && r.direction === 'invite' && r.status === 'pending'); }
 
 function viewPresentationGroups(u){
   const myGroup = getMyGroup(u);
   const allGroups = DB.presentation_groups;
   const myRequests = myGroup && myGroup.leader_id === u.id ? getGroupPendingRequests(myGroup.id) : [];
+  const mySentInvites = myGroup && myGroup.leader_id === u.id ? getGroupPendingInvites(myGroup.id) : [];
+  const incomingInvites = getMyIncomingInvites(u);
   return `
     <div class="page-head"><div><h2>Presentation Groups</h2><p>Create your team, invite members, and pick your presentation topic.</p></div><div class="actions">${!myGroup ? `<button class="btn primary" onclick="openModal('pgroupCreate')">+ Create group</button>` : ''}</div></div>
+    ${incomingInvites.length ? `
+      <div class="card" style="margin-bottom:16px;border-left:3px solid #22c55e;background:rgba(34,197,94,.05)">
+        <div class="row" style="margin-bottom:10px"><b style="font-size:15px;color:#7ee2a4">✉️ You have ${incomingInvites.length} group invitation${incomingInvites.length!==1?'s':''}</b></div>
+        <div class="stack" style="gap:8px">${incomingInvites.map(inv => {
+          const g = DB.presentation_groups.find(x => x.id === inv.group_id);
+          const leader = profileOf(g?.leader_id);
+          if (!g) return '';
+          return `<div class="row" style="gap:10px;padding:12px;background:var(--panel2);border-radius:10px;flex-wrap:wrap">
+            <div class="avatar" style="background:${colorFor(leader?.id || 'x')}">${esc(initials(leader?.name || '?'))}</div>
+            <div style="flex:1;min-width:200px">
+              <div style="font-weight:600;font-size:13.5px">${esc(g.name)}</div>
+              <div class="tiny muted">Invited by ${esc(leader?.name || 'leader')}${g.topic ? ' · 📌 ' + esc(g.topic) : ''}</div>
+              ${inv.message ? `<div class="tiny muted" style="margin-top:3px">"${esc(inv.message)}"</div>` : ''}
+            </div>
+            <div class="row" style="gap:6px">
+              <button class="btn sm primary" onclick="respondInvite('${inv.id}','accepted')">Accept</button>
+              <button class="btn sm danger" onclick="respondInvite('${inv.id}','rejected')">Decline</button>
+            </div>
+          </div>`;
+        }).join('')}</div>
+      </div>
+    ` : ''}
     ${myGroup ? `
       <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)">
         <div class="row wrap" style="align-items:flex-start;margin-bottom:10px">
@@ -784,10 +809,11 @@ function viewPresentationGroups(u){
             <div style="font-weight:650;font-size:16px;margin-bottom:4px">${esc(myGroup.name)}</div>
             <div class="row wrap tiny muted" style="gap:6px"><span class="tag green">Your group</span>${myGroup.topic ? `<span class="tag blue">📌 ${esc(myGroup.topic)}</span>` : `<span class="tag amber">No topic set</span>`}<span class="tag">${getGroupMembers(myGroup).length}/${myGroup.max_size} members</span>${myGroup.leader_id === u.id ? `<span class="tag admin">👑 You are leader</span>` : `<span class="tag">Member</span>`}</div>
           </div>
-          <div class="row wrap" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${myGroup.id}')">View details</button>${myGroup.leader_id === u.id ? `<button class="btn sm primary" onclick="openModal('pgroupEdit',{id:'${myGroup.id}'})">✎ Edit</button>` : ''}${myGroup.leader_id !== u.id ? `<button class="btn sm danger" onclick="leaveGroup('${myGroup.id}')">Leave group</button>` : ''}</div>
+          <div class="row wrap" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${myGroup.id}')">View details</button>${myGroup.leader_id === u.id ? `<button class="btn sm primary" onclick="openModal('pgroupEdit',{id:'${myGroup.id}'})">✎ Edit / Invite</button>` : ''}${myGroup.leader_id !== u.id ? `<button class="btn sm danger" onclick="leaveGroup('${myGroup.id}')">Leave group</button>` : ''}${myGroup.leader_id === u.id ? `<button class="btn sm danger" onclick="deletePgroup('${myGroup.id}')">🗑 Delete group</button>` : ''}</div>
         </div>
         <div class="divider"></div>
         <div class="row wrap" style="gap:6px">${getGroupMembers(myGroup).map(m => `<div class="row" style="gap:6px;background:var(--panel2);padding:5px 10px;border-radius:20px"><div class="avatar" style="width:22px;height:22px;flex:0 0 22px;border-radius:6px;font-size:10px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><span class="small">${esc(m.name)}</span>${m.id === myGroup.leader_id ? `<span class="tiny" style="color:#f7c76a">👑</span>` : ''}</div>`).join('')}</div>
+        ${myGroup.leader_id === u.id && mySentInvites.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b class="small">📤 Pending invitations (${mySentInvites.length})</b></div><div class="stack" style="gap:6px">${mySentInvites.map(inv => { const target = profileOf(inv.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(inv.user_id)}">${esc(initials(target?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(target?.name || 'Unknown')}</div><div class="tiny muted">${esc(target?.student_id || '')} · Waiting for response</div></div><span class="tag amber">Pending</span><button class="btn sm danger" onclick="cancelInvite('${inv.id}')">Cancel</button></div>`; }).join('')}</div>` : ''}
         ${myGroup.leader_id === u.id && myRequests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b class="small">🔔 Join requests (${myRequests.length})</b></div><div class="stack" style="gap:8px">${myRequests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted')">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected')">Reject</button></div>`; }).join('')}</div>` : ''}
       </div>
     ` : ''}
@@ -796,17 +822,22 @@ function viewPresentationGroups(u){
       const members = getGroupMembers(g);
       const isFull = members.length >= g.max_size;
       const isMine = myGroup && myGroup.id === g.id;
-      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && r.status === 'pending');
-      return `<div class="card"><div style="font-weight:640;font-size:15px;margin-bottom:6px">${esc(g.name)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:10px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size} ${isFull?'full':'open'}</span>${isMine ? `<span class="tag green">Your group</span>` : ''}</div><div class="row wrap" style="gap:4px;margin-bottom:12px">${members.map(m => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:10px;background:${colorFor(m.id)}" title="${esc(m.name)}${m.id===g.leader_id?' (leader)':''}">${esc(initials(m.name))}</div>`).join('')}${Array(Math.max(0, g.max_size - members.length)).fill(0).map(() => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px dashed var(--line)">?</div>`).join('')}</div><div class="row" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${g.id}')">View members</button>${!isMine && !isFull && !pendingReq && !myGroup ? `<button class="btn sm primary" onclick="openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMine && !isFull && pendingReq ? `<span class="tag amber">Request pending</span>` : ''}${!isMine && isFull ? `<span class="tag red">Group full</span>` : ''}</div></div>`;
+      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && (r.direction || 'request') === 'request' && r.status === 'pending');
+      const invited = isInvitedToGroup(g.id, u.id);
+      return `<div class="card"><div style="font-weight:640;font-size:15px;margin-bottom:6px">${esc(g.name)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:10px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size} ${isFull?'full':'open'}</span>${isMine ? `<span class="tag green">Your group</span>` : ''}${invited ? `<span class="tag amber">✉️ Invited you</span>` : ''}</div><div class="row wrap" style="gap:4px;margin-bottom:12px">${members.map(m => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:10px;background:${colorFor(m.id)}" title="${esc(m.name)}${m.id===g.leader_id?' (leader)':''}">${esc(initials(m.name))}</div>`).join('')}${Array(Math.max(0, g.max_size - members.length)).fill(0).map(() => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px dashed var(--line)">?</div>`).join('')}</div><div class="row" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${g.id}')">View members</button>${!isMine && !isFull && !pendingReq && !invited && !myGroup ? `<button class="btn sm primary" onclick="openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMine && !isFull && pendingReq ? `<span class="tag amber">Request pending</span>` : ''}${!isMine && invited ? `<span class="tag green">✉️ Invited — check top</span>` : ''}${!isMine && isFull ? `<span class="tag red">Group full</span>` : ''}</div></div>`;
     }).join('')}</div>` : `<div class="empty"><span class="big">👥</span>No groups yet.${!myGroup ? ' Click "Create group" to start.' : ''}</div>`}`;
 }
-
 function openPgroupDetail(gid){ pgroupDetailId = gid; openModal('pgroupDetail', { id: gid }); }
 
 function togglePgroupDraftMember(uidTarget){
   const i = pgroupDraft.members.indexOf(uidTarget);
-  if (i > -1) pgroupDraft.members.splice(i, 1);
-  else { if (pgroupDraft.members.length + 1 >= pgroupDraft.maxSize){ toast('Team size limit reached', 'err'); return; } pgroupDraft.members.push(uidTarget); }
+  if (i > -1){ pgroupDraft.members.splice(i, 1); render(); return; }
+  const m = S.modal;
+  const g = m && m.id ? DB.presentation_groups.find(x => x.id === m.id) : null;
+  const currentCount = g ? (g.members || []).length : 0;
+  const projectedTotal = 1 + currentCount + pgroupDraft.members.length + 1;
+  if (projectedTotal > pgroupDraft.maxSize){ toast(`Team size limit (${pgroupDraft.maxSize}) reached`, 'err'); return; }
+  pgroupDraft.members.push(uidTarget);
   render();
 }
 
@@ -816,12 +847,37 @@ async function savePgroup(id){
   const maxSize = parseInt($('#pg_max')?.value) || 4;
   if (!name){ toast('Group name required', 'err'); return; }
   if (maxSize < 1){ toast('Max size must be at least 1', 'err'); return; }
-  if (pgroupDraft.members.length + 1 > maxSize){ toast(`Too many members (limit ${maxSize})`, 'err'); return; }
   const me = S.profile;
-  const data = { name, topic, max_size: maxSize, members: pgroupDraft.members, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() };
-  let error;
-  if (id){ ({ error } = await sb.from('presentation_groups').update(data).eq('id', id)); if (error){ toast(error.message, 'err'); return; } toast('Group updated'); }
-  else { ({ error } = await sb.from('presentation_groups').insert({ ...data, leader_id: me.id })); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New presentation group', `${me.name} created "${name}".`, 'pgroups'); toast('Group created'); }
+  const data = { name, topic, max_size: maxSize, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() };
+  let groupId = id;
+  if (id){
+    const { error } = await sb.from('presentation_groups').update(data).eq('id', id);
+    if (error){ toast(error.message, 'err'); return; }
+  } else {
+    const { data: created, error } = await sb.from('presentation_groups').insert({ ...data, leader_id: me.id, members: [] }).select().single();
+    if (error){ toast(error.message, 'err'); return; }
+    groupId = created.id;
+  }
+  const g = DB.presentation_groups.find(x => x.id === groupId) || { members: [] };
+  const currentMembers = g.members || [];
+  const alreadyInvited = DB.group_join_requests.filter(r => r.group_id === groupId && r.direction === 'invite' && r.status === 'pending').map(r => r.user_id);
+  const newInvitees = pgroupDraft.members.filter(uidTarget => !currentMembers.includes(uidTarget) && !alreadyInvited.includes(uidTarget));
+  const projectedTotal = 1 + currentMembers.length + pgroupDraft.members.length;
+  if (projectedTotal > maxSize){
+    toast(`Team size limit is ${maxSize}. Currently ${projectedTotal} would be invited/joined.`, 'err');
+    return;
+  }
+  if (newInvitees.length){
+    await sb.from('group_join_requests').delete().eq('group_id', groupId).in('user_id', newInvitees);
+    const inviteRows = newInvitees.map(uidTarget => ({ group_id: groupId, user_id: uidTarget, direction: 'invite', status: 'pending', message: '' }));
+    const { error: invErr } = await sb.from('group_join_requests').insert(inviteRows);
+    if (invErr){ toast('Invite failed: ' + invErr.message, 'err'); return; }
+    for (const uidTarget of newInvitees){
+      await notify(uidTarget, '✉️ Group invitation', `${me.name} invited you to join "${name}". Open Presentation Groups to accept.`, 'pgroups');
+    }
+  }
+  if (!id){ await notifyClass(me.id, 'New presentation group', `${me.name} created "${name}".`, 'pgroups'); toast('Group created · Invitations sent'); }
+  else { toast(newInvitees.length ? `Group updated · ${newInvitees.length} invitation(s) sent` : 'Group updated'); }
   closeModal();
 }
 
@@ -832,6 +888,7 @@ async function leaveGroup(gid){
   const members = (g.members || []).filter(m => m !== S.profile.id);
   const { error } = await sb.from('presentation_groups').update({ members }).eq('id', gid);
   if (error){ toast(error.message, 'err'); return; }
+  await notify(g.leader_id, 'Member left group', `${S.profile.name} left "${g.name}".`, 'pgroups');
   toast('Left group');
 }
 async function removeGroupMember(gid, uidTarget){
@@ -870,18 +927,26 @@ async function deletePgroup(gid){
 async function sendJoinRequest(gid){
   const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
   const message = $('#pjr_msg')?.value.trim() || '';
-  const { error } = await sb.from('group_join_requests').insert({ group_id: gid, user_id: S.profile.id, message });
+  const { error } = await sb.from('group_join_requests').insert({ group_id: gid, user_id: S.profile.id, message, direction: 'request' });
   if (error){ toast(error.message, 'err'); return; }
-  await notify(g.leader_id, 'New join request', `${S.profile.name} wants to join "${g.name}".`, 'pgroups');
+  await notify(g.leader_id, '🔔 New join request', `${S.profile.name} wants to join "${g.name}".`, 'pgroups');
   toast('Request sent'); closeModal();
 }
 async function respondJoinRequest(reqId, status){
   const r = DB.group_join_requests.find(x => x.id === reqId); if (!r) return;
+  if (r.status !== 'pending'){ toast('This request is no longer pending.', 'err'); await fetchAll(); render(); return; }
   const g = DB.presentation_groups.find(x => x.id === r.group_id); if (!g) return;
   if (status === 'accepted'){
+    const requester = profileOf(r.user_id);
+    const existingGroup = requester ? getMyGroup(requester) : null;
+    if (existingGroup && existingGroup.id !== g.id){
+      toast('Requester is already in another group', 'err');
+      await sb.from('group_join_requests').update({ status: 'rejected' }).eq('id', reqId);
+      await fetchAll(); render(); return;
+    }
     const members = g.members || [];
     const total = members.length + 1 + (g.leader_id ? 1 : 0);
-    if (total >= g.max_size){ toast('Group is full', 'err'); return; }
+    if (total > g.max_size){ toast('Group is full', 'err'); return; }
     if (!members.includes(r.user_id)) members.push(r.user_id);
     const { error } = await sb.from('presentation_groups').update({ members }).eq('id', g.id);
     if (error){ toast(error.message, 'err'); return; }
@@ -892,6 +957,36 @@ async function respondJoinRequest(reqId, status){
     toast('Request rejected');
   }
   await sb.from('group_join_requests').update({ status }).eq('id', reqId);
+}
+async function respondInvite(reqId, status){
+  const r = DB.group_join_requests.find(x => x.id === reqId); if (!r) return;
+  if (r.status !== 'pending'){ toast('This invitation is no longer valid.', 'err'); await fetchAll(); render(); return; }
+  const g = DB.presentation_groups.find(x => x.id === r.group_id); if (!g) return;
+  if (status === 'accepted'){
+    if (getMyGroup(S.profile)){ toast('You are already in a group. Leave it first.', 'err'); return; }
+    const members = g.members || [];
+    const total = members.length + 1 + (g.leader_id ? 1 : 0);
+    if (total > g.max_size){ toast('Group is full now', 'err'); return; }
+    if (!members.includes(r.user_id)) members.push(r.user_id);
+    const { error } = await sb.from('presentation_groups').update({ members }).eq('id', g.id);
+    if (error){ toast(error.message, 'err'); return; }
+    await notify(g.leader_id, '✅ Invitation accepted', `${S.profile.name} joined "${g.name}".`, 'pgroups');
+    toast('Joined group');
+  } else {
+    await notify(g.leader_id, 'Invitation declined', `${S.profile.name} declined your invitation to "${g.name}".`, 'pgroups');
+    toast('Invitation declined');
+  }
+  await sb.from('group_join_requests').update({ status }).eq('id', reqId);
+}
+async function cancelInvite(reqId){
+  const r = DB.group_join_requests.find(x => x.id === reqId); if (!r) return;
+  const g = DB.presentation_groups.find(x => x.id === r.group_id); if (!g) return;
+  if (g.leader_id !== S.profile.id){ toast('Only leader can cancel', 'err'); return; }
+  if (r.status !== 'pending'){ toast('Already handled', 'err'); return; }
+  if (!confirm('Cancel this invitation?')) return;
+  await sb.from('group_join_requests').update({ status: 'cancelled' }).eq('id', reqId);
+  await notify(r.user_id, 'Invitation cancelled', `Your invitation to "${g.name}" was cancelled.`, 'pgroups');
+  toast('Invitation cancelled');
 }
 async function changeGroupTopic(gid){
   const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
@@ -915,7 +1010,6 @@ function viewForms(u){
     <div class="row wrap" style="margin-bottom:16px"><button class="btn sm ${tab==='forms'?'primary':''}" onclick="S.formsTab='forms';render()">📝 Forms</button><button class="btn sm ${tab==='results'?'primary':''}" onclick="S.formsTab='results';render()">📊 Form Results${publishedForms.length ? ` (${publishedForms.length})` : ''}</button></div>
     ${tab === 'forms' ? viewFormsList(u, myForms, canBuild) : viewFormResultsList(u, publishedForms)}`;
 }
-
 function viewFormsList(u, myForms, canBuild){
   return myForms.length ? `<div class="grid g2">${myForms.map(f => {
     const responses = DB.form_responses.filter(r => r.form_id === f.id);
@@ -926,7 +1020,6 @@ function viewFormsList(u, myForms, canBuild){
     return `<div class="card"><div class="row" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:15px;margin-bottom:4px">${esc(f.title)}</div>${f.description ? `<div class="tiny muted" style="margin-bottom:6px;white-space:pre-wrap">${esc(f.description)}</div>` : ''}<div class="row wrap tiny muted" style="gap:6px"><span class="tag ${f.is_open?'green':'red'}">${f.is_open?'Open':'Closed'}</span>${f.published ? `<span class="tag blue">📤 Published</span>` : ''}<span class="tag">${(f.fields||[]).length} question${(f.fields||[]).length!==1?'s':''}</span>${f.dept ? `<span class="tag">${esc((f.dept||'').toUpperCase())}-${esc(f.batch||'')}-${esc((f.section||'').toUpperCase())}</span>` : ''}<span>by ${esc(author?.name || 'Unknown')}</span></div></div></div><div class="divider"></div><div class="row wrap" style="gap:6px">${!canManage(u) && f.is_open && !mine ? `<button class="btn primary sm" onclick="openFormFill('${f.id}')">Fill form</button>` : ''}${!canManage(u) && !f.is_open ? `<span class="tag red">Closed</span>` : ''}${mine ? `<span class="tag green">✓ You responded</span>` : ''}${canManage(u) ? `<button class="btn sm" onclick="openFormResponses('${f.id}')">📊 ${responses.length} response${responses.length!==1?'s':''}</button>` : ''}${canEdit ? `<button class="btn sm" onclick="openModal('formBuilder',{id:'${f.id}'})">✎ Edit</button><button class="btn sm" onclick="toggleFormOpen('${f.id}')">${f.is_open?'Close':'Open'}</button>` : ''}${canEdit ? `<button class="btn sm ${f.published?'':'primary'}" onclick="openFormPublish('${f.id}')">${f.published?'✎ Edit publish':'📤 Publish results'}</button>` : ''}${canEdit ? `<button class="btn danger sm" style="margin-left:auto" onclick="deleteForm('${f.id}')">🗑</button>` : ''}</div></div>`;
   }).join('')}</div>` : `<div class="empty"><span class="big">📝</span>No forms yet.${canBuild ? ' Click "Create form" to start.' : ''}</div>`;
 }
-
 function viewFormResultsList(u, publishedForms){
   if (!publishedForms.length) return `<div class="empty"><span class="big">📊</span>No published form results yet.<br><br><span class="small">CR will publish results here when ready.</span></div>`;
   return `<div class="stack">${publishedForms.map(f => {
@@ -937,7 +1030,6 @@ function viewFormResultsList(u, publishedForms){
     return `<div class="card"><div class="row" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-weight:650;font-size:16px;margin-bottom:4px">📊 ${esc(f.title)}</div>${f.description ? `<div class="small muted" style="margin-bottom:6px;white-space:pre-wrap">${esc(f.description)}</div>` : ''}<div class="row wrap tiny muted" style="gap:6px"><span class="tag blue">${responses.length} response${responses.length!==1?'s':''}</span>${f.dept ? `<span class="tag">${esc((f.dept||'').toUpperCase())}-${esc(f.batch||'')}-${esc((f.section||'').toUpperCase())}</span>` : ''}<span>by ${esc(author?.name || 'Unknown')}</span>${f.published_at ? `<span>published ${fmtDateTime(f.published_at)}</span>` : ''}</div></div>${canManageThis ? `<button class="btn sm" onclick="openFormPublish('${f.id}')">✎ Edit</button><button class="btn sm danger" onclick="unpublishForm('${f.id}')">Unpublish</button>` : ''}</div><div class="divider"></div>${responses.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${f.show_name ? '<th>Name</th>' : ''}${f.show_id ? '<th>Student ID</th>' : ''}${fields.map(x => `<th>${esc(x.label)}</th>`).join('')}${f.show_time ? '<th>Submitted</th>' : ''}</tr></thead><tbody>${responses.map(r => { const responder = profileOf(r.user_id); return `<tr>${f.show_name ? `<td class="small"><b>${esc(responder?.name || '—')}</b></td>` : ''}${f.show_id ? `<td class="small">${esc(responder?.student_id || '—')}</td>` : ''}${fields.map(field => { const v = r.answers?.[field.id]; return `<td class="small">${esc(Array.isArray(v) ? v.join(', ') : (v || '—'))}</td>`; }).join('')}${f.show_time ? `<td class="tiny muted">${fmtDateTime(r.submitted_at)}</td>` : ''}</tr>`; }).join('')}</tbody></table></div>` : `<div class="empty" style="padding:24px"><span class="big">📭</span>No responses yet.</div>`}</div>`;
   }).join('')}</div>`;
 }
-
 function openFormPublish(formId){
   const f = DB.forms.find(x => x.id === formId); if (!f) return;
   formPublishFormId = formId;
@@ -977,7 +1069,6 @@ function updateFieldType(i, type){
 }
 function addFieldOption(i){ formFieldsDraft[i].options = formFieldsDraft[i].options || []; formFieldsDraft[i].options.push('Option ' + (formFieldsDraft[i].options.length + 1)); render(); }
 function removeFieldOption(i, j){ formFieldsDraft[i].options.splice(j,1); render(); }
-
 function getTakenOptions(formId, fieldId){
   const taken = {};
   DB.form_responses.filter(r => r.form_id === formId).forEach(r => {
@@ -989,7 +1080,6 @@ function getTakenOptions(formId, fieldId){
   });
   return taken;
 }
-
 async function saveForm(id){
   const title = $('#fm_title')?.value.trim();
   const description = $('#fm_desc')?.value.trim() || '';
@@ -1011,8 +1101,7 @@ async function saveForm(id){
   else { ({ error } = await sb.from('forms').insert({ ...data, created_by: me.id, is_open: true })); }
   if (error){ toast(error.message, 'err'); return; }
   if (!id) await notifyClass(me.id, 'New form created', title, 'forms');
-  toast(id ? 'Form updated' : 'Form created');
-  closeModal();
+  toast(id ? 'Form updated' : 'Form created'); closeModal();
 }
 async function deleteForm(id){
   const f = DB.forms.find(x=>x.id===id); if (!f) return;
@@ -1034,7 +1123,6 @@ async function toggleFormOpen(id){
 }
 function openFormFill(formId){ formResponsesFormId = formId; formFillAnswers = {}; openModal('formFill', { formId }); }
 async function openFormResponses(formId){ formResponsesFormId = formId; openModal('formResponses', { formId }); }
-
 async function submitFormResponse(formId){
   const f = DB.forms.find(x=>x.id===formId); if (!f) return;
   const fields = f.fields || [];
@@ -1064,8 +1152,7 @@ async function submitFormResponse(formId){
   if (existing){ ({ error } = await sb.from('form_responses').update({ answers, submitted_at: new Date().toISOString() }).eq('id', existing.id)); }
   else { ({ error } = await sb.from('form_responses').insert({ form_id: formId, user_id: S.profile.id, answers })); }
   if (error){ toast(error.message, 'err'); return; }
-  toast(existing ? 'Response updated' : 'Response submitted');
-  closeModal();
+  toast(existing ? 'Response updated' : 'Response submitted'); closeModal();
 }
 async function deleteFormResponse(id){
   if (!confirm('Delete this response?')) return;
@@ -1117,7 +1204,6 @@ async function saveInstruction(id){
   closeModal();
 }
 async function deleteInstruction(id){ if (!confirm('Delete this instruction?')) return; const { error } = await sb.from('instructions').delete().eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Instruction deleted'); }
-
 function viewFeedback(u){
   const me = S.profile;
   const mine = isAdmin(me) ? DB.feedback : DB.feedback.filter(f => f.user_id === me.id);
@@ -1146,7 +1232,6 @@ async function submitHelpReply(hid){
   if (el) el.value = ''; toast('Reply posted');
 }
 async function toggleHelpResolved(hid, val){ await sb.from('help_requests').update({ resolved: val }).eq('id', hid); toast(val ? 'Marked resolved' : 'Reopened'); }
-
 function viewManageUsers(u){
   if (!isAdmin(u)) return `<div class="empty">Admins only.</div>`;
   const students = DB.profiles.filter(x => x.role === 'student');
@@ -1284,9 +1369,41 @@ function viewModal(u){
     case 'pgroupCreate':
     case 'pgroupEdit': {
       const g = m.id ? DB.presentation_groups.find(x => x.id === m.id) : null;
-      if (!m._init){ if (g) pgroupDraft = { name: g.name, topic: g.topic || '', maxSize: g.max_size, members: [...(g.members || [])] }; m._init = true; }
-      const candidates = DB.profiles.filter(p => p.id !== u.id && p.role === 'student' && (p.dept || '').toUpperCase() === (u.dept || '').toUpperCase() && p.batch === u.batch && (p.section || '').toUpperCase() === (u.section || '').toUpperCase() && !getMyGroup(p));
-      return modalShell(g ? 'Edit group' : 'Create presentation group', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">You'll be the <b style="color:#f7c76a">👑 group leader</b>.</div></div><label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="pg_name" value="${esc(pgroupDraft.name)}" placeholder="e.g. Team Alpha" data-fk="pg_name"></label><label class="f"><span>Presentation topic (optional)</span><input class="inp" id="pg_topic" value="${esc(pgroupDraft.topic)}" placeholder="e.g. AI in Healthcare" data-fk="pg_topic"></label><label class="f"><span>Max team size (incl. you)</span><input class="inp" type="number" id="pg_max" min="1" max="12" value="${pgroupDraft.maxSize}" data-fk="pg_max"></label><div class="divider"></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Add members (optional)</b><span class="tag" style="margin-left:auto">${pgroupDraft.members.length} selected</span></div>${candidates.length ? `<div style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${candidates.map(c => `<label class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px;cursor:pointer"><input type="checkbox" ${pgroupDraft.members.includes(c.id)?'checked':''} onchange="togglePgroupDraftMember('${c.id}')"><div class="avatar" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;font-size:12px;background:${colorFor(c.id)}">${esc(initials(c.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div class="tiny muted">${esc(c.student_id)}</div></div></label>`).join('')}</div>` : `<div class="empty" style="padding:20px"><span class="big">👤</span>No available students.</div>`}<div class="card" style="background:rgba(91,140,255,.08);border-color:rgba(91,140,255,.3);padding:10px;margin-top:14px"><div class="tiny" style="color:#9dbaff">Total team size: <b>${pgroupDraft.members.length + 1}</b></div></div>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePgroup('${g?g.id:''}')">${g?'Save':'Create'}</button>`);
+      if (!m._init){
+        if (g){
+          const alreadyInvited = getGroupPendingInvites(g.id).map(r => r.user_id);
+          pgroupDraft = { name: g.name, topic: g.topic || '', maxSize: g.max_size, members: [...alreadyInvited] };
+        } else {
+          pgroupDraft = { name: '', topic: '', maxSize: 4, members: [] };
+        }
+        m._init = true;
+      }
+      const currentMembers = g ? (g.members || []) : [];
+      const pendingInvitees = g ? getGroupPendingInvites(g.id).map(r => r.user_id) : [];
+      const candidates = DB.profiles.filter(p =>
+        p.id !== u.id &&
+        (p.role === 'student' || p.role === 'cr') &&
+        (p.dept || '').toUpperCase() === (u.dept || '').toUpperCase() &&
+        p.batch === u.batch &&
+        (p.section || '').toUpperCase() === (u.section || '').toUpperCase() &&
+        !getMyGroup(p) &&
+        !currentMembers.includes(p.id) &&
+        !pendingInvitees.includes(p.id)
+      );
+      const currentMemberProfiles = currentMembers.map(id => profileOf(id)).filter(Boolean);
+      const pendingInviteeProfiles = pendingInvitees.map(id => profileOf(id)).filter(Boolean);
+      return modalShell(g ? 'Edit group / Invite members' : 'Create presentation group', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">You'll be the <b style="color:#f7c76a">👑 group leader</b>. Selected people will receive an <b style="color:#22c55e">invitation</b> — they must accept before joining.</div></div>
+        <label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="pg_name" value="${esc(pgroupDraft.name)}" placeholder="e.g. Team Alpha" data-fk="pg_name"></label>
+        <label class="f"><span>Presentation topic (optional)</span><input class="inp" id="pg_topic" value="${esc(pgroupDraft.topic)}" placeholder="e.g. AI in Healthcare" data-fk="pg_topic"></label>
+        <label class="f"><span>Max team size (incl. you)</span><input class="inp" type="number" id="pg_max" min="1" max="12" value="${pgroupDraft.maxSize}" data-fk="pg_max"></label>
+        ${currentMemberProfiles.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b style="font-size:14px">Current members (${currentMemberProfiles.length})</b></div><div class="row wrap" style="gap:6px;margin-bottom:10px">${currentMemberProfiles.map(cm => `<div class="row" style="gap:6px;background:var(--panel2);padding:5px 10px;border-radius:20px"><div class="avatar" style="width:22px;height:22px;flex:0 0 22px;border-radius:6px;font-size:10px;background:${colorFor(cm.id)}">${esc(initials(cm.name))}</div><span class="small">${esc(cm.name)}</span></div>`).join('')}</div>` : ''}
+        ${pendingInviteeProfiles.length ? `<div class="row" style="margin-bottom:8px"><b style="font-size:14px">📤 Already invited (${pendingInviteeProfiles.length})</b></div><div class="row wrap" style="gap:6px;margin-bottom:10px">${pendingInviteeProfiles.map(pi => `<div class="row" style="gap:6px;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.3);padding:5px 10px;border-radius:20px"><span class="tiny" style="color:#f7c76a">⏳</span><span class="small">${esc(pi.name)}</span></div>`).join('')}</div>` : ''}
+        <div class="divider"></div>
+        <div class="row" style="margin-bottom:10px"><b style="font-size:14px">Invite new members</b><span class="tag" style="margin-left:auto">${pgroupDraft.members.length} selected</span></div>
+        ${candidates.length ? `<div style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${candidates.map(c => `<label class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px;cursor:pointer"><input type="checkbox" ${pgroupDraft.members.includes(c.id)?'checked':''} onchange="togglePgroupDraftMember('${c.id}')"><div class="avatar" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;font-size:12px;background:${colorFor(c.id)}">${esc(initials(c.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(c.name)}${c.role === 'cr' ? ' <span class="tag purple" style="font-size:9px">CR</span>' : ''}</div><div class="tiny muted">${esc(c.student_id)}</div></div></label>`).join('')}</div>` : `<div class="empty" style="padding:20px"><span class="big">👤</span>No available students or CRs to invite.</div>`}
+        <div class="card" style="background:rgba(91,140,255,.08);border-color:rgba(91,140,255,.3);padding:10px;margin-top:14px"><div class="tiny" style="color:#9dbaff">After saving, <b>${pgroupDraft.members.length}</b> invitation(s) will be sent. Accepted members become part of the group.</div></div>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePgroup('${g?g.id:''}')">${g?'Save & send invites':'Create & send invites'}</button>`);
     }
     case 'pgroupDetail': {
       const g = DB.presentation_groups.find(x => x.id === m.id);
@@ -1295,9 +1412,20 @@ function viewModal(u){
       const isLeader = g.leader_id === u.id;
       const isMember = isLeader || (g.members || []).includes(u.id);
       const requests = isLeader ? getGroupPendingRequests(g.id) : [];
+      const invites = isLeader ? getGroupPendingInvites(g.id) : [];
       const isFull = members.length >= g.max_size;
-      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && r.status === 'pending');
-      return modalShell(g.name, `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size}</span>${isLeader ? `<span class="tag admin">👑 Leader</span>` : isMember ? `<span class="tag">Member</span>` : ''}</div></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Members (${members.length})</b></div><div class="stack" style="gap:8px">${members.map(mm => { const isL = mm.id === g.leader_id; return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(mm.id)}">${esc(initials(mm.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(mm.name)} ${isL?'👑':''}</div><div class="tiny muted">${esc(mm.student_id)}</div></div>${isLeader && mm.id !== u.id ? `<button class="btn sm" onclick="if(confirm('Make ${esc(mm.name)} leader?')){transferLeadership('${g.id}','${mm.id}');}">Make leader</button><button class="btn sm danger" onclick="removeGroupMember('${g.id}','${mm.id}')">Remove</button>` : ''}</div>`; }).join('')}</div>${isLeader ? `<div class="divider"></div><label class="f"><span>Change topic</span><div class="row" style="gap:6px"><input class="inp" id="pgt_topic" value="${esc(g.topic||'')}" style="flex:1"><button class="btn primary" onclick="changeGroupTopic('${g.id}')">Save</button></div></label>` : ''}${requests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b style="font-size:14px">🔔 Requests (${requests.length})</b></div><div class="stack" style="gap:8px">${requests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted');closeModal();">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected');closeModal();">Reject</button></div>`; }).join('')}</div>` : ''}${!isMember && !isFull && !pendingReq && !getMyGroup(u) ? `<div class="divider"></div><button class="btn primary" style="width:100%" onclick="closeModal();openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMember && pendingReq ? `<div class="divider"></div><div class="tag amber" style="display:block;text-align:center;padding:10px">Request pending</div>` : ''}${!isMember && isFull ? `<div class="divider"></div><div class="tag red" style="display:block;text-align:center;padding:10px">Group full</div>` : ''}`, `<button class="btn ghost" onclick="closeModal()">Close</button>${isLeader ? `<button class="btn danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}`);
+      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && (r.direction || 'request') === 'request' && r.status === 'pending');
+      return modalShell(g.name, `
+        <div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size}</span>${isLeader ? `<span class="tag admin">👑 Leader</span>` : isMember ? `<span class="tag">Member</span>` : ''}</div></div>
+        <div class="row" style="margin-bottom:10px"><b style="font-size:14px">Members (${members.length})</b></div>
+        <div class="stack" style="gap:8px">${members.map(mm => { const isL = mm.id === g.leader_id; return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(mm.id)}">${esc(initials(mm.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(mm.name)} ${isL?'👑':''}</div><div class="tiny muted">${esc(mm.student_id)}</div></div>${isLeader && mm.id !== u.id ? `<button class="btn sm" onclick="if(confirm('Make ${esc(mm.name)} leader?')){transferLeadership('${g.id}','${mm.id}');}">Make leader</button><button class="btn sm danger" onclick="removeGroupMember('${g.id}','${mm.id}')">Remove</button>` : ''}</div>`; }).join('')}</div>
+        ${isLeader ? `<div class="divider"></div><label class="f"><span>Change topic</span><div class="row" style="gap:6px"><input class="inp" id="pgt_topic" value="${esc(g.topic||'')}" style="flex:1"><button class="btn primary" onclick="changeGroupTopic('${g.id}')">Save</button></div></label>` : ''}
+        ${invites.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b style="font-size:14px">📤 Pending invitations (${invites.length})</b></div><div class="stack" style="gap:8px">${invites.map(inv => { const target = profileOf(inv.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(inv.user_id)}">${esc(initials(target?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(target?.name || 'Unknown')}</div><div class="tiny muted">${esc(target?.student_id || '')} · Waiting for response</div></div><span class="tag amber">Pending</span><button class="btn sm danger" onclick="cancelInvite('${inv.id}');closeModal();">Cancel</button></div>`; }).join('')}</div>` : ''}
+        ${requests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b style="font-size:14px">🔔 Join requests (${requests.length})</b></div><div class="stack" style="gap:8px">${requests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted');closeModal();">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected');closeModal();">Reject</button></div>`; }).join('')}</div>` : ''}
+        ${!isMember && !isFull && !pendingReq && !getMyGroup(u) ? `<div class="divider"></div><button class="btn primary" style="width:100%" onclick="closeModal();openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}
+        ${!isMember && pendingReq ? `<div class="divider"></div><div class="tag amber" style="display:block;text-align:center;padding:10px">Request pending</div>` : ''}
+        ${!isMember && isFull ? `<div class="divider"></div><div class="tag red" style="display:block;text-align:center;padding:10px">Group full</div>` : ''}
+      `, `<button class="btn ghost" onclick="closeModal()">Close</button>${isLeader ? `<button class="btn primary" onclick="closeModal();openModal('pgroupEdit',{id:'${g.id}'})">✎ Invite members</button><button class="btn danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}`);
     }
     case 'pgroupJoin': {
       const g = DB.presentation_groups.find(x => x.id === m.id);
@@ -1341,7 +1469,6 @@ async function saveProfile(){
   Object.assign(S.profile, updates);
   await fetchAll(); toast('Profile updated'); closeModal(); render();
 }
-
 async function saveSectionConfig(dept,batch,section){
   const form_url = ($('#cf_form')?.value || '').trim();
   const webhook_url = ($('#cf_url')?.value || '').trim();
@@ -1354,7 +1481,6 @@ async function saveSectionConfig(dept,batch,section){
   if (error){ toast(error.message, 'err'); return; }
   toast('Config saved');
 }
-
 async function saveResource(id){
   const title = $('#r_title').value.trim();
   const link = $('#r_link').value.trim();
@@ -1378,7 +1504,6 @@ async function saveResource(id){
   if (error){ toast(error.message, 'err'); return; }
   toast(id ? 'Resource updated' : 'Resource uploaded'); closeModal();
 }
-
 async function saveNotice(id){
   const title = $('#n_title').value.trim();
   const body = $('#n_body').value.trim();
@@ -1389,7 +1514,6 @@ async function saveNotice(id){
   else { const { error } = await sb.from('notices').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New notice', title, 'notices'); toast('Notice published'); }
   closeModal();
 }
-
 async function saveEvent(id){
   const title = $('#e_title').value.trim();
   const date = $('#e_date').value;
@@ -1400,7 +1524,6 @@ async function saveEvent(id){
   else { const { error } = await sb.from('events').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New event', `${title} — ${fmtDate(date)}`, 'calendar'); toast('Event added'); }
   closeModal();
 }
-
 async function saveGroup(id){
   const name = $('#g_name').value.trim();
   const link = $('#g_link').value.trim();
@@ -1412,7 +1535,6 @@ async function saveGroup(id){
   else { const { error } = await sb.from('groups').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New class group added', name, 'groups'); toast('Group added'); }
   closeModal();
 }
-
 async function savePresentation(){
   const title = $('#p_title').value.trim();
   const deadline = $('#p_deadline').value;
@@ -1423,7 +1545,6 @@ async function savePresentation(){
   await notifyClass(me.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
   toast('Presentation created'); closeModal();
 }
-
 async function submitFeedback(){
   const subject = $('#fb_subj').value.trim(); const body = $('#fb_body').value.trim();
   if (!subject || !body){ toast('Subject and body required', 'err'); return; }
@@ -1461,7 +1582,6 @@ async function syncToSheet(sub){
   }
   return sent;
 }
-
 async function submitPresentation(pid, existingId){
   const p = DB.presentations.find(x => x.id === pid);
   if (!p){ toast('Presentation not found', 'err'); return; }
@@ -1506,7 +1626,6 @@ async function submitPresentation(pid, existingId){
   if (S.profile){ await fetchAll(); subscribeRealtime(); }
   render();
 })();
-
 async function loadProfile(){
   if (!S.user) return;
   for (let i=0; i<5; i++){
