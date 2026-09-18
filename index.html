@@ -763,9 +763,10 @@ function exportSubmissions(pid){
 }
 
 /* =========================================================
-   PRESENTATION GROUPS  (with Invitation Flow)
+   PRESENTATION GROUPS  (multiple groups + admin delete)
    ========================================================= */
-function getMyGroup(u){ return DB.presentation_groups.find(g => g.leader_id === u.id || (g.members || []).includes(u.id)); }
+function getMyGroups(u){ return DB.presentation_groups.filter(g => g.leader_id === u.id || (g.members || []).includes(u.id)); }
+function getMyGroup(u){ return getMyGroups(u)[0] || null; }
 function getGroupMembers(g){ return [g.leader_id, ...(g.members || [])].filter(Boolean).map(id => profileOf(id)).filter(Boolean); }
 function getGroupPendingRequests(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && (r.direction || 'request') === 'request' && r.status === 'pending'); }
 function getGroupPendingInvites(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && r.direction === 'invite' && r.status === 'pending'); }
@@ -773,60 +774,162 @@ function getMyIncomingInvites(u){ return DB.group_join_requests.filter(r => r.us
 function isInvitedToGroup(gid, uid){ return DB.group_join_requests.some(r => r.group_id === gid && r.user_id === uid && r.direction === 'invite' && r.status === 'pending'); }
 
 function viewPresentationGroups(u){
-  const myGroup = getMyGroup(u);
-  const allGroups = DB.presentation_groups;
-  const myRequests = myGroup && myGroup.leader_id === u.id ? getGroupPendingRequests(myGroup.id) : [];
-  const mySentInvites = myGroup && myGroup.leader_id === u.id ? getGroupPendingInvites(myGroup.id) : [];
+  const myGroups = getMyGroups(u);
+  const myGroupIds = new Set(myGroups.map(g => g.id));
+  const otherGroups = DB.presentation_groups.filter(g => !myGroupIds.has(g.id));
   const incomingInvites = getMyIncomingInvites(u);
+
   return `
-    <div class="page-head"><div><h2>Presentation Groups</h2><p>Create your team, invite members, and pick your presentation topic.</p></div><div class="actions">${!myGroup ? `<button class="btn primary" onclick="openModal('pgroupCreate')">+ Create group</button>` : ''}</div></div>
-    ${incomingInvites.length ? `
-      <div class="card" style="margin-bottom:16px;border-left:3px solid #22c55e;background:rgba(34,197,94,.05)">
-        <div class="row" style="margin-bottom:10px"><b style="font-size:15px;color:#7ee2a4">✉️ You have ${incomingInvites.length} group invitation${incomingInvites.length!==1?'s':''}</b></div>
-        <div class="stack" style="gap:8px">${incomingInvites.map(inv => {
-          const g = DB.presentation_groups.find(x => x.id === inv.group_id);
-          const leader = profileOf(g?.leader_id);
-          if (!g) return '';
-          return `<div class="row" style="gap:10px;padding:12px;background:var(--panel2);border-radius:10px;flex-wrap:wrap">
-            <div class="avatar" style="background:${colorFor(leader?.id || 'x')}">${esc(initials(leader?.name || '?'))}</div>
-            <div style="flex:1;min-width:200px">
-              <div style="font-weight:600;font-size:13.5px">${esc(g.name)}</div>
-              <div class="tiny muted">Invited by ${esc(leader?.name || 'leader')}${g.topic ? ' · 📌 ' + esc(g.topic) : ''}</div>
-              ${inv.message ? `<div class="tiny muted" style="margin-top:3px">"${esc(inv.message)}"</div>` : ''}
+    <div class="page-head">
+      <div><h2>Presentation Groups</h2><p>Create your team, invite members, and pick your presentation topic.</p></div>
+      <div class="actions">${!myGroups.length ? `<button class="btn primary" onclick="openModal('pgroupCreate')">+ Create group</button>` : ''}</div>
+    </div>
+    ${incomingInvites.length ? renderIncomingInvitesBanner(incomingInvites) : ''}
+    ${myGroups.length ? `
+      <div class="row wrap" style="margin-bottom:12px;align-items:flex-start;gap:12px">
+        <div style="flex:1;min-width:220px">
+          <h3 style="margin:0;font-size:16px;font-weight:650">👥 My Group${myGroups.length > 1 ? 's' : ''} <span class="tag" style="font-weight:700;margin-left:4px">${myGroups.length}</span></h3>
+          <p class="small muted" style="margin:4px 0 0">Your team${myGroups.length > 1 ? 's' : ''}, member list and topic.</p>
+        </div>
+        ${myGroups.length > 1 ? `<div class="card" style="background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.35);padding:10px 12px;max-width:420px"><div class="tiny" style="color:#f7c76a">⚠️ You belong to <b>${myGroups.length} groups</b>. Delete or leave the ones you don't want below.</div></div>` : ''}
+      </div>
+      <div class="stack" style="margin-bottom:24px">
+        ${myGroups.map(g => renderMyGroupCard(g, u)).join('')}
+      </div>
+    ` : ''}
+    <div class="card" style="margin-bottom:16px"><b style="font-size:14.5px">All other groups (${otherGroups.length})</b><div class="tiny muted" style="margin-top:4px">Click a group to see members and topic. If there's space, you can request to join.</div></div>
+    ${otherGroups.length ? `<div class="grid g3">${otherGroups.map(g => renderOtherGroupCard(g, u, myGroups)).join('')}</div>` : (DB.presentation_groups.length ? `<div class="empty"><span class="big">✅</span>No other groups in your section.</div>` : `<div class="empty"><span class="big">👥</span>No groups yet.${!myGroups.length ? ' Click "Create group" to start.' : ''}</div>`)}
+  `;
+}
+
+function renderIncomingInvitesBanner(invites){
+  return `
+    <div class="card" style="margin-bottom:16px;border-left:3px solid #22c55e;background:rgba(34,197,94,.05)">
+      <div class="row" style="margin-bottom:10px"><b style="font-size:15px;color:#7ee2a4">✉️ You have ${invites.length} group invitation${invites.length!==1?'s':''}</b></div>
+      <div class="stack" style="gap:8px">${invites.map(inv => {
+        const g = DB.presentation_groups.find(x => x.id === inv.group_id);
+        const leader = profileOf(g?.leader_id);
+        if (!g) return '';
+        return `<div class="row" style="gap:10px;padding:12px;background:var(--panel2);border-radius:10px;flex-wrap:wrap">
+          <div class="avatar" style="background:${colorFor(leader?.id || 'x')}">${esc(initials(leader?.name || '?'))}</div>
+          <div style="flex:1;min-width:200px">
+            <div style="font-weight:600;font-size:13.5px">${esc(g.name)}</div>
+            <div class="tiny muted">Invited by ${esc(leader?.name || 'leader')}${g.topic ? ' · 📌 ' + esc(g.topic) : ''}</div>
+            ${inv.message ? `<div class="tiny muted" style="margin-top:3px">"${esc(inv.message)}"</div>` : ''}
+          </div>
+          <div class="row" style="gap:6px">
+            <button class="btn sm primary" onclick="respondInvite('${inv.id}','accepted')">Accept</button>
+            <button class="btn sm danger" onclick="respondInvite('${inv.id}','rejected')">Decline</button>
+          </div>
+        </div>`;
+      }).join('')}</div>
+    </div>
+  `;
+}
+
+function renderMyGroupCard(g, u){
+  const isLeader = g.leader_id === u.id;
+  const amAdmin = isAdmin(u);
+  const members = getGroupMembers(g);
+  const myRequests = isLeader ? getGroupPendingRequests(g.id) : [];
+  const mySentInvites = isLeader ? getGroupPendingInvites(g.id) : [];
+  return `
+    <div class="card" style="border-left:3px solid var(--accent)">
+      <div class="row wrap" style="align-items:flex-start;margin-bottom:10px">
+        <div style="flex:1;min-width:220px">
+          <div style="font-weight:650;font-size:16px;margin-bottom:4px">${esc(g.name)}</div>
+          <div class="row wrap tiny muted" style="gap:6px">
+            <span class="tag green">My Group</span>
+            ${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic set</span>`}
+            <span class="tag">${members.length}/${g.max_size} members</span>
+            ${isLeader ? `<span class="tag admin">👑 You are leader</span>` : `<span class="tag">Member</span>`}
+          </div>
+        </div>
+        <div class="row wrap" style="gap:6px">
+          <button class="btn sm" onclick="openPgroupDetail('${g.id}')">View details</button>
+          ${isLeader ? `<button class="btn sm primary" onclick="openModal('pgroupEdit',{id:'${g.id}'})">✎ Edit / Invite</button>` : ''}
+          ${!isLeader ? `<button class="btn sm danger" onclick="leaveGroup('${g.id}')">Leave group</button>` : ''}
+          ${isLeader || amAdmin ? `<button class="btn sm danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="row wrap" style="gap:6px">
+        ${members.map(m => `
+          <div class="row" style="gap:6px;background:var(--panel2);padding:5px 10px;border-radius:20px">
+            <div class="avatar" style="width:22px;height:22px;flex:0 0 22px;border-radius:6px;font-size:10px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div>
+            <span class="small">${esc(m.name)}</span>
+            ${m.id === g.leader_id ? `<span class="tiny" style="color:#f7c76a">👑</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      ${isLeader && mySentInvites.length ? `
+        <div class="divider"></div>
+        <div class="row" style="margin-bottom:8px"><b class="small">📤 Pending invitations (${mySentInvites.length})</b></div>
+        <div class="stack" style="gap:6px">${mySentInvites.map(inv => {
+          const target = profileOf(inv.user_id);
+          return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px">
+            <div class="avatar" style="background:${colorFor(inv.user_id)}">${esc(initials(target?.name || '?'))}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:13px">${esc(target?.name || 'Unknown')}</div>
+              <div class="tiny muted">${esc(target?.student_id || '')} · Waiting for response</div>
             </div>
-            <div class="row" style="gap:6px">
-              <button class="btn sm primary" onclick="respondInvite('${inv.id}','accepted')">Accept</button>
-              <button class="btn sm danger" onclick="respondInvite('${inv.id}','rejected')">Decline</button>
-            </div>
+            <span class="tag amber">Pending</span>
+            <button class="btn sm danger" onclick="cancelInvite('${inv.id}')">Cancel</button>
           </div>`;
         }).join('')}</div>
-      </div>
-    ` : ''}
-    ${myGroup ? `
-      <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)">
-        <div class="row wrap" style="align-items:flex-start;margin-bottom:10px">
-          <div style="flex:1;min-width:220px">
-            <div style="font-weight:650;font-size:16px;margin-bottom:4px">${esc(myGroup.name)}</div>
-            <div class="row wrap tiny muted" style="gap:6px"><span class="tag green">Your group</span>${myGroup.topic ? `<span class="tag blue">📌 ${esc(myGroup.topic)}</span>` : `<span class="tag amber">No topic set</span>`}<span class="tag">${getGroupMembers(myGroup).length}/${myGroup.max_size} members</span>${myGroup.leader_id === u.id ? `<span class="tag admin">👑 You are leader</span>` : `<span class="tag">Member</span>`}</div>
-          </div>
-          <div class="row wrap" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${myGroup.id}')">View details</button>${myGroup.leader_id === u.id ? `<button class="btn sm primary" onclick="openModal('pgroupEdit',{id:'${myGroup.id}'})">✎ Edit / Invite</button>` : ''}${myGroup.leader_id !== u.id ? `<button class="btn sm danger" onclick="leaveGroup('${myGroup.id}')">Leave group</button>` : ''}${myGroup.leader_id === u.id ? `<button class="btn sm danger" onclick="deletePgroup('${myGroup.id}')">🗑 Delete group</button>` : ''}</div>
-        </div>
+      ` : ''}
+      ${isLeader && myRequests.length ? `
         <div class="divider"></div>
-        <div class="row wrap" style="gap:6px">${getGroupMembers(myGroup).map(m => `<div class="row" style="gap:6px;background:var(--panel2);padding:5px 10px;border-radius:20px"><div class="avatar" style="width:22px;height:22px;flex:0 0 22px;border-radius:6px;font-size:10px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><span class="small">${esc(m.name)}</span>${m.id === myGroup.leader_id ? `<span class="tiny" style="color:#f7c76a">👑</span>` : ''}</div>`).join('')}</div>
-        ${myGroup.leader_id === u.id && mySentInvites.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b class="small">📤 Pending invitations (${mySentInvites.length})</b></div><div class="stack" style="gap:6px">${mySentInvites.map(inv => { const target = profileOf(inv.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(inv.user_id)}">${esc(initials(target?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(target?.name || 'Unknown')}</div><div class="tiny muted">${esc(target?.student_id || '')} · Waiting for response</div></div><span class="tag amber">Pending</span><button class="btn sm danger" onclick="cancelInvite('${inv.id}')">Cancel</button></div>`; }).join('')}</div>` : ''}
-        ${myGroup.leader_id === u.id && myRequests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b class="small">🔔 Join requests (${myRequests.length})</b></div><div class="stack" style="gap:8px">${myRequests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted')">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected')">Reject</button></div>`; }).join('')}</div>` : ''}
-      </div>
-    ` : ''}
-    <div class="card" style="margin-bottom:16px"><b style="font-size:14.5px">All groups (${allGroups.length})</b><div class="tiny muted" style="margin-top:4px">Click a group to see members and topic. If there's space, you can request to join.</div></div>
-    ${allGroups.length ? `<div class="grid g3">${allGroups.map(g => {
-      const members = getGroupMembers(g);
-      const isFull = members.length >= g.max_size;
-      const isMine = myGroup && myGroup.id === g.id;
-      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && (r.direction || 'request') === 'request' && r.status === 'pending');
-      const invited = isInvitedToGroup(g.id, u.id);
-      return `<div class="card"><div style="font-weight:640;font-size:15px;margin-bottom:6px">${esc(g.name)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:10px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size} ${isFull?'full':'open'}</span>${isMine ? `<span class="tag green">Your group</span>` : ''}${invited ? `<span class="tag amber">✉️ Invited you</span>` : ''}</div><div class="row wrap" style="gap:4px;margin-bottom:12px">${members.map(m => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:10px;background:${colorFor(m.id)}" title="${esc(m.name)}${m.id===g.leader_id?' (leader)':''}">${esc(initials(m.name))}</div>`).join('')}${Array(Math.max(0, g.max_size - members.length)).fill(0).map(() => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px dashed var(--line)">?</div>`).join('')}</div><div class="row" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${g.id}')">View members</button>${!isMine && !isFull && !pendingReq && !invited && !myGroup ? `<button class="btn sm primary" onclick="openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMine && !isFull && pendingReq ? `<span class="tag amber">Request pending</span>` : ''}${!isMine && invited ? `<span class="tag green">✉️ Invited — check top</span>` : ''}${!isMine && isFull ? `<span class="tag red">Group full</span>` : ''}</div></div>`;
-    }).join('')}</div>` : `<div class="empty"><span class="big">👥</span>No groups yet.${!myGroup ? ' Click "Create group" to start.' : ''}</div>`}`;
+        <div class="row" style="margin-bottom:8px"><b class="small">🔔 Join requests (${myRequests.length})</b></div>
+        <div class="stack" style="gap:8px">${myRequests.map(r => {
+          const reqUser = profileOf(r.user_id);
+          return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px">
+            <div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div>
+              <div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div>
+            </div>
+            <button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted')">Accept</button>
+            <button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected')">Reject</button>
+          </div>`;
+        }).join('')}</div>
+      ` : ''}
+    </div>
+  `;
 }
+
+function renderOtherGroupCard(g, u, myGroups){
+  const members = getGroupMembers(g);
+  const isFull = members.length >= g.max_size;
+  const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && (r.direction || 'request') === 'request' && r.status === 'pending');
+  const invited = isInvitedToGroup(g.id, u.id);
+  const inAnyGroup = myGroups.length > 0;
+  const amAdmin = isAdmin(u);
+  return `
+    <div class="card">
+      <div style="font-weight:640;font-size:15px;margin-bottom:6px">${esc(g.name)}</div>
+      <div class="row wrap tiny muted" style="gap:6px;margin-bottom:10px">
+        ${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag">No topic</span>`}
+        <span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size} ${isFull?'full':'open'}</span>
+        ${invited ? `<span class="tag amber">✉️ Invited you</span>` : ''}
+        ${amAdmin ? `<span class="tag purple">${esc((g.dept||'').toUpperCase())}-${esc(g.batch||'')}-${esc((g.section||'').toUpperCase())}</span>` : ''}
+      </div>
+      <div class="row wrap" style="gap:4px;margin-bottom:12px">
+        ${members.map(m => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:10px;background:${colorFor(m.id)}" title="${esc(m.name)}${m.id===g.leader_id?' (leader)':''}">${esc(initials(m.name))}</div>`).join('')}
+        ${Array(Math.max(0, g.max_size - members.length)).fill(0).map(() => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px dashed var(--line)">?</div>`).join('')}
+      </div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <button class="btn sm" onclick="openPgroupDetail('${g.id}')">View members</button>
+        ${!isFull && !pendingReq && !invited && !inAnyGroup ? `<button class="btn sm primary" onclick="openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}
+        ${!isFull && pendingReq ? `<span class="tag amber">Request pending</span>` : ''}
+        ${invited ? `<span class="tag green">✉️ Invited — check top</span>` : ''}
+        ${isFull ? `<span class="tag red">Group full</span>` : ''}
+        ${amAdmin ? `<button class="btn sm danger" style="margin-left:auto" onclick="deletePgroup('${g.id}')">🗑 Admin delete</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function openPgroupDetail(gid){ pgroupDetailId = gid; openModal('pgroupDetail', { id: gid }); }
 
 function togglePgroupDraftMember(uidTarget){
@@ -917,11 +1020,16 @@ async function transferLeadership(gid, uidTarget){
 }
 async function deletePgroup(gid){
   const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
-  if (g.leader_id !== S.profile.id){ toast('Only leader can delete', 'err'); return; }
-  if (!confirm(`Delete group "${g.name}"? All members will be removed.`)) return;
+  const amAdmin = isAdmin(S.profile);
+  const amLeader = g.leader_id === S.profile.id;
+  if (!amAdmin && !amLeader){ toast('Only leader or admin can delete', 'err'); return; }
+  const memberCount = (g.members || []).length;
+  const who = amAdmin && !amLeader ? 'as admin' : 'as leader';
+  if (!confirm(`Delete group "${g.name}" ${who}?\n\nThis will remove ${memberCount} member(s) and all pending invitations/requests.`)) return;
+  await sb.from('group_join_requests').delete().eq('group_id', gid);
   const { error } = await sb.from('presentation_groups').delete().eq('id', gid);
   if (error){ toast(error.message, 'err'); return; }
-  await notify((g.members || []), 'Group deleted', `"${g.name}" was deleted by the leader.`, 'pgroups');
+  await notify((g.members || []), 'Group deleted', `"${g.name}" was deleted${amAdmin && !amLeader ? ' by admin' : ' by the leader'}.`, 'pgroups');
   toast('Group deleted'); closeModal();
 }
 async function sendJoinRequest(gid){
@@ -1410,13 +1518,14 @@ function viewModal(u){
       if (!g) return modalShell('Group', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
       const members = getGroupMembers(g);
       const isLeader = g.leader_id === u.id;
+      const amAdmin = isAdmin(u);
       const isMember = isLeader || (g.members || []).includes(u.id);
       const requests = isLeader ? getGroupPendingRequests(g.id) : [];
       const invites = isLeader ? getGroupPendingInvites(g.id) : [];
       const isFull = members.length >= g.max_size;
       const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && (r.direction || 'request') === 'request' && r.status === 'pending');
       return modalShell(g.name, `
-        <div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size}</span>${isLeader ? `<span class="tag admin">👑 Leader</span>` : isMember ? `<span class="tag">Member</span>` : ''}</div></div>
+        <div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size}</span>${isLeader ? `<span class="tag admin">👑 Leader</span>` : isMember ? `<span class="tag">Member</span>` : ''}${amAdmin ? `<span class="tag purple">Admin view · ${esc((g.dept||'').toUpperCase())}-${esc(g.batch||'')}-${esc((g.section||'').toUpperCase())}</span>` : ''}</div></div>
         <div class="row" style="margin-bottom:10px"><b style="font-size:14px">Members (${members.length})</b></div>
         <div class="stack" style="gap:8px">${members.map(mm => { const isL = mm.id === g.leader_id; return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(mm.id)}">${esc(initials(mm.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(mm.name)} ${isL?'👑':''}</div><div class="tiny muted">${esc(mm.student_id)}</div></div>${isLeader && mm.id !== u.id ? `<button class="btn sm" onclick="if(confirm('Make ${esc(mm.name)} leader?')){transferLeadership('${g.id}','${mm.id}');}">Make leader</button><button class="btn sm danger" onclick="removeGroupMember('${g.id}','${mm.id}')">Remove</button>` : ''}</div>`; }).join('')}</div>
         ${isLeader ? `<div class="divider"></div><label class="f"><span>Change topic</span><div class="row" style="gap:6px"><input class="inp" id="pgt_topic" value="${esc(g.topic||'')}" style="flex:1"><button class="btn primary" onclick="changeGroupTopic('${g.id}')">Save</button></div></label>` : ''}
@@ -1425,7 +1534,7 @@ function viewModal(u){
         ${!isMember && !isFull && !pendingReq && !getMyGroup(u) ? `<div class="divider"></div><button class="btn primary" style="width:100%" onclick="closeModal();openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}
         ${!isMember && pendingReq ? `<div class="divider"></div><div class="tag amber" style="display:block;text-align:center;padding:10px">Request pending</div>` : ''}
         ${!isMember && isFull ? `<div class="divider"></div><div class="tag red" style="display:block;text-align:center;padding:10px">Group full</div>` : ''}
-      `, `<button class="btn ghost" onclick="closeModal()">Close</button>${isLeader ? `<button class="btn primary" onclick="closeModal();openModal('pgroupEdit',{id:'${g.id}'})">✎ Invite members</button><button class="btn danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}`);
+      `, `<button class="btn ghost" onclick="closeModal()">Close</button>${isLeader ? `<button class="btn primary" onclick="closeModal();openModal('pgroupEdit',{id:'${g.id}'})">✎ Invite members</button>` : ''}${isLeader || amAdmin ? `<button class="btn danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}`);
     }
     case 'pgroupJoin': {
       const g = DB.presentation_groups.find(x => x.id === m.id);
