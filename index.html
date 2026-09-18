@@ -247,7 +247,6 @@ const APPS_SCRIPT_CODE = `function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)})).setMimeType(ContentService.MimeType.JSON);
   }
 }
-
 function upsertRow(sheet, headers, row, submissionId) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers);
@@ -265,7 +264,6 @@ function upsertRow(sheet, headers, row, submissionId) {
   if (found > -1) { sheet.getRange(found, 1, 1, row.length).setValues([row]); }
   else { sheet.appendRow(row); }
 }
-
 function sanitizeTabName(name) {
   var clean = String(name).replace(/[^a-zA-Z0-9 _-]/g, '-').replace(/\s+/g, ' ').trim();
   if (clean.length > 90) clean = clean.substring(0, 90);
@@ -308,7 +306,7 @@ function inScope(me, row){
 }
 
 let S = { route:'dashboard', user:null, profile:null, modal:null, toast:null, search:'', resFilter:{q:'',course:'',type:''}, noticeFilter:'All', formsTab:'forms', calYear:null, calMonth:null, selectedPresentation:null, authMode:'login', authError:'', loading:true };
-let DB = { profiles:[], resources:[], notices:[], notice_acks:[], events:[], groups:[], presentations:[], submissions:[], notifications:[], class_info:null, section_configs:[], feedback:[], help_requests:[], help_replies:[], instructions:[], forms:[], form_responses:[] };
+let DB = { profiles:[], resources:[], notices:[], notice_acks:[], events:[], groups:[], presentations:[], submissions:[], notifications:[], class_info:null, section_configs:[], feedback:[], help_requests:[], help_replies:[], instructions:[], forms:[], form_responses:[], presentation_groups:[], group_join_requests:[] };
 let toastTimer = null;
 let channels = [];
 let memberDraft = [];
@@ -320,10 +318,12 @@ let formResponsesFormId = null;
 let formFillAnswers = {};
 let formPublishDraft = { fields: [], showName: true, showId: true, showTime: false };
 let formPublishFormId = null;
+let pgroupDraft = { name: '', topic: '', maxSize: 4, members: [] };
+let pgroupDetailId = null;
 
 async function fetchAll(){
   const me = S.profile;
-  const [p, r, n, a, e, g, pr, s, nt, ci, sc, fb, hr, hrep, instr, frm, fresp] = await Promise.all([
+  const [p, r, n, a, e, g, pr, s, nt, ci, sc, fb, hr, hrep, instr, frm, fresp, pgrp, greq] = await Promise.all([
     sb.from('profiles').select('*').order('name'),
     sb.from('resources').select('*').order('uploaded_at', {ascending:false}),
     sb.from('notices').select('*').order('created_at', {ascending:false}),
@@ -340,7 +340,9 @@ async function fetchAll(){
     sb.from('help_replies').select('*').order('created_at'),
     sb.from('instructions').select('*').order('created_at', {ascending:false}),
     sb.from('forms').select('*').order('created_at', {ascending:false}),
-    sb.from('form_responses').select('*').order('submitted_at', {ascending:false})
+    sb.from('form_responses').select('*').order('submitted_at', {ascending:false}),
+    sb.from('presentation_groups').select('*').order('created_at', {ascending:false}),
+    sb.from('group_join_requests').select('*').order('created_at', {ascending:false})
   ]);
   if (p.data){ DB.profiles = p.data.filter(x => !x.disabled); if (S.profile){ const fresh = DB.profiles.find(x => x.id === S.profile.id); if (fresh) S.profile = fresh; } }
   if (r.data) DB.resources = r.data.filter(row => inScope(me, row));
@@ -359,24 +361,24 @@ async function fetchAll(){
   if (instr.data) DB.instructions = instr.data;
   if (frm.data) DB.forms = frm.data.filter(row => inScope(me, row));
   if (fresp.data) DB.form_responses = fresp.data;
+  if (pgrp.data) DB.presentation_groups = pgrp.data.filter(row => inScope(me, row));
+  if (greq.data) DB.group_join_requests = greq.data;
   if (!DB.class_info) DB.class_info = { name:'UniSync', dept:'CSE', batch:'—', section:'—', semester:'—' };
 }
 
 function subscribeRealtime(){
   channels.forEach(c => sb.removeChannel(c));
   channels = [];
-  const tables = ['profiles','resources','notices','notice_acks','events','groups','presentations','submissions','notifications','class_info','section_configs','feedback','help_requests','help_replies','instructions','forms','form_responses'];
+  const tables = ['profiles','resources','notices','notice_acks','events','groups','presentations','submissions','notifications','class_info','section_configs','feedback','help_requests','help_replies','instructions','forms','form_responses','presentation_groups','group_join_requests'];
   tables.forEach(table => {
-    const ch = sb.channel(`rt_${table}`)
-      .on('postgres_changes', { event:'*', schema:'public', table }, async () => {
-        await fetchAll();
-        if (S.modal) return;
-        const a = document.activeElement;
-        if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) return;
-        if (document.hidden) return;
-        render();
-      })
-      .subscribe();
+    const ch = sb.channel(`rt_${table}`).on('postgres_changes', { event:'*', schema:'public', table }, async () => {
+      await fetchAll();
+      if (S.modal) return;
+      const a = document.activeElement;
+      if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) return;
+      if (document.hidden) return;
+      render();
+    }).subscribe();
     channels.push(ch);
   });
 }
@@ -406,22 +408,13 @@ async function notifyClass(exceptId, title, body, link){
 function viewAuth(){
   const mode = S.authMode;
   return `<div class="auth-wrap"><div class="auth">
-    <div class="row" style="margin-bottom:16px">
-      <div class="logo" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff">US</div>
-      <div><h1 style="margin:0;font-size:19px">UniSync</h1><p class="sub" style="margin:0">Your class, synced.</p></div>
-    </div>
-    ${mode==='register' ? `
-      <div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Create your account</div><div class="small muted">New accounts start as students</div></div>
+    <div class="row" style="margin-bottom:16px"><div class="logo" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff">US</div><div><h1 style="margin:0;font-size:19px">UniSync</h1><p class="sub" style="margin:0">Your class, synced.</p></div></div>
+    ${mode==='register' ? `<div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Create your account</div><div class="small muted">New accounts start as students</div></div>
       <label class="f"><span>Full name <span class="req">*</span></span><input class="inp" id="li_name" placeholder="Your full name" data-fk="li_name"></label>
       <label class="f"><span>Student ID <span class="req">*</span></span><input class="inp" id="li_sid" placeholder="e.g. 2021001" data-fk="li_sid"></label>
-      <div class="frow">
-        <label class="f"><span>Department <span class="req">*</span></span><input class="inp" id="rg_dept" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="rg_dept"></label>
-        <label class="f"><span>Batch <span class="req">*</span></span><input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch"></label>
-      </div>
+      <div class="frow"><label class="f"><span>Department <span class="req">*</span></span><input class="inp" id="rg_dept" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="rg_dept"></label><label class="f"><span>Batch <span class="req">*</span></span><input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch"></label></div>
       <label class="f"><span>Section <span class="req">*</span></span><input class="inp" id="rg_section" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="rg_section"></label>
-    ` : `
-      <div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Sign in</div><div class="small muted">Any role can sign in here</div></div>
-    `}
+    ` : `<div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Sign in</div><div class="small muted">Any role can sign in here</div></div>`}
     <label class="f"><span>Email <span class="req">*</span></span><input class="inp" id="li_email" type="email" placeholder="you@uni.edu" data-fk="li_email"></label>
     <label class="f"><span>Password <span class="req">*</span></span><input class="inp" id="li_pw" type="password" placeholder="••••••" data-fk="li_pw" onkeydown="if(event.key==='Enter')doAuth()"></label>
     ${S.authError ? `<div class="err" style="margin-bottom:10px">${esc(S.authError)}</div>` : ''}
@@ -464,6 +457,7 @@ const NAV = [
   { id:'notices',      ico:'📢', label:'Notices',      section:'Main' },
   { id:'calendar',     ico:'🗓', label:'Calendar',     section:'Main' },
   { id:'presentations',ico:'🎤', label:'Presentations',section:'Class' },
+  { id:'pgroups',      ico:'👥', label:'Present. Groups',section:'Class' },
   { id:'forms',        ico:'📝', label:'Forms',        section:'Class' },
   { id:'groups',       ico:'💬', label:'Groups',       section:'Class' },
   { id:'help',         ico:'🆘', label:'Help / Ask',   section:'Class' },
@@ -480,12 +474,7 @@ function viewSidebar(u){
   const sections = ['Main','Class','More','Admin'];
   let html = `<aside class="sidebar"><div class="brand"><div class="logo">US</div><div><h1>UniSync</h1><small>${esc(classLabel(u))}</small></div></div><nav class="nav">`;
   sections.forEach(sec => {
-    const items = NAV.filter(n => {
-      if (n.section !== sec) return false;
-      if (n.adminOnly) return isAdmin(u);
-      if (n.managerOnly) return canManage(u);
-      return true;
-    });
+    const items = NAV.filter(n => { if (n.section !== sec) return false; if (n.adminOnly) return isAdmin(u); if (n.managerOnly) return canManage(u); return true; });
     if (!items.length) return;
     html += `<div class="nav-sep">${sec}</div>`;
     items.forEach(n => { html += `<button class="nav-item ${S.route===n.id?'active':''}" onclick="go('${n.id}')" title="${n.label}"><span class="ico">${n.ico}</span><span class="lbl">${n.label}</span></button>`; });
@@ -550,6 +539,7 @@ function viewRoute(u){
     case 'notices':       return viewNotices(u);
     case 'calendar':      return viewCalendar(u);
     case 'presentations': return viewPresentations(u);
+    case 'pgroups':       return viewPresentationGroups(u);
     case 'forms':         return viewForms(u);
     case 'groups':        return viewGroups(u);
     case 'members':       return canManage(u) ? viewMembers(u) : viewDashboard(u);
@@ -586,12 +576,7 @@ function viewDashboard(u){
   else stats = `<div class="grid g4" style="margin-bottom:18px">${stat(todays.length,'Classes today')}${stat(upcoming.filter(e=>['Assignment','Quiz','Exam','Midterm','Final'].includes(e.type)).length,'Deadlines this week')}${stat(notices.length,'Active notices')}${stat(mySubs.length,'My submissions')}</div>`;
   const evRow = e => { const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span></div>`; };
   return `
-    <div class="page-head">
-      <div><h2>Hello, ${esc(u.name.split(' ')[0])} 👋</h2><p>${greeting}</p></div>
-      <div class="actions">
-        ${canManage(u) ? `<button class="btn" onclick="openModal('event')">+ Event</button><button class="btn" onclick="openModal('notice')">+ Notice</button><button class="btn primary" onclick="openModal('presentation')">+ Presentation</button>` : `<button class="btn primary" onclick="go('presentations')">Submit presentation</button>`}
-      </div>
-    </div>
+    <div class="page-head"><div><h2>Hello, ${esc(u.name.split(' ')[0])} 👋</h2><p>${greeting}</p></div><div class="actions">${canManage(u) ? `<button class="btn" onclick="openModal('event')">+ Event</button><button class="btn" onclick="openModal('notice')">+ Notice</button><button class="btn primary" onclick="openModal('presentation')">+ Presentation</button>` : `<button class="btn primary" onclick="go('presentations')">Submit presentation</button>`}</div></div>
     ${stats}
     <div class="grid g2">
       <div class="card"><div class="row" style="margin-bottom:12px"><b style="font-size:14.5px">${todays.length?"Today's schedule":'Upcoming this week'}</b><button class="btn ghost sm" style="margin-left:auto" onclick="go('calendar')">View calendar →</button></div><div class="stack">${(todays.length?todays:upcoming).slice(0,5).map(evRow).join('') || `<div class="empty"><span class="big">🗓</span>Nothing scheduled.</div>`}</div></div>
@@ -601,6 +586,9 @@ function viewDashboard(u){
     </div>`;
 }
 
+/* =========================================================
+   RESOURCES
+   ========================================================= */
 function viewResources(u){
   const f = S.resFilter;
   const courses = [...new Set(DB.resources.map(r=>r.course).filter(Boolean))].sort();
@@ -610,11 +598,7 @@ function viewResources(u){
   if (f.type) list = list.filter(r => r.type === f.type);
   return `
     <div class="page-head"><div><h2>Resources & Notes</h2><p>Shared study materials for ${esc(classLabel(u))}. Anyone can upload.</p></div><div class="actions"><button class="btn primary" onclick="openModal('resource')">+ Upload resource</button></div></div>
-    <div class="card" style="margin-bottom:16px"><div class="row wrap">
-      <input class="inp" style="flex:2;min-width:200px" placeholder="Search…" value="${esc(f.q)}" data-fk="resq" oninput="S.resFilter.q=this.value;render()">
-      <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.course=this.value;render()"><option value="">All courses</option>${courses.map(c=>`<option ${f.course===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-      <select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.type=this.value;render()"><option value="">All types</option>${RESOURCE_TYPES.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select>
-    </div></div>
+    <div class="card" style="margin-bottom:16px"><div class="row wrap"><input class="inp" style="flex:2;min-width:200px" placeholder="Search…" value="${esc(f.q)}" data-fk="resq" oninput="S.resFilter.q=this.value;render()"><select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.course=this.value;render()"><option value="">All courses</option>${courses.map(c=>`<option ${f.course===c?'selected':''}>${esc(c)}</option>`).join('')}</select><select class="inp" style="flex:1;min-width:150px" onchange="S.resFilter.type=this.value;render()"><option value="">All types</option>${RESOURCE_TYPES.map(t=>`<option ${f.type===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div></div>
     ${list.length ? `<div class="grid g2">${list.map(r => resourceCard(r, u)).join('')}</div>` : `<div class="empty"><span class="big">📚</span>No resources in this section yet.</div>`}`;
 }
 
@@ -642,6 +626,9 @@ async function deleteResource(id){
   toast('Resource deleted');
 }
 
+/* =========================================================
+   NOTICES
+   ========================================================= */
 function viewNotices(u){
   const today = iso(0);
   let list = DB.notices.filter(n => !n.expires_at || n.expires_at >= today || canManage(u));
@@ -656,10 +643,12 @@ function viewNotices(u){
       return `<div class="card" style="border-left:3px solid ${n.priority==='Urgent'?'var(--danger)':n.priority==='Important'?'var(--warn)':'var(--line)'}"><div class="row" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:15px;margin-bottom:5px">${n.pinned?'📌 ':''}${esc(n.title)}</div><div class="row wrap tiny muted" style="gap:6px"><span class="tag blue">${esc(n.category)}</span>${n.priority!=='Normal'?`<span class="tag ${PRIORITY_TAG[n.priority]}">${n.priority}</span>`:''}${n.dept?`<span class="tag">${esc((n.dept||'').toUpperCase())}-${esc(n.batch||'')}-${esc((n.section||'').toUpperCase())}</span>`:''}<span>by ${esc(nameOf(n.created_by))} · ${fmtDateTime(n.created_at)}</span></div></div>${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('notice',{id:'${n.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteNotice('${n.id}')">🗑</button></div>` : ''}</div><div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(n.body)}</div><div class="divider"></div><div class="row wrap"><span class="tiny muted">${ackCount} acknowledged</span>${!canManage(u) ? (acked ? `<span class="tag green" style="margin-left:auto">✓ Acknowledged</span>` : `<button class="btn sm primary" style="margin-left:auto" onclick="ackNotice('${n.id}')">Acknowledge</button>`) : ''}</div></div>`;
     }).join('') || `<div class="empty"><span class="big">📢</span>No notices for this section yet.</div>`}</div>`;
 }
-
 async function ackNotice(id){ await sb.from('notice_acks').insert({ notice_id: id, user_id: S.profile.id }); toast('Acknowledged'); }
 async function deleteNotice(id){ if (!confirm('Delete this notice?')) return; await sb.from('notices').delete().eq('id', id); toast('Notice deleted'); }
 
+/* =========================================================
+   CALENDAR
+   ========================================================= */
 function viewCalendar(u){
   const now = new Date();
   if (S.calYear === null){ S.calYear = now.getFullYear(); S.calMonth = now.getMonth(); }
@@ -682,11 +671,13 @@ function viewCalendar(u){
     <div class="card" style="margin-bottom:16px"><div class="row" style="margin-bottom:14px"><button class="btn sm" onclick="calMove(-1)">‹</button><b style="font-size:15px;min-width:170px;text-align:center">${monthName}</b><button class="btn sm" onclick="calMove(1)">›</button><button class="btn ghost sm" onclick="calToday()">Today</button><div class="row wrap" style="margin-left:auto;gap:12px">${legend}</div></div><div class="cal-head">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div>${d}</div>`).join('')}</div><div class="cal-grid">${cells}</div></div>
     <div class="card"><b style="font-size:14.5px">Upcoming events</b><div class="stack" style="margin-top:12px">${upcoming.map(e=>{ const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span>${canManage(u)?`<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('event',{id:'${e.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteEvent('${e.id}')">🗑</button></div>`:''}</div>`; }).join('') || `<div class="empty"><span class="big">🗓</span>No upcoming events.</div>`}</div></div>`;
 }
-
 function calMove(delta){ let m = S.calMonth + delta, y = S.calYear; if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; } S.calMonth = m; S.calYear = y; render(); }
 function calToday(){ const n = new Date(); S.calYear = n.getFullYear(); S.calMonth = n.getMonth(); render(); }
 async function deleteEvent(id){ if (!confirm('Delete this event?')) return; await sb.from('events').delete().eq('id', id); toast('Event deleted'); }
 
+/* =========================================================
+   GROUPS (Social links)
+   ========================================================= */
 function viewGroups(u){
   const list = [...DB.groups];
   const counts = GROUP_PLATFORMS.reduce((acc,p)=>{ acc[p] = DB.groups.filter(g=>g.platform===p).length; return acc; }, {});
@@ -695,9 +686,11 @@ function viewGroups(u){
     <div class="row wrap" style="margin-bottom:16px">${GROUP_PLATFORMS.map(p => { const meta = PLATFORM_META[p]; const n = counts[p]; if (!n) return ''; return `<div class="card" style="display:flex;align-items:center;gap:10px;padding:10px 14px;min-width:170px"><div class="platform-badge" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;background:${meta.color}">${meta.svg}</div><div><div style="font-weight:600;font-size:13px">${meta.name}</div><div class="tiny muted">${n} group${n!==1?'s':''}</div></div></div>`; }).join('') || `<div class="card small muted">No groups yet.</div>`}</div>
     ${list.length ? `<div class="grid g3">${list.map(g => { const meta = PLATFORM_META[g.platform] || PLATFORM_META.other; return `<div class="group-card"><div class="group-head"><div class="platform-badge" style="background:${meta.color}">${meta.svg}</div><div style="flex:1;min-width:0"><div class="group-name">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div>${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('group',{id:'${g.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteGroup('${g.id}')">🗑</button></div>` : ''}</div>${g.description ? `<div class="group-desc">${esc(g.description)}</div>` : ''}<div class="group-foot"><a class="open-link" href="${esc(g.link)}" target="_blank" rel="noopener" style="background:${meta.color}">${meta.svg.replace('width="22" height="22"','width="14" height="14"')} Open ${meta.name}</a></div></div>`; }).join('')}</div>` : `<div class="empty"><span class="big">💬</span>No groups in this section yet.</div>`}`;
 }
-
 async function deleteGroup(id){ if (!confirm('Remove this group?')) return; await sb.from('groups').delete().eq('id', id); toast('Group removed'); }
 
+/* =========================================================
+   PRESENTATIONS
+   ========================================================= */
 function viewPresentations(u){
   if (!DB.presentations.length){
     return `<div class="page-head"><div><h2>Presentation Submissions</h2><p>No events yet for ${esc(classLabel(u))}.</p></div>${canManage(u)?`<div class="actions"><button class="btn primary" onclick="openModal('presentation')">+ New presentation</button></div>`:''}</div><div class="empty"><span class="big">🎤</span>No presentation events.</div>`;
@@ -722,41 +715,32 @@ function viewPresentations(u){
 }
 
 async function deletePresentation(id){
-  const p = DB.presentations.find(x=>x.id===id);
-  if (!p) return;
+  const p = DB.presentations.find(x=>x.id===id); if (!p) return;
   const subCount = DB.submissions.filter(s => s.presentation_id === id).length;
   if (!confirm(`Delete "${p.title}"?\n\nThis will permanently delete the presentation and ${subCount} submission(s).`)) return;
   await sb.from('submissions').delete().eq('presentation_id', id);
   const { error } = await sb.from('presentations').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
-  syncDeleteToSheet(p);
-  S.selectedPresentation = null;
-  toast('Presentation deleted');
-  render();
+  syncDeleteToSheet(p); S.selectedPresentation = null; toast('Presentation deleted'); render();
 }
-
 async function syncDeleteToSheet(p){
   const sectionCfg = DB.section_configs.find(c => c.dept !== '*' && sectionKey(c.dept, c.batch, c.section) === sectionKey(p.dept, p.batch, p.section));
   const adminCfg = DB.section_configs.find(c => c.dept === '*');
   const base = { action: 'deletePresentation', presentation: p.title, dept: (p.dept || '').toUpperCase(), batch: p.batch || '', section: (p.section || '').toUpperCase() };
   if (sectionCfg?.webhook_url && !sectionCfg.webhook_url.includes('PASTE_')){
-    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); }
-    catch(e){ console.warn('Section delete sync failed', e); }
+    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); } catch(e){}
   }
   if (adminCfg?.webhook_url && !adminCfg.webhook_url.includes('PASTE_')){
-    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); }
-    catch(e){ console.warn('Admin delete sync failed', e); }
+    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); } catch(e){}
   }
   return true;
 }
-
 async function deleteSubmission(id){
   if (!confirm('Remove this submission? You can submit again if the deadline has not passed.')) return;
   const { error } = await sb.from('submissions').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
   toast('Submission removed');
 }
-
 async function remindNonSubmitters(pid){
   const p = DB.presentations.find(x=>x.id===pid); if (!p) return;
   const covered = new Set();
@@ -767,7 +751,6 @@ async function remindNonSubmitters(pid){
   await notify(targets, 'Presentation reminder', `You haven't submitted for "${p.title}". Deadline: ${fmtDate(p.deadline)}.`, 'presentations');
   toast(`Reminder sent to ${targets.length} student(s)`);
 }
-
 function exportSubmissions(pid){
   const p = DB.presentations.find(x=>x.id===pid) || { title:'Presentation', course:'' };
   const subs = DB.submissions.filter(s => s.presentation_id === pid);
@@ -777,33 +760,160 @@ function exportSubmissions(pid){
   const rows = subs.map(s => { const row = [s.team_name||'', s.leader_name, s.leader_id, s.link, s.submitted_at]; for (let i=0;i<maxMembers;i++){ const m = (s.members||[])[i]; row.push(m ? m.name : '', m ? m.id : ''); } return row; });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `submissions_${p.title.replace(/\W+/g,'_')}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-  toast('CSV exported');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `submissions_${p.title.replace(/\W+/g,'_')}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); toast('CSV exported');
+}
+
+/* =========================================================
+   PRESENTATION GROUPS
+   ========================================================= */
+function getMyGroup(u){ return DB.presentation_groups.find(g => g.leader_id === u.id || (g.members || []).includes(u.id)); }
+function getGroupMembers(g){ return [g.leader_id, ...(g.members || [])].filter(Boolean).map(id => profileOf(id)).filter(Boolean); }
+function getGroupPendingRequests(gid){ return DB.group_join_requests.filter(r => r.group_id === gid && r.status === 'pending'); }
+
+function viewPresentationGroups(u){
+  const myGroup = getMyGroup(u);
+  const allGroups = DB.presentation_groups;
+  const myRequests = myGroup && myGroup.leader_id === u.id ? getGroupPendingRequests(myGroup.id) : [];
+  return `
+    <div class="page-head"><div><h2>Presentation Groups</h2><p>Create your team, invite members, and pick your presentation topic.</p></div><div class="actions">${!myGroup ? `<button class="btn primary" onclick="openModal('pgroupCreate')">+ Create group</button>` : ''}</div></div>
+    ${myGroup ? `
+      <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)">
+        <div class="row wrap" style="align-items:flex-start;margin-bottom:10px">
+          <div style="flex:1;min-width:220px">
+            <div style="font-weight:650;font-size:16px;margin-bottom:4px">${esc(myGroup.name)}</div>
+            <div class="row wrap tiny muted" style="gap:6px"><span class="tag green">Your group</span>${myGroup.topic ? `<span class="tag blue">📌 ${esc(myGroup.topic)}</span>` : `<span class="tag amber">No topic set</span>`}<span class="tag">${getGroupMembers(myGroup).length}/${myGroup.max_size} members</span>${myGroup.leader_id === u.id ? `<span class="tag admin">👑 You are leader</span>` : `<span class="tag">Member</span>`}</div>
+          </div>
+          <div class="row wrap" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${myGroup.id}')">View details</button>${myGroup.leader_id === u.id ? `<button class="btn sm primary" onclick="openModal('pgroupEdit',{id:'${myGroup.id}'})">✎ Edit</button>` : ''}${myGroup.leader_id !== u.id ? `<button class="btn sm danger" onclick="leaveGroup('${myGroup.id}')">Leave group</button>` : ''}</div>
+        </div>
+        <div class="divider"></div>
+        <div class="row wrap" style="gap:6px">${getGroupMembers(myGroup).map(m => `<div class="row" style="gap:6px;background:var(--panel2);padding:5px 10px;border-radius:20px"><div class="avatar" style="width:22px;height:22px;flex:0 0 22px;border-radius:6px;font-size:10px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><span class="small">${esc(m.name)}</span>${m.id === myGroup.leader_id ? `<span class="tiny" style="color:#f7c76a">👑</span>` : ''}</div>`).join('')}</div>
+        ${myGroup.leader_id === u.id && myRequests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b class="small">🔔 Join requests (${myRequests.length})</b></div><div class="stack" style="gap:8px">${myRequests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted')">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected')">Reject</button></div>`; }).join('')}</div>` : ''}
+      </div>
+    ` : ''}
+    <div class="card" style="margin-bottom:16px"><b style="font-size:14.5px">All groups (${allGroups.length})</b><div class="tiny muted" style="margin-top:4px">Click a group to see members and topic. If there's space, you can request to join.</div></div>
+    ${allGroups.length ? `<div class="grid g3">${allGroups.map(g => {
+      const members = getGroupMembers(g);
+      const isFull = members.length >= g.max_size;
+      const isMine = myGroup && myGroup.id === g.id;
+      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && r.status === 'pending');
+      return `<div class="card"><div style="font-weight:640;font-size:15px;margin-bottom:6px">${esc(g.name)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:10px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size} ${isFull?'full':'open'}</span>${isMine ? `<span class="tag green">Your group</span>` : ''}</div><div class="row wrap" style="gap:4px;margin-bottom:12px">${members.map(m => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:10px;background:${colorFor(m.id)}" title="${esc(m.name)}${m.id===g.leader_id?' (leader)':''}">${esc(initials(m.name))}</div>`).join('')}${Array(Math.max(0, g.max_size - members.length)).fill(0).map(() => `<div class="avatar" style="width:26px;height:26px;flex:0 0 26px;border-radius:7px;font-size:11px;background:var(--panel2);color:var(--muted);border:1px dashed var(--line)">?</div>`).join('')}</div><div class="row" style="gap:6px"><button class="btn sm" onclick="openPgroupDetail('${g.id}')">View members</button>${!isMine && !isFull && !pendingReq && !myGroup ? `<button class="btn sm primary" onclick="openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMine && !isFull && pendingReq ? `<span class="tag amber">Request pending</span>` : ''}${!isMine && isFull ? `<span class="tag red">Group full</span>` : ''}</div></div>`;
+    }).join('')}</div>` : `<div class="empty"><span class="big">👥</span>No groups yet.${!myGroup ? ' Click "Create group" to start.' : ''}</div>`}`;
+}
+
+function openPgroupDetail(gid){ pgroupDetailId = gid; openModal('pgroupDetail', { id: gid }); }
+
+function togglePgroupDraftMember(uidTarget){
+  const i = pgroupDraft.members.indexOf(uidTarget);
+  if (i > -1) pgroupDraft.members.splice(i, 1);
+  else { if (pgroupDraft.members.length + 1 >= pgroupDraft.maxSize){ toast('Team size limit reached', 'err'); return; } pgroupDraft.members.push(uidTarget); }
+  render();
+}
+
+async function savePgroup(id){
+  const name = $('#pg_name')?.value.trim();
+  const topic = $('#pg_topic')?.value.trim() || '';
+  const maxSize = parseInt($('#pg_max')?.value) || 4;
+  if (!name){ toast('Group name required', 'err'); return; }
+  if (maxSize < 1){ toast('Max size must be at least 1', 'err'); return; }
+  if (pgroupDraft.members.length + 1 > maxSize){ toast(`Too many members (limit ${maxSize})`, 'err'); return; }
+  const me = S.profile;
+  const data = { name, topic, max_size: maxSize, members: pgroupDraft.members, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() };
+  let error;
+  if (id){ ({ error } = await sb.from('presentation_groups').update(data).eq('id', id)); if (error){ toast(error.message, 'err'); return; } toast('Group updated'); }
+  else { ({ error } = await sb.from('presentation_groups').insert({ ...data, leader_id: me.id })); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New presentation group', `${me.name} created "${name}".`, 'pgroups'); toast('Group created'); }
+  closeModal();
+}
+
+async function leaveGroup(gid){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  if (g.leader_id === S.profile.id){ toast('You are the leader. Transfer leadership first.', 'err'); return; }
+  if (!confirm('Leave this group?')) return;
+  const members = (g.members || []).filter(m => m !== S.profile.id);
+  const { error } = await sb.from('presentation_groups').update({ members }).eq('id', gid);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Left group');
+}
+async function removeGroupMember(gid, uidTarget){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  if (g.leader_id !== S.profile.id){ toast('Only leader can remove members', 'err'); return; }
+  if (uidTarget === S.profile.id){ toast('Cannot remove yourself', 'err'); return; }
+  const m = profileOf(uidTarget);
+  if (!confirm(`Remove ${m?.name || 'member'} from the group?`)) return;
+  const members = (g.members || []).filter(x => x !== uidTarget);
+  const { error } = await sb.from('presentation_groups').update({ members }).eq('id', gid);
+  if (error){ toast(error.message, 'err'); return; }
+  await notify(uidTarget, 'Removed from group', `You were removed from "${g.name}".`, 'pgroups');
+  toast('Member removed'); closeModal();
+}
+async function transferLeadership(gid, uidTarget){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  if (g.leader_id !== S.profile.id){ toast('Only leader can transfer', 'err'); return; }
+  const m = profileOf(uidTarget);
+  if (!confirm(`Make ${m?.name || 'this member'} the new leader?`)) return;
+  const newMembers = (g.members || []).filter(x => x !== uidTarget);
+  newMembers.push(g.leader_id);
+  const { error } = await sb.from('presentation_groups').update({ leader_id: uidTarget, members: newMembers }).eq('id', gid);
+  if (error){ toast(error.message, 'err'); return; }
+  await notify(uidTarget, 'You are now a group leader', `You are now the leader of "${g.name}".`, 'pgroups');
+  toast('Leadership transferred'); closeModal();
+}
+async function deletePgroup(gid){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  if (g.leader_id !== S.profile.id){ toast('Only leader can delete', 'err'); return; }
+  if (!confirm(`Delete group "${g.name}"? All members will be removed.`)) return;
+  const { error } = await sb.from('presentation_groups').delete().eq('id', gid);
+  if (error){ toast(error.message, 'err'); return; }
+  await notify((g.members || []), 'Group deleted', `"${g.name}" was deleted by the leader.`, 'pgroups');
+  toast('Group deleted'); closeModal();
+}
+async function sendJoinRequest(gid){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  const message = $('#pjr_msg')?.value.trim() || '';
+  const { error } = await sb.from('group_join_requests').insert({ group_id: gid, user_id: S.profile.id, message });
+  if (error){ toast(error.message, 'err'); return; }
+  await notify(g.leader_id, 'New join request', `${S.profile.name} wants to join "${g.name}".`, 'pgroups');
+  toast('Request sent'); closeModal();
+}
+async function respondJoinRequest(reqId, status){
+  const r = DB.group_join_requests.find(x => x.id === reqId); if (!r) return;
+  const g = DB.presentation_groups.find(x => x.id === r.group_id); if (!g) return;
+  if (status === 'accepted'){
+    const members = g.members || [];
+    const total = members.length + 1 + (g.leader_id ? 1 : 0);
+    if (total >= g.max_size){ toast('Group is full', 'err'); return; }
+    if (!members.includes(r.user_id)) members.push(r.user_id);
+    const { error } = await sb.from('presentation_groups').update({ members }).eq('id', g.id);
+    if (error){ toast(error.message, 'err'); return; }
+    await notify(r.user_id, 'Join request accepted', `You joined "${g.name}".`, 'pgroups');
+    toast('Request accepted');
+  } else {
+    await notify(r.user_id, 'Join request rejected', `Your request to join "${g.name}" was rejected.`, 'pgroups');
+    toast('Request rejected');
+  }
+  await sb.from('group_join_requests').update({ status }).eq('id', reqId);
+}
+async function changeGroupTopic(gid){
+  const g = DB.presentation_groups.find(x => x.id === gid); if (!g) return;
+  if (g.leader_id !== S.profile.id){ toast('Only leader can change topic', 'err'); return; }
+  const topic = $('#pgt_topic')?.value.trim() || '';
+  const { error } = await sb.from('presentation_groups').update({ topic }).eq('id', gid);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Topic updated');
 }
 
 /* =========================================================
    FORMS
    ========================================================= */
-
 function viewForms(u){
   const canBuild = canManage(u);
   const tab = S.formsTab || 'forms';
   const myForms = isAdmin(u) ? DB.forms : DB.forms.filter(f => !f.dept || meScopes(u).some(s => s.dept === (f.dept||'').toUpperCase() && s.batch === f.batch && s.section === (f.section||'').toUpperCase()));
   const publishedForms = myForms.filter(f => f.published);
   return `
-    <div class="page-head">
-      <div><h2>Forms</h2><p>${canBuild ? 'Create and manage custom forms for your class.' : 'Fill forms created by your CR, Teacher or Admin.'}</p></div>
-      ${canBuild && tab === 'forms' ? `<div class="actions"><button class="btn primary" onclick="openModal('formBuilder')">+ Create form</button></div>` : ''}
-    </div>
-    <div class="row wrap" style="margin-bottom:16px">
-      <button class="btn sm ${tab==='forms'?'primary':''}" onclick="S.formsTab='forms';render()">📝 Forms</button>
-      <button class="btn sm ${tab==='results'?'primary':''}" onclick="S.formsTab='results';render()">📊 Form Results${publishedForms.length ? ` (${publishedForms.length})` : ''}</button>
-    </div>
-    ${tab === 'forms' ? viewFormsList(u, myForms, canBuild) : viewFormResultsList(u, publishedForms)}
-  `;
+    <div class="page-head"><div><h2>Forms</h2><p>${canBuild ? 'Create and manage custom forms for your class.' : 'Fill forms created by your CR, Teacher or Admin.'}</p></div>${canBuild && tab === 'forms' ? `<div class="actions"><button class="btn primary" onclick="openModal('formBuilder')">+ Create form</button></div>` : ''}</div>
+    <div class="row wrap" style="margin-bottom:16px"><button class="btn sm ${tab==='forms'?'primary':''}" onclick="S.formsTab='forms';render()">📝 Forms</button><button class="btn sm ${tab==='results'?'primary':''}" onclick="S.formsTab='results';render()">📊 Form Results${publishedForms.length ? ` (${publishedForms.length})` : ''}</button></div>
+    ${tab === 'forms' ? viewFormsList(u, myForms, canBuild) : viewFormResultsList(u, publishedForms)}`;
 }
 
 function viewFormsList(u, myForms, canBuild){
@@ -811,7 +921,6 @@ function viewFormsList(u, myForms, canBuild){
     const responses = DB.form_responses.filter(r => r.form_id === f.id);
     const mine = responses.find(r => r.user_id === u.id);
     const author = profileOf(f.created_by);
-    const isOwner = f.created_by === u.id;
     const inMyScope = isAdmin(u) || meScopes(u).some(s => s.dept === (f.dept||'').toUpperCase() && s.batch === f.batch && s.section === (f.section||'').toUpperCase());
     const canEdit = canManage(u) && inMyScope;
     return `<div class="card"><div class="row" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:15px;margin-bottom:4px">${esc(f.title)}</div>${f.description ? `<div class="tiny muted" style="margin-bottom:6px;white-space:pre-wrap">${esc(f.description)}</div>` : ''}<div class="row wrap tiny muted" style="gap:6px"><span class="tag ${f.is_open?'green':'red'}">${f.is_open?'Open':'Closed'}</span>${f.published ? `<span class="tag blue">📤 Published</span>` : ''}<span class="tag">${(f.fields||[]).length} question${(f.fields||[]).length!==1?'s':''}</span>${f.dept ? `<span class="tag">${esc((f.dept||'').toUpperCase())}-${esc(f.batch||'')}-${esc((f.section||'').toUpperCase())}</span>` : ''}<span>by ${esc(author?.name || 'Unknown')}</span></div></div></div><div class="divider"></div><div class="row wrap" style="gap:6px">${!canManage(u) && f.is_open && !mine ? `<button class="btn primary sm" onclick="openFormFill('${f.id}')">Fill form</button>` : ''}${!canManage(u) && !f.is_open ? `<span class="tag red">Closed</span>` : ''}${mine ? `<span class="tag green">✓ You responded</span>` : ''}${canManage(u) ? `<button class="btn sm" onclick="openFormResponses('${f.id}')">📊 ${responses.length} response${responses.length!==1?'s':''}</button>` : ''}${canEdit ? `<button class="btn sm" onclick="openModal('formBuilder',{id:'${f.id}'})">✎ Edit</button><button class="btn sm" onclick="toggleFormOpen('${f.id}')">${f.is_open?'Close':'Open'}</button>` : ''}${canEdit ? `<button class="btn sm ${f.published?'':'primary'}" onclick="openFormPublish('${f.id}')">${f.published?'✎ Edit publish':'📤 Publish results'}</button>` : ''}${canEdit ? `<button class="btn danger sm" style="margin-left:auto" onclick="deleteForm('${f.id}')">🗑</button>` : ''}</div></div>`;
@@ -819,9 +928,7 @@ function viewFormsList(u, myForms, canBuild){
 }
 
 function viewFormResultsList(u, publishedForms){
-  if (!publishedForms.length){
-    return `<div class="empty"><span class="big">📊</span>No published form results yet.<br><br><span class="small">CR will publish results here when ready.</span></div>`;
-  }
+  if (!publishedForms.length) return `<div class="empty"><span class="big">📊</span>No published form results yet.<br><br><span class="small">CR will publish results here when ready.</span></div>`;
   return `<div class="stack">${publishedForms.map(f => {
     const responses = DB.form_responses.filter(r => r.form_id === f.id);
     const fields = (f.fields || []).filter(x => (f.published_fields || []).includes(x.id));
@@ -837,56 +944,51 @@ function openFormPublish(formId){
   formPublishDraft = { fields: [...(f.published_fields || [])], showName: f.show_name !== false, showId: f.show_id !== false, showTime: !!f.show_time };
   openModal('formPublish', { formId });
 }
-
 async function saveFormPublish(){
   const f = DB.forms.find(x => x.id === formPublishFormId); if (!f) return;
   const payload = { published: true, published_fields: formPublishDraft.fields, show_name: formPublishDraft.showName, show_id: formPublishDraft.showId, show_time: formPublishDraft.showTime, published_at: new Date().toISOString() };
   const { error } = await sb.from('forms').update(payload).eq('id', f.id);
   if (error){ toast(error.message, 'err'); return; }
   await notifyClass(S.profile.id, 'Form results published', `"${f.title}" results are now visible.`, 'forms');
-  toast('Results published');
-  closeModal();
+  toast('Results published'); closeModal();
 }
-
 async function unpublishForm(id){
   const f = DB.forms.find(x => x.id === id); if (!f) return;
-  if (!confirm(`Unpublish "${f.title}"? Students will no longer see these results.`)) return;
+  if (!confirm(`Unpublish "${f.title}"?`)) return;
   const { error } = await sb.from('forms').update({ published: false }).eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
   toast('Unpublished');
 }
-
 function togglePublishField(fieldId){
   const i = formPublishDraft.fields.indexOf(fieldId);
-  if (i > -1) formPublishDraft.fields.splice(i, 1);
-  else formPublishDraft.fields.push(fieldId);
+  if (i > -1) formPublishDraft.fields.splice(i, 1); else formPublishDraft.fields.push(fieldId);
   render();
 }
-
 function addFormField(type){
   formFieldsDraft.push({ id: uid('fl'), type: type || 'short', label: '', required: false, placeholder: '', options: (type === 'choice' || type === 'checkbox' || type === 'dropdown') ? ['Option 1'] : [] });
   render();
 }
 function removeFormField(i){ formFieldsDraft.splice(i,1); render(); }
-function moveFormField(i, dir){
-  const j = i + dir;
-  if (j < 0 || j >= formFieldsDraft.length) return;
-  const tmp = formFieldsDraft[i];
-  formFieldsDraft[i] = formFieldsDraft[j];
-  formFieldsDraft[j] = tmp;
-  render();
-}
+function moveFormField(i, dir){ const j = i + dir; if (j < 0 || j >= formFieldsDraft.length) return; const tmp = formFieldsDraft[i]; formFieldsDraft[i] = formFieldsDraft[j]; formFieldsDraft[j] = tmp; render(); }
 function updateFieldType(i, type){
   formFieldsDraft[i].type = type;
   if ((type === 'choice' || type === 'checkbox' || type === 'dropdown') && (!formFieldsDraft[i].options || !formFieldsDraft[i].options.length)) formFieldsDraft[i].options = ['Option 1'];
   render();
 }
-function addFieldOption(i){
-  formFieldsDraft[i].options = formFieldsDraft[i].options || [];
-  formFieldsDraft[i].options.push('Option ' + (formFieldsDraft[i].options.length + 1));
-  render();
-}
+function addFieldOption(i){ formFieldsDraft[i].options = formFieldsDraft[i].options || []; formFieldsDraft[i].options.push('Option ' + (formFieldsDraft[i].options.length + 1)); render(); }
 function removeFieldOption(i, j){ formFieldsDraft[i].options.splice(j,1); render(); }
+
+function getTakenOptions(formId, fieldId){
+  const taken = {};
+  DB.form_responses.filter(r => r.form_id === formId).forEach(r => {
+    const v = r.answers?.[fieldId];
+    const u = profileOf(r.user_id);
+    const info = { name: u?.name || 'Someone', id: u?.student_id || '', userId: r.user_id };
+    if (Array.isArray(v)){ v.forEach(opt => { taken[opt] = info; }); }
+    else if (v){ taken[v] = info; }
+  });
+  return taken;
+}
 
 async function saveForm(id){
   const title = $('#fm_title')?.value.trim();
@@ -899,7 +1001,11 @@ async function saveForm(id){
     if ((f.type === 'choice' || f.type === 'checkbox' || f.type === 'dropdown') && (!f.options || !f.options.length)){ toast(`Question ${i+1}: add at least one option`, 'err'); return; }
   }
   const me = S.profile;
-  const data = { title, description, fields: formFieldsDraft.map(f => ({ id: f.id, type: f.type, label: f.label.trim(), required: !!f.required, placeholder: (f.placeholder||'').trim(), options: (f.options||[]).map(o => String(o).trim()).filter(Boolean) })), dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() };
+  const data = {
+    title, description,
+    fields: formFieldsDraft.map(f => ({ id: f.id, type: f.type, label: f.label.trim(), required: !!f.required, placeholder: (f.placeholder||'').trim(), options: (f.options||[]).map(o => String(o).trim()).filter(Boolean), unique: !!f.unique })),
+    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase()
+  };
   let error;
   if (id){ ({ error } = await sb.from('forms').update(data).eq('id', id)); }
   else { ({ error } = await sb.from('forms').insert({ ...data, created_by: me.id, is_open: true })); }
@@ -908,12 +1014,11 @@ async function saveForm(id){
   toast(id ? 'Form updated' : 'Form created');
   closeModal();
 }
-
 async function deleteForm(id){
   const f = DB.forms.find(x=>x.id===id); if (!f) return;
   const myScopes = meScopes(S.profile);
   const inScopeCheck = isAdmin(S.profile) || myScopes.some(s => s.dept === (f.dept||'').toUpperCase() && s.batch === f.batch && s.section === (f.section||'').toUpperCase());
-  if (!inScopeCheck){ toast('You can only delete forms in your own section', 'err'); return; }
+  if (!inScopeCheck){ toast('Not your section', 'err'); return; }
   if (!confirm(`Delete "${f.title}" and all its responses?`)) return;
   const { error } = await sb.from('forms').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
@@ -927,7 +1032,6 @@ async function toggleFormOpen(id){
   await sb.from('forms').update({ is_open: !f.is_open }).eq('id', id);
   toast(f.is_open ? 'Form closed' : 'Form opened');
 }
-
 function openFormFill(formId){ formResponsesFormId = formId; formFillAnswers = {}; openModal('formFill', { formId }); }
 async function openFormResponses(formId){ formResponsesFormId = formId; openModal('formResponses', { formId }); }
 
@@ -945,6 +1049,16 @@ async function submitFormResponse(formId){
     if (field.required && empty){ toast(`"${field.label}" is required`, 'err'); return; }
     answers[field.id] = val;
   }
+  for (const field of fields){
+    if (!field.unique) continue;
+    const chosen = answers[field.id];
+    if (!chosen) continue;
+    const chosenList = Array.isArray(chosen) ? chosen : [chosen];
+    const taken = getTakenOptions(formId, field.id);
+    for (const opt of chosenList){
+      if (taken[opt] && taken[opt].userId !== S.profile.id){ toast(`"${opt}" is already taken by ${taken[opt].name}`, 'err'); return; }
+    }
+  }
   const existing = DB.form_responses.find(r => r.form_id === formId && r.user_id === S.profile.id);
   let error;
   if (existing){ ({ error } = await sb.from('form_responses').update({ answers, submitted_at: new Date().toISOString() }).eq('id', existing.id)); }
@@ -953,15 +1067,12 @@ async function submitFormResponse(formId){
   toast(existing ? 'Response updated' : 'Response submitted');
   closeModal();
 }
-
 async function deleteFormResponse(id){
   if (!confirm('Delete this response?')) return;
   const { error } = await sb.from('form_responses').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
-  toast('Response deleted');
-  closeModal();
+  toast('Response deleted'); closeModal();
 }
-
 function exportFormResponses(formId){
   const f = DB.forms.find(x=>x.id===formId); if (!f) return;
   const fields = f.fields || [];
@@ -970,17 +1081,13 @@ function exportFormResponses(formId){
   const rows = responses.map(r => { const u = profileOf(r.user_id); const row = [u?.name || 'Unknown', u?.student_id || '', r.submitted_at]; fields.forEach(field => { const v = r.answers?.[field.id]; row.push(Array.isArray(v) ? v.join(', ') : (v || '')); }); return row; });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `responses_${f.title.replace(/\W+/g,'_')}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-  toast('CSV exported');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `responses_${f.title.replace(/\W+/g,'_')}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); toast('CSV exported');
 }
 
 /* =========================================================
-   OTHER SECTIONS
+   MEMBERS / DIRECTORY / INSTRUCTIONS / FEEDBACK / HELP / USERS
    ========================================================= */
-
 function viewMembers(u){
   const me = S.profile;
   const myScopes = meScopes(me);
@@ -988,42 +1095,22 @@ function viewMembers(u){
   const sorted = [...visible].sort((a,b) => { const rank = x => x.role==='admin'?0:x.role==='teacher'?1:x.role==='cr'?2:3; return rank(a) - rank(b) || a.name.localeCompare(b.name); });
   return `<div class="page-head"><div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members</p></div>${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage Users</button></div>` : ''}</div><div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)}</div><div class="tiny muted" style="margin-top:3px">${esc(m.email||'')}</div><div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div></div>${roleBadge(m)}</div></div>`).join('')}</div>`;
 }
-
 function viewCRDirectory(u){
   const crs = DB.profiles.filter(p => (p.role === 'cr' || p.role === 'teacher'));
   const sorted = [...crs].sort((a,b) => a.name.localeCompare(b.name));
   return `<div class="page-head"><div><h2>CR & Teacher Directory</h2><p>${sorted.length} class representatives across all sections.</p></div></div><div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.dept||'—').toUpperCase()} · Batch ${esc(m.batch||'—')} · Sec ${esc((m.section||'—').toUpperCase())}</div><div style="margin-top:6px">${roleBadge(m)}</div></div></div></div>`).join('') || `<div class="empty"><span class="big">🎓</span>No CRs yet.</div>`}</div>`;
 }
-
 function viewInstructions(u){
   const canAdd = isAdmin(u) || isTeacher(u);
   return `<div class="page-head"><div><h2>Instructions & Setup Guide</h2><p>Follow these steps to connect your Google Sheet to UniSync.</p></div>${canAdd ? `<div class="actions"><button class="btn primary" onclick="openModal('instruction')">+ Add instruction</button></div>` : ''}</div>
     <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)"><div style="font-weight:650;font-size:16px;margin-bottom:6px">📌 Overview</div><div class="small muted" style="line-height:1.6">Each CR / Teacher needs their own Google Sheet for their section. Follow the steps below, then paste the webhook URL + secret into your <b>Profile → Presentation Sheet config</b>.<br><br><b style="color:var(--accent)">If you are the Admin:</b> set the webhook URL + secret in <b>Profile → Global Sheet config</b> instead. Submissions from <b>every section</b> will be collected in your sheet, and the Apps Script will auto-create tabs per section (e.g. <b>SWE-48-G</b>) and per course (e.g. <b>CSE 2205</b>).</div></div>
-    <div class="card" style="margin-bottom:16px"><div class="row" style="margin-bottom:12px"><b style="font-size:15px">📖 Setup Guide</b></div><ol style="line-height:1.9;padding-left:22px;color:#cfd6e4;margin:0">
-      <li>Open <a href="https://sheets.new" target="_blank" rel="noopener">sheets.new</a> to create a new Google Sheet. Name it e.g. <b>UniSync — SWE-48-G</b>.</li>
-      <li>In the Sheet, click <b>Extensions</b> → <b>Apps Script</b>.</li>
-      <li>Delete the default code, then <b>paste the code below</b>.</li>
-      <li>In the pasted code, change <b>YOUR_SECRET_HERE</b> to a secret phrase of your choice. <b>Write it down.</b></li>
-      <li>Press <b>Ctrl+S</b> to save. Name the project e.g. <b>UniSync Sheet Sync</b>.</li>
-      <li>Click <b>Deploy</b> → <b>New deployment</b>.</li>
-      <li>Click the ⚙️ gear → <b>Web app</b>.</li>
-      <li>Set: <b>Execute as:</b> Me, <b>Who has access:</b> Anyone.</li>
-      <li>Click <b>Deploy</b> → <b>Authorize access</b> → choose your Gmail.</li>
-      <li>Warning screen → click <b>Advanced</b> → <b>Go to "UniSync Sheet Sync" (unsafe)</b> → <b>Allow</b>.</li>
-      <li>Copy the <b>Web app URL</b> (ends with <b>/exec</b>).</li>
-      <li>In UniSync, open your <b>Profile</b> → paste the URL + your secret → <b>Save</b>.</li>
-    </ol></div>
+    <div class="card" style="margin-bottom:16px"><div class="row" style="margin-bottom:12px"><b style="font-size:15px">📖 Setup Guide</b></div><ol style="line-height:1.9;padding-left:22px;color:#cfd6e4;margin:0"><li>Open <a href="https://sheets.new" target="_blank" rel="noopener">sheets.new</a> to create a new Google Sheet. Name it e.g. <b>UniSync — SWE-48-G</b>.</li><li>In the Sheet, click <b>Extensions</b> → <b>Apps Script</b>.</li><li>Delete the default code, then <b>paste the code below</b>.</li><li>In the pasted code, change <b>YOUR_SECRET_HERE</b> to a secret phrase of your choice. <b>Write it down.</b></li><li>Press <b>Ctrl+S</b> to save. Name the project e.g. <b>UniSync Sheet Sync</b>.</li><li>Click <b>Deploy</b> → <b>New deployment</b>.</li><li>Click the ⚙️ gear → <b>Web app</b>.</li><li>Set: <b>Execute as:</b> Me, <b>Who has access:</b> Anyone.</li><li>Click <b>Deploy</b> → <b>Authorize access</b> → choose your Gmail.</li><li>Warning screen → click <b>Advanced</b> → <b>Go to "UniSync Sheet Sync" (unsafe)</b> → <b>Allow</b>.</li><li>Copy the <b>Web app URL</b> (ends with <b>/exec</b>).</li><li>In UniSync, open your <b>Profile</b> → paste the URL + your secret → <b>Save</b>.</li></ol></div>
     <div class="card" style="margin-bottom:16px"><div class="row" style="margin-bottom:12px"><b style="font-size:15px">💻 Apps Script Code</b><button class="btn sm primary" style="margin-left:auto" onclick="copyAppsScript()">📋 Copy code</button></div><div class="tiny muted" style="margin-bottom:10px">Paste this into <b>Extensions → Apps Script</b>. Change <code>YOUR_SECRET_HERE</code> before deploying.</div><pre id="appscript-code" class="code-block">${esc(APPS_SCRIPT_CODE)}</pre></div>
     ${DB.instructions.length ? `<div class="card"><b style="font-size:15px">📝 Additional instructions</b><div class="stack" style="margin-top:14px">${DB.instructions.map(n => { const author = profileOf(n.created_by); const canDelete = isAdmin(u) || (isTeacher(u) && n.created_by === u.id); return `<div class="card" style="background:var(--panel2);padding:14px"><div class="row" style="align-items:flex-start;margin-bottom:6px"><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:15px">${esc(n.title)}</div><div class="tiny muted" style="margin-top:3px">by ${esc(author?.name || 'Unknown')} · ${fmtDateTime(n.created_at)}</div></div>${canDelete ? `<button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteInstruction('${n.id}')">🗑</button>` : ''}</div><div style="white-space:pre-wrap;line-height:1.65;color:#cfd6e4;margin-top:6px">${esc(n.body)}</div></div>`; }).join('')}</div></div>` : ''}`;
 }
-
-async function copyAppsScript(){
-  try { await navigator.clipboard.writeText(APPS_SCRIPT_CODE); toast('Apps Script code copied!'); }
-  catch(e){ toast('Copy failed — select manually', 'err'); }
-}
+async function copyAppsScript(){ try { await navigator.clipboard.writeText(APPS_SCRIPT_CODE); toast('Apps Script code copied!'); } catch(e){ toast('Copy failed', 'err'); } }
 async function saveInstruction(id){
-  const title = $('#in_title').value.trim();
-  const body = $('#in_body').value.trim();
+  const title = $('#in_title').value.trim(); const body = $('#in_body').value.trim();
   if (!title || !body){ toast('Title and body required', 'err'); return; }
   if (id){ const { error } = await sb.from('instructions').update({ title, body }).eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Instruction updated'); }
   else { const { error } = await sb.from('instructions').insert({ title, body, created_by: S.profile.id }); if (error){ toast(error.message, 'err'); return; } toast('Instruction added'); }
@@ -1036,7 +1123,6 @@ function viewFeedback(u){
   const mine = isAdmin(me) ? DB.feedback : DB.feedback.filter(f => f.user_id === me.id);
   return `<div class="page-head"><div><h2>Feedback</h2><p>${isAdmin(me) ? 'All feedback from users.' : 'Submit feedback and see admin replies.'}</p></div><div class="actions"><button class="btn primary" onclick="openModal('feedback')">+ Submit feedback</button></div></div><div class="stack">${mine.map(f => { const author = profileOf(f.user_id); return `<div class="card"><div style="font-weight:640;font-size:15px;margin-bottom:5px">${esc(f.subject)}</div><div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">${author?`<span class="tag">${esc(author.name)}${author.dept?` · ${esc(author.dept.toUpperCase())}-${esc(author.batch||'')}-${esc((author.section||'').toUpperCase())}`:''}</span>`:''}<span>${fmtDateTime(f.created_at)}</span></div><div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(f.body)}</div>${f.reply ? `<div class="divider"></div><div style="background:var(--panel2);padding:10px;border-radius:8px"><div class="tiny muted" style="margin-bottom:4px">Admin reply · ${fmtDateTime(f.replied_at)}</div><div style="white-space:pre-wrap;line-height:1.55">${esc(f.reply)}</div></div>` : ''}${isAdmin(me) && !f.reply ? `<div class="divider"></div><button class="btn sm primary" onclick="openModal('replyFeedback',{id:'${f.id}'})">Reply</button>` : ''}</div>`; }).join('') || `<div class="empty"><span class="big">💬</span>No feedback yet.</div>`}</div>`;
 }
-
 function viewHelp(u){
   const me = S.profile;
   const myScopes = meScopes(me);
@@ -1052,15 +1138,12 @@ function viewHelp(u){
   });
   return `<div class="page-head"><div><h2>Help / Ask</h2><p>Ask for help from specific groups.</p></div><div class="actions"><button class="btn primary" onclick="openModal('helpRequest')">+ New request</button></div></div><div class="stack">${visible.map(h => { const author = profileOf(h.user_id); const replies = DB.help_replies.filter(r => r.request_id === h.id); return `<div class="card"><div class="row" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1;min-width:0"><div style="font-weight:640;font-size:15px;margin-bottom:5px">${h.resolved?'✅ ':''}${esc(h.title)}</div><div class="row wrap tiny muted" style="gap:6px"><span class="tag ${h.target==='cr'?'purple':h.target==='teacher'?'teacher':'blue'}">to: ${h.target==='cr'?'CR':h.target==='teacher'?'Teacher':'All Students'}</span><span class="tag">${esc((h.dept||'').toUpperCase())}-${esc(h.batch||'')}-${esc((h.section||'').toUpperCase())}</span>${author?`<span>by ${esc(author.name)}</span>`:''}<span>${fmtDateTime(h.created_at)}</span></div></div>${h.user_id === me.id ? `<button class="btn sm ${h.resolved?'':'primary'}" onclick="toggleHelpResolved('${h.id}',${!h.resolved})">${h.resolved?'Reopen':'Mark resolved'}</button>` : ''}</div><div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(h.body)}</div><div class="divider"></div><div class="stack" style="gap:8px">${replies.map(r => { const rep = profileOf(r.user_id); return `<div style="background:var(--panel2);padding:10px;border-radius:8px"><div class="tiny muted" style="margin-bottom:4px">${esc(rep?.name||'User')} · ${fmtDateTime(r.created_at)}</div><div style="white-space:pre-wrap;line-height:1.55">${esc(r.body)}</div></div>`; }).join('') || `<div class="tiny muted">No replies yet.</div>`}</div><div class="divider"></div><div class="row" style="gap:6px"><input class="inp" id="hr_${h.id}" placeholder="Write a reply…" style="flex:1" onkeydown="if(event.key==='Enter')submitHelpReply('${h.id}')"><button class="btn primary sm" onclick="submitHelpReply('${h.id}')">Reply</button></div></div>`; }).join('') || `<div class="empty"><span class="big">🆘</span>No help requests for you right now.</div>`}</div>`;
 }
-
 async function submitHelpReply(hid){
-  const el = document.getElementById('hr_'+hid);
-  const body = (el?.value||'').trim();
+  const el = document.getElementById('hr_'+hid); const body = (el?.value||'').trim();
   if (!body) return;
   const { error } = await sb.from('help_replies').insert({ request_id: hid, user_id: S.profile.id, body });
   if (error){ toast(error.message, 'err'); return; }
-  if (el) el.value = '';
-  toast('Reply posted');
+  if (el) el.value = ''; toast('Reply posted');
 }
 async function toggleHelpResolved(hid, val){ await sb.from('help_requests').update({ resolved: val }).eq('id', hid); toast(val ? 'Marked resolved' : 'Reopened'); }
 
@@ -1073,7 +1156,6 @@ function viewManageUsers(u){
   const rowFor = m => `<tr><td><div class="row"><div class="avatar" style="width:30px;height:30px;flex:0 0 30px;border-radius:9px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div><div style="font-weight:600;font-size:13px">${esc(m.name)}</div><div class="tiny muted">${esc(m.email||'')}</div></div></div></td><td class="small">${esc(m.student_id)}</td><td class="small">${esc(classLabel(m))}</td><td>${roleBadge(m)}</td><td style="text-align:right;white-space:nowrap">${m.role !== 'admin' ? `<select class="inp" style="width:auto;display:inline-block;padding:4px 8px;font-size:12px" onchange="changeRole('${m.id}', this.value)"><option value="student" ${m.role==='student'?'selected':''}>Student</option><option value="cr" ${m.role==='cr'?'selected':''}>CR</option><option value="teacher" ${m.role==='teacher'?'selected':''}>Teacher</option></select><button class="btn sm danger" style="margin-left:6px" onclick="removeMember('${m.id}')">Remove</button>` : ''}</td></tr>`;
   return `<div class="page-head"><div><h2>Manage Users</h2><p>Appoint CRs / Teachers or remove members.</p></div></div><div class="grid g4" style="margin-bottom:18px"><div class="stat"><div class="n">${students.length}</div><div class="l">Students</div></div><div class="stat"><div class="n">${crs.length}</div><div class="l">CRs</div></div><div class="stat"><div class="n">${teachers.length}</div><div class="l">Teachers</div></div><div class="stat"><div class="n">${admins.length}</div><div class="l">Admins</div></div></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead><tbody>${[...admins, ...teachers, ...crs, ...students].map(rowFor).join('')}</tbody></table></div>`;
 }
-
 async function changeRole(id, role){
   const m = DB.profiles.find(x=>x.id===id); if (!m) return;
   if (!confirm(`Change ${m.name}'s role to ${role}?`)) return;
@@ -1090,16 +1172,13 @@ async function removeMember(id){
   if (error){ toast(error.message, 'err'); return; }
   toast('Member removed');
 }
-
 function viewNotifications(u){
   const mine = DB.notifications.filter(n=>n.user_id===u.id);
   return `<div class="page-head"><div><h2>Notifications</h2><p>${mine.filter(n=>!n.read).length} unread</p></div><div class="actions"><button class="btn" onclick="markAllRead()">Mark all read</button><button class="btn danger" onclick="clearNotifications()">Clear all</button></div></div><div class="stack">${mine.map(n => `<div class="list-item" style="${n.read?'':'border-color:rgba(91,140,255,.35)'}"><div class="dotc" style="background:${n.read?'#3a4256':'var(--accent)'}"></div><div class="lead"><div class="t">${esc(n.title)}</div><div class="tiny muted">${esc(n.body||'')}</div><div class="tiny muted" style="margin-top:3px">${fmtDateTime(n.created_at)}</div></div>${n.link?`<button class="btn sm" onclick="go('${n.link}')">Open</button>`:''}</div>`).join('') || `<div class="empty"><span class="big">🔔</span>No notifications.</div>`}</div>`;
 }
 async function markAllRead(){ await sb.from('notifications').update({ read: true }).eq('user_id', S.profile.id).eq('read', false); }
 async function clearNotifications(){ await sb.from('notifications').delete().eq('user_id', S.profile.id); toast('Cleared'); }
-
 function doSearch(q){ S.search = q; if (q.trim() && S.route !== 'search') S.route = 'search'; if (!q.trim() && S.route === 'search') S.route = 'dashboard'; render(); }
-
 function viewSearch(u){
   const q = S.search.trim().toLowerCase();
   if (!q) return `<div class="empty"><span class="big">🔍</span>Type something to search.</div>`;
@@ -1110,11 +1189,15 @@ function viewSearch(u){
   const mem = DB.profiles.filter(m => isAdmin(u) || myScopes.some(s => (m.dept||'').toUpperCase() === s.dept && m.batch === s.batch && (m.section||'').toUpperCase() === s.section)).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
   const grs = DB.groups.filter(g => (g.name + ' ' + (g.description||'')).toLowerCase().includes(q));
   const fms = DB.forms.filter(f => (f.title + ' ' + (f.description||'')).toLowerCase().includes(q));
-  const total = res.length + not.length + evs.length + mem.length + grs.length + fms.length;
+  const pgs = DB.presentation_groups.filter(g => (g.name + ' ' + (g.topic||'')).toLowerCase().includes(q));
+  const total = res.length + not.length + evs.length + mem.length + grs.length + fms.length + pgs.length;
   const block = (title, items, renderer) => items.length ? `<div class="card" style="margin-bottom:14px"><b style="font-size:14px">${title} <span class="muted">(${items.length})</span></b><div class="stack" style="margin-top:10px">${items.map(renderer).join('')}</div></div>` : '';
-  return `<div class="page-head"><div><h2>Search</h2><p>${total} result${total!==1?'s':''} for "${esc(S.search)}"</p></div></div>${total ? '' : `<div class="empty"><span class="big">🔍</span>Nothing found.</div>`}${block('Resources', res, r => `<div class="list-item"><div class="lead"><div class="t">${esc(r.title)}</div><div class="tiny muted">${esc(r.course||'—')} · ${esc(r.type)}</div></div><button class="btn sm" onclick="openResource('${r.id}')">Open</button></div>`)}${block('Notices', not, n => `<div class="list-item" onclick="go('notices')" style="cursor:pointer"><div class="lead"><div class="t">${esc(n.title)}</div></div></div>`)}${block('Events', evs, e => `<div class="list-item" onclick="go('calendar')" style="cursor:pointer"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)}</div></div></div>`)}${block('Forms', fms, f => `<div class="list-item" onclick="go('forms')" style="cursor:pointer"><div class="lead"><div class="t">${esc(f.title)}</div></div></div>`)}${block('Groups', grs, g => `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="lead"><div class="t">${esc(g.name)}</div></div></a>`)}${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(classLabel(m))}</div></div></div>`)}`;
+  return `<div class="page-head"><div><h2>Search</h2><p>${total} result${total!==1?'s':''} for "${esc(S.search)}"</p></div></div>${total ? '' : `<div class="empty"><span class="big">🔍</span>Nothing found.</div>`}${block('Resources', res, r => `<div class="list-item"><div class="lead"><div class="t">${esc(r.title)}</div><div class="tiny muted">${esc(r.course||'—')} · ${esc(r.type)}</div></div><button class="btn sm" onclick="openResource('${r.id}')">Open</button></div>`)}${block('Notices', not, n => `<div class="list-item" onclick="go('notices')" style="cursor:pointer"><div class="lead"><div class="t">${esc(n.title)}</div></div></div>`)}${block('Events', evs, e => `<div class="list-item" onclick="go('calendar')" style="cursor:pointer"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)}</div></div></div>`)}${block('Forms', fms, f => `<div class="list-item" onclick="go('forms')" style="cursor:pointer"><div class="lead"><div class="t">${esc(f.title)}</div></div></div>`)}${block('Presentation Groups', pgs, g => `<div class="list-item" onclick="go('pgroups')" style="cursor:pointer"><div class="lead"><div class="t">${esc(g.name)}</div><div class="tiny muted">${esc(g.topic||'No topic')}</div></div></div>`)}${block('Groups', grs, g => `<a class="list-item" href="${esc(g.link)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div class="lead"><div class="t">${esc(g.name)}</div></div></a>`)}${block('Members', mem, m => `<div class="list-item"><div class="avatar" style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;font-size:11px;background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div class="lead"><div class="t">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(classLabel(m))}</div></div></div>`)}`;
 }
 
+/* =========================================================
+   MODALS
+   ========================================================= */
 function modalShell(title, bodyHtml, footHtml){
   return `<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h3>${title}</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body">${bodyHtml}</div><div class="modal-foot">${footHtml}</div></div></div>`;
 }
@@ -1123,8 +1206,7 @@ function viewModal(u){
   const m = S.modal;
   switch(m.type){
     case 'profile': {
-      const isT = isTeacher(u);
-      const isA = isAdmin(u);
+      const isT = isTeacher(u), isA = isAdmin(u);
       if (!m._init){ extraSectionsDraft = JSON.parse(JSON.stringify(u.extra_sections || [])); m._init = true; }
       const cfgSection = selectedConfigSection || { dept: u.dept||'', batch: u.batch||'', section: u.section||'' };
       const cfg = DB.section_configs.find(c => c.dept !== '*' && sectionKey(c.dept,c.batch,c.section) === sectionKey(cfgSection.dept,cfgSection.batch,cfgSection.section)) || {};
@@ -1136,196 +1218,104 @@ function viewModal(u){
         <div class="frow"><label class="f"><span>Department</span><input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept"></label><label class="f"><span>Batch</span><input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch"></label></div>
         <label class="f"><span>Primary section</span><input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section"></label>
         ${isT ? `<div class="divider"></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Additional sections (Teacher)</b></div><div id="extraSectionsList">${extraSectionsDraft.map((s,i)=>`<div class="member-box"><div class="mb-head">Section ${i+1}<button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeExtraSection(${i})">Remove</button></div><div class="frow" style="gap:8px"><input class="inp" placeholder="Dept" value="${esc(s.dept||'')}" oninput="extraSectionsDraft[${i}].dept=this.value.toUpperCase()"><input class="inp" placeholder="Batch" value="${esc(s.batch||'')}" oninput="extraSectionsDraft[${i}].batch=this.value"><input class="inp" placeholder="Section" value="${esc(s.section||'')}" oninput="extraSectionsDraft[${i}].section=this.value.toUpperCase()"></div></div>`).join('') || `<div class="small muted" style="padding:8px 0">No extra sections.</div>`}</div><button class="btn sm" onclick="addExtraSection()">+ Add section</button>` : ''}
-        ${isA ? `<div class="divider"></div><div style="font-weight:600;font-size:14px;margin-bottom:6px">🌐 Global Sheet config (Admin)</div><div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px"><div class="tiny muted">Submissions from <b>ALL sections</b> will go to your Google Sheet. Auto-creates tabs: <b>Submissions</b>, per-presentation, per-section (SWE-48-G), per-course (CSE 2205).</div></div><label class="f"><span>Global Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(adminCfg.webhook_url||'')}" placeholder="https://script.google.com/macros/s/…/exec" data-fk="cf_url"></label><label class="f"><span>Global Secret</span><input class="inp" id="cf_secret" value="${esc(adminCfg.webhook_secret||'')}" placeholder="your-secret-phrase" data-fk="cf_secret"></label><button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('*','*','*')">Save global config</button>` : ''}
-        ${!isA && canManage(u) ? `<div class="divider"></div><div style="font-weight:600;font-size:14px;margin-bottom:10px">Presentation Sheet config</div><label class="f"><span>Section</span><select class="inp" id="cf_scope" onchange="selectConfigScope(this.value)">${scopes.map(s => { const v = sectionKey(s.dept,s.batch,s.section); const sel = sectionKey(cfgSection.dept,cfgSection.batch,cfgSection.section)===v?'selected':''; return `<option value="${v}" ${sel}>${esc(s.dept)}-${esc(s.batch)}-${esc(s.section)}</option>`; }).join('')}</select></label><label class="f"><span>Google Form URL (optional)</span><input class="inp" id="cf_form" value="${esc(cfg.form_url||'')}" placeholder="https://docs.google.com/forms/…" data-fk="cf_form"></label><label class="f"><span>Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(cfg.webhook_url||'')}" placeholder="https://script.google.com/macros/s/…/exec" data-fk="cf_url"></label><label class="f"><span>Secret</span><input class="inp" id="cf_secret" value="${esc(cfg.webhook_secret||'')}" placeholder="your-secret-phrase" data-fk="cf_secret"></label><button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('${cfgSection.dept}','${cfgSection.batch}','${cfgSection.section}')">Save section config</button>` : ''}
+        ${isA ? `<div class="divider"></div><div style="font-weight:600;font-size:14px;margin-bottom:6px">🌐 Global Sheet config (Admin)</div><div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px"><div class="tiny muted">Submissions from <b>ALL sections</b> go to your sheet.</div></div><label class="f"><span>Global Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(adminCfg.webhook_url||'')}" data-fk="cf_url"></label><label class="f"><span>Global Secret</span><input class="inp" id="cf_secret" value="${esc(adminCfg.webhook_secret||'')}" data-fk="cf_secret"></label><button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('*','*','*')">Save global config</button>` : ''}
+        ${!isA && canManage(u) ? `<div class="divider"></div><div style="font-weight:600;font-size:14px;margin-bottom:10px">Presentation Sheet config</div><label class="f"><span>Section</span><select class="inp" id="cf_scope" onchange="selectConfigScope(this.value)">${scopes.map(s => { const v = sectionKey(s.dept,s.batch,s.section); const sel = sectionKey(cfgSection.dept,cfgSection.batch,cfgSection.section)===v?'selected':''; return `<option value="${v}" ${sel}>${esc(s.dept)}-${esc(s.batch)}-${esc(s.section)}</option>`; }).join('')}</select></label><label class="f"><span>Google Form URL (optional)</span><input class="inp" id="cf_form" value="${esc(cfg.form_url||'')}" data-fk="cf_form"></label><label class="f"><span>Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(cfg.webhook_url||'')}" data-fk="cf_url"></label><label class="f"><span>Secret</span><input class="inp" id="cf_secret" value="${esc(cfg.webhook_secret||'')}" data-fk="cf_secret"></label><button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('${cfgSection.dept}','${cfgSection.batch}','${cfgSection.section}')">Save section config</button>` : ''}
       `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveProfile()">Save changes</button>`);
     }
-
     case 'resource': {
       const r = m.id ? DB.resources.find(x=>x.id===m.id) : null;
-      return modalShell(r ? 'Edit resource' : 'Upload resource', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="r_title" value="${esc(r?.title||'')}" data-fk="r_title"></label>
-        <div class="frow"><label class="f"><span>Course</span><input class="inp" id="r_course" value="${esc(r?.course||'')}" data-fk="r_course"></label><label class="f"><span>Type</span><select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${((r?.type||'PDF (Drive)')===t)?'selected':''}>${t}</option>`).join('')}</select></label></div>
-        <label class="f"><span>Topic</span><input class="inp" id="r_topic" value="${esc(r?.topic||'')}" data-fk="r_topic"></label>
-        <label class="f"><span>Teacher</span><input class="inp" id="r_teacher" value="${esc(r?.teacher||'')}" data-fk="r_teacher"></label>
-        <label class="f"><span>Link (Drive/Docs/URL)</span><input class="inp" id="r_link" value="${esc(r?.link||'')}" data-fk="r_link"></label>
-        ${!r ? `<label class="f"><span>Or upload a file (max 5 MB)</span><input class="inp" type="file" id="r_file"></label>` : `<div class="tiny muted" style="margin-bottom:10px">Existing file: ${esc(r.file_name||'—')}</div>`}
-        <label class="f"><span>Tags (comma separated)</span><input class="inp" id="r_tags" value="${esc((r?.tags||[]).join(', '))}" data-fk="r_tags"></label>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResource('${r?r.id:''}')">${r?'Save changes':'Upload'}</button>`);
+      return modalShell(r ? 'Edit resource' : 'Upload resource', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div><label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="r_title" value="${esc(r?.title||'')}" data-fk="r_title"></label><div class="frow"><label class="f"><span>Course</span><input class="inp" id="r_course" value="${esc(r?.course||'')}" data-fk="r_course"></label><label class="f"><span>Type</span><select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${((r?.type||'PDF (Drive)')===t)?'selected':''}>${t}</option>`).join('')}</select></label></div><label class="f"><span>Topic</span><input class="inp" id="r_topic" value="${esc(r?.topic||'')}" data-fk="r_topic"></label><label class="f"><span>Teacher</span><input class="inp" id="r_teacher" value="${esc(r?.teacher||'')}" data-fk="r_teacher"></label><label class="f"><span>Link</span><input class="inp" id="r_link" value="${esc(r?.link||'')}" data-fk="r_link"></label>${!r ? `<label class="f"><span>Or file (max 5 MB)</span><input class="inp" type="file" id="r_file"></label>` : ''}<label class="f"><span>Tags</span><input class="inp" id="r_tags" value="${esc((r?.tags||[]).join(', '))}" data-fk="r_tags"></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResource('${r?r.id:''}')">${r?'Save':'Upload'}</button>`);
     }
-
     case 'notice': {
       const n = m.id ? DB.notices.find(x=>x.id===m.id) : null;
-      return modalShell(n ? 'Edit notice' : 'New notice', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="n_title" value="${esc(n?.title||'')}" data-fk="n_title"></label>
-        <label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="n_body" style="min-height:130px" data-fk="n_body">${esc(n?.body||'')}</textarea></label>
-        <div class="frow"><label class="f"><span>Category</span><select class="inp" id="n_cat">${NOTICE_CATS.map(c=>`<option ${n?.category===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f"><span>Priority</span><select class="inp" id="n_pri">${PRIORITIES.map(p=>`<option ${n?.priority===p?'selected':''}>${p}</option>`).join('')}</select></label></div>
-        <div class="frow"><label class="f"><span>Expires on</span><input class="inp" type="date" id="n_exp" value="${esc(n?.expires_at||'')}"></label><label class="f"><span>Pin</span><select class="inp" id="n_pin"><option value="no" ${n&&!n.pinned?'selected':''}>No</option><option value="yes" ${n?.pinned?'selected':''}>Yes</option></select></label></div>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveNotice('${n?n.id:''}')">${n?'Save changes':'Publish'}</button>`);
+      return modalShell(n ? 'Edit notice' : 'New notice', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div><label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="n_title" value="${esc(n?.title||'')}" data-fk="n_title"></label><label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="n_body" style="min-height:130px" data-fk="n_body">${esc(n?.body||'')}</textarea></label><div class="frow"><label class="f"><span>Category</span><select class="inp" id="n_cat">${NOTICE_CATS.map(c=>`<option ${n?.category===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f"><span>Priority</span><select class="inp" id="n_pri">${PRIORITIES.map(p=>`<option ${n?.priority===p?'selected':''}>${p}</option>`).join('')}</select></label></div><div class="frow"><label class="f"><span>Expires</span><input class="inp" type="date" id="n_exp" value="${esc(n?.expires_at||'')}"></label><label class="f"><span>Pin</span><select class="inp" id="n_pin"><option value="no" ${n&&!n.pinned?'selected':''}>No</option><option value="yes" ${n?.pinned?'selected':''}>Yes</option></select></label></div>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveNotice('${n?n.id:''}')">${n?'Save':'Publish'}</button>`);
     }
-
     case 'event': {
       const e = m.id ? DB.events.find(x=>x.id===m.id) : null;
-      return modalShell(e ? 'Edit event' : 'Add event', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="e_title" value="${esc(e?.title||'')}" placeholder="Data Structures Midterm" data-fk="e_title"></label>
-        <div class="frow"><label class="f"><span>Type</span><select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option ${e?.type===t?'selected':''}>${t}</option>`).join('')}</select></label><label class="f"><span>Course</span><input class="inp" id="e_course" value="${esc(e?.course||'')}" data-fk="e_course"></label></div>
-        <div class="frow"><label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${esc(e?.date||iso(0))}"></label><label class="f"><span>Location</span><input class="inp" id="e_loc" value="${esc(e?.location||'')}" data-fk="e_loc"></label></div>
-        <div class="frow"><label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="${esc(e?.start_time||'09:00')}"></label><label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="${esc(e?.end_time||'10:00')}"></label></div>
-        <label class="f"><span>Description</span><textarea class="inp" id="e_desc" data-fk="e_desc">${esc(e?.description||'')}</textarea></label>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEvent('${e?e.id:''}')">${e?'Save changes':'Add event'}</button>`);
+      return modalShell(e ? 'Edit event' : 'Add event', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div><label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="e_title" value="${esc(e?.title||'')}" data-fk="e_title"></label><div class="frow"><label class="f"><span>Type</span><select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option ${e?.type===t?'selected':''}>${t}</option>`).join('')}</select></label><label class="f"><span>Course</span><input class="inp" id="e_course" value="${esc(e?.course||'')}" data-fk="e_course"></label></div><div class="frow"><label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${esc(e?.date||iso(0))}"></label><label class="f"><span>Location</span><input class="inp" id="e_loc" value="${esc(e?.location||'')}" data-fk="e_loc"></label></div><div class="frow"><label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="${esc(e?.start_time||'09:00')}"></label><label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="${esc(e?.end_time||'10:00')}"></label></div><label class="f"><span>Description</span><textarea class="inp" id="e_desc" data-fk="e_desc">${esc(e?.description||'')}</textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEvent('${e?e.id:''}')">${e?'Save':'Add'}</button>`);
     }
-
     case 'group': {
       const g = m.id ? DB.groups.find(x=>x.id===m.id) : null;
-      return modalShell(g ? 'Edit group' : 'Add group', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="g_name" value="${esc(g?.name||'')}" data-fk="g_name"></label>
-        <label class="f"><span>Platform</span><select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}" ${g?.platform===p?'selected':''}>${PLATFORM_META[p].name}</option>`).join('')}</select></label>
-        <label class="f"><span>Group link <span class="req">*</span></span><input class="inp" id="g_link" value="${esc(g?.link||'')}" data-fk="g_link"></label>
-        <label class="f"><span>Description</span><textarea class="inp" id="g_desc" data-fk="g_desc">${esc(g?.description||'')}</textarea></label>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveGroup('${g?g.id:''}')">${g?'Save changes':'Add'}</button>`);
+      return modalShell(g ? 'Edit group' : 'Add group', `<label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="g_name" value="${esc(g?.name||'')}" data-fk="g_name"></label><label class="f"><span>Platform</span><select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}" ${g?.platform===p?'selected':''}>${PLATFORM_META[p].name}</option>`).join('')}</select></label><label class="f"><span>Link <span class="req">*</span></span><input class="inp" id="g_link" value="${esc(g?.link||'')}" data-fk="g_link"></label><label class="f"><span>Description</span><textarea class="inp" id="g_desc" data-fk="g_desc">${esc(g?.description||'')}</textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveGroup('${g?g.id:''}')">${g?'Save':'Add'}</button>`);
     }
-
-    case 'presentation': return modalShell('New presentation event', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="p_title" placeholder="Database Project Presentation" data-fk="p_title"></label>
-      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="p_course" data-fk="p_course"></label><label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label></div>
-      <label class="f"><span>Max team size</span><input class="inp" type="number" id="p_max" min="1" max="12" value="4"></label>
-      <label class="f"><span>Instructions</span><textarea class="inp" id="p_instr" data-fk="p_instr"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePresentation()">Create</button>`);
-
+    case 'presentation': return modalShell('New presentation event', `<label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="p_title" data-fk="p_title"></label><div class="frow"><label class="f"><span>Course</span><input class="inp" id="p_course" data-fk="p_course"></label><label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label></div><label class="f"><span>Max team size</span><input class="inp" type="number" id="p_max" min="1" max="12" value="4"></label><label class="f"><span>Instructions</span><textarea class="inp" id="p_instr" data-fk="p_instr"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePresentation()">Create</button>`);
     case 'submission': {
       const p = DB.presentations.find(x=>x.id===m.presentationId);
       const existing = m.submissionId ? DB.submissions.find(s => s.id === m.submissionId) : null;
       if (!m._init){ memberDraft = existing ? JSON.parse(JSON.stringify(existing.members||[])) : []; submissionDraft = { link: existing?.link || '', teamName: existing?.team_name || '', leaderName: existing?.leader_name || u.name, leaderId: existing?.leader_id || u.student_id }; m._init = true; }
       const max = p?.max_team_size || 6;
-      return modalShell(existing ? 'Update submission' : 'Submit presentation', `
-        <div class="card" style="background:var(--panel2);margin-bottom:16px;padding:12px"><div style="font-weight:600;font-size:13.5px">${esc(p?.title||'Presentation')}</div><div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div></div>
-        <label class="f"><span>Presentation link <span class="req">*</span></span><input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" data-fk="sb_link" oninput="submissionDraft.link=this.value"></label>
-        <label class="f"><span>Team name</span><input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team" oninput="submissionDraft.teamName=this.value"></label>
-        <div class="frow"><label class="f"><span>Leader name <span class="req">*</span></span><input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln" oninput="submissionDraft.leaderName=this.value"></label><label class="f"><span>Leader ID <span class="req">*</span></span><input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li" oninput="submissionDraft.leaderId=this.value"></label></div>
-        <div class="divider"></div>
-        <div class="row" style="margin-bottom:10px"><div class="small" style="font-weight:600">Team members</div><span class="tag" style="margin-left:auto">${memberDraft.length}/${Math.max(0, max-1)}</span></div>
-        <div id="memberList">${memberDraft.map((mm,i)=>`<div class="member-box"><div class="mb-head">Member ${i+1}<button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeMemberRow(${i})">Remove</button></div><div class="frow" style="gap:8px"><input class="inp" placeholder="Name" value="${esc(mm.name||'')}" oninput="memberDraft[${i}].name=this.value"><input class="inp" placeholder="ID" value="${esc(mm.id||'')}" oninput="memberDraft[${i}].id=this.value"></div></div>`).join('') || `<div class="small muted" style="padding:8px 0">No members yet.</div>`}</div>
-        <button class="btn sm" onclick="addMemberRow()">+ Add member</button>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitPresentation('${m.presentationId}','${m.submissionId||''}')">${existing?'Update':'Submit'}</button>`);
+      return modalShell(existing ? 'Update submission' : 'Submit presentation', `<div class="card" style="background:var(--panel2);margin-bottom:16px;padding:12px"><div style="font-weight:600">${esc(p?.title||'Presentation')}</div><div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div></div><label class="f"><span>Link <span class="req">*</span></span><input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" data-fk="sb_link" oninput="submissionDraft.link=this.value"></label><label class="f"><span>Team name</span><input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team" oninput="submissionDraft.teamName=this.value"></label><div class="frow"><label class="f"><span>Leader name <span class="req">*</span></span><input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln" oninput="submissionDraft.leaderName=this.value"></label><label class="f"><span>Leader ID <span class="req">*</span></span><input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li" oninput="submissionDraft.leaderId=this.value"></label></div><div class="divider"></div><div class="row" style="margin-bottom:10px"><div class="small" style="font-weight:600">Members</div><span class="tag" style="margin-left:auto">${memberDraft.length}/${Math.max(0, max-1)}</span></div><div id="memberList">${memberDraft.map((mm,i)=>`<div class="member-box"><div class="mb-head">Member ${i+1}<button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeMemberRow(${i})">Remove</button></div><div class="frow" style="gap:8px"><input class="inp" placeholder="Name" value="${esc(mm.name||'')}" oninput="memberDraft[${i}].name=this.value"><input class="inp" placeholder="ID" value="${esc(mm.id||'')}" oninput="memberDraft[${i}].id=this.value"></div></div>`).join('') || `<div class="small muted" style="padding:8px 0">No members yet.</div>`}</div><button class="btn sm" onclick="addMemberRow()">+ Add member</button>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitPresentation('${m.presentationId}','${m.submissionId||''}')">${existing?'Update':'Submit'}</button>`);
     }
-
-    case 'feedback': return modalShell('Submit feedback', `
-      <label class="f"><span>Subject <span class="req">*</span></span><input class="inp" id="fb_subj" data-fk="fb_subj"></label>
-      <label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="fb_body" style="min-height:120px" data-fk="fb_body"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedback()">Send to admin</button>`);
-
+    case 'feedback': return modalShell('Submit feedback', `<label class="f"><span>Subject <span class="req">*</span></span><input class="inp" id="fb_subj" data-fk="fb_subj"></label><label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="fb_body" style="min-height:120px" data-fk="fb_body"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedback()">Send to admin</button>`);
     case 'replyFeedback': {
       const f = DB.feedback.find(x=>x.id===m.id);
-      return modalShell('Reply to feedback', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div style="font-weight:600;font-size:13.5px">${esc(f?.subject||'')}</div><div class="tiny muted" style="margin-top:4px;white-space:pre-wrap">${esc(f?.body||'')}</div></div>
-        <label class="f"><span>Your reply <span class="req">*</span></span><textarea class="inp" id="fb_reply" style="min-height:130px" data-fk="fb_reply"></textarea></label>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedbackReply('${m.id}')">Send reply</button>`);
+      return modalShell('Reply', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div style="font-weight:600">${esc(f?.subject||'')}</div><div class="tiny muted" style="margin-top:4px;white-space:pre-wrap">${esc(f?.body||'')}</div></div><label class="f"><span>Your reply <span class="req">*</span></span><textarea class="inp" id="fb_reply" style="min-height:130px" data-fk="fb_reply"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedbackReply('${m.id}')">Send</button>`);
     }
-
     case 'instruction': {
       const n = m.id ? DB.instructions.find(x=>x.id===m.id) : null;
-      return modalShell(n ? 'Edit instruction' : 'Add instruction', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Only visible to CRs, Teachers and Admins.</div></div>
-        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="in_title" value="${esc(n?.title||'')}" data-fk="in_title"></label>
-        <label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="in_body" style="min-height:160px" data-fk="in_body">${esc(n?.body||'')}</textarea></label>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveInstruction('${n?n.id:''}')">${n?'Save changes':'Add'}</button>`);
+      return modalShell(n ? 'Edit instruction' : 'Add instruction', `<label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="in_title" value="${esc(n?.title||'')}" data-fk="in_title"></label><label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="in_body" style="min-height:160px" data-fk="in_body">${esc(n?.body||'')}</textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveInstruction('${n?n.id:''}')">${n?'Save':'Add'}</button>`);
     }
-
-    case 'helpRequest': return modalShell('New help request', `
-      <label class="f"><span>Target audience <span class="req">*</span></span>
-        <select class="inp" id="h_target">
-          <option value="students">All students in my section</option>
-          <option value="cr">CR of my section</option>
-          <option value="teacher">Teacher of my section</option>
-        </select>
-      </label>
-      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="h_title" data-fk="h_title"></label>
-      <label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="h_body" style="min-height:120px" data-fk="h_body"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitHelpRequest()">Post request</button>`);
-
+    case 'helpRequest': return modalShell('New help request', `<label class="f"><span>Target <span class="req">*</span></span><select class="inp" id="h_target"><option value="students">All students in my section</option><option value="cr">CR of my section</option><option value="teacher">Teacher of my section</option></select></label><label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="h_title" data-fk="h_title"></label><label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="h_body" style="min-height:120px" data-fk="h_body"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitHelpRequest()">Post</button>`);
     case 'formBuilder': {
       const f = m.id ? DB.forms.find(x=>x.id===m.id) : null;
       if (!m._init){ formFieldsDraft = f ? JSON.parse(JSON.stringify(f.fields || [])) : []; m._init = true; }
-      return modalShell(f ? 'Edit form' : 'Create form', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Form title <span class="req">*</span></span><input class="inp" id="fm_title" value="${esc(f?.title||'')}" placeholder="e.g. Project Topic Submission" data-fk="fm_title"></label>
-        <label class="f"><span>Description (optional)</span><textarea class="inp" id="fm_desc" placeholder="Explain what this form is for…" data-fk="fm_desc">${esc(f?.description||'')}</textarea></label>
-        <div class="divider"></div>
-        <div class="row" style="margin-bottom:10px"><b style="font-size:14px">Questions</b><span class="tag" style="margin-left:auto">${formFieldsDraft.length}</span></div>
-        <div class="stack">
-          ${formFieldsDraft.map((fl,i)=>`
-            <div class="member-box">
-              <div class="mb-head"><span>Q${i+1}</span><div class="row" style="margin-left:auto;gap:4px"><button class="btn ghost sm" style="padding:2px 7px" onclick="moveFormField(${i},-1)">↑</button><button class="btn ghost sm" style="padding:2px 7px" onclick="moveFormField(${i},1)">↓</button><button class="btn ghost sm" style="padding:2px 7px" onclick="removeFormField(${i})">Remove</button></div></div>
-              <div class="frow" style="gap:8px"><input class="inp" placeholder="Question label" value="${esc(fl.label||'')}" oninput="formFieldsDraft[${i}].label=this.value" style="flex:2"><select class="inp" style="flex:1" onchange="updateFieldType(${i},this.value)">${FIELD_TYPES.map(t => `<option value="${t.v}" ${fl.type===t.v?'selected':''}>${t.n}</option>`).join('')}</select></div>
-              <div class="row" style="margin-top:6px"><label class="row" style="gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" ${fl.required?'checked':''} onchange="formFieldsDraft[${i}].required=this.checked"> Required</label></div>
-              ${['short','paragraph','number','email','link'].includes(fl.type) ? `<input class="inp" placeholder="Placeholder (optional)" value="${esc(fl.placeholder||'')}" oninput="formFieldsDraft[${i}].placeholder=this.value" style="margin-top:6px">` : ''}
-              ${['choice','checkbox','dropdown'].includes(fl.type) ? `<div style="margin-top:6px"><div class="tiny muted" style="margin-bottom:4px">Options</div>${(fl.options||[]).map((o,j)=>`<div class="row" style="gap:6px;margin-bottom:4px"><input class="inp" value="${esc(o)}" oninput="formFieldsDraft[${i}].options[${j}]=this.value" style="flex:1"><button class="btn ghost sm" style="padding:2px 7px" onclick="removeFieldOption(${i},${j})">✕</button></div>`).join('')}<button class="btn sm" onclick="addFieldOption(${i})">+ Add option</button></div>` : ''}
-            </div>
-          `).join('') || `<div class="empty" style="padding:20px"><span class="big">📝</span>No questions yet.</div>`}
-        </div>
-        <div class="divider"></div>
-        <div class="row wrap" style="gap:6px">${FIELD_TYPES.map(t => `<button class="btn sm" onclick="addFormField('${t.v}')">+ ${t.n}</button>`).join('')}</div>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveForm('${f?f.id:''}')">${f?'Save changes':'Create form'}</button>`);
+      return modalShell(f ? 'Edit form' : 'Create form', `<label class="f"><span>Form title <span class="req">*</span></span><input class="inp" id="fm_title" value="${esc(f?.title||'')}" data-fk="fm_title"></label><label class="f"><span>Description</span><textarea class="inp" id="fm_desc" data-fk="fm_desc">${esc(f?.description||'')}</textarea></label><div class="divider"></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Questions</b><span class="tag" style="margin-left:auto">${formFieldsDraft.length}</span></div><div class="stack">${formFieldsDraft.map((fl,i)=>`<div class="member-box"><div class="mb-head"><span>Q${i+1}</span><div class="row" style="margin-left:auto;gap:4px"><button class="btn ghost sm" style="padding:2px 7px" onclick="moveFormField(${i},-1)">↑</button><button class="btn ghost sm" style="padding:2px 7px" onclick="moveFormField(${i},1)">↓</button><button class="btn ghost sm" style="padding:2px 7px" onclick="removeFormField(${i})">Remove</button></div></div><div class="frow" style="gap:8px"><input class="inp" placeholder="Question label" value="${esc(fl.label||'')}" oninput="formFieldsDraft[${i}].label=this.value" style="flex:2"><select class="inp" style="flex:1" onchange="updateFieldType(${i},this.value)">${FIELD_TYPES.map(t => `<option value="${t.v}" ${fl.type===t.v?'selected':''}>${t.n}</option>`).join('')}</select></div><div class="row wrap" style="margin-top:6px;gap:12px"><label class="row" style="gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" ${fl.required?'checked':''} onchange="formFieldsDraft[${i}].required=this.checked"> Required</label>${['choice','checkbox','dropdown'].includes(fl.type) ? `<label class="row" style="gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" ${fl.unique?'checked':''} onchange="formFieldsDraft[${i}].unique=this.checked"> 🔒 Unique (one per option)</label>` : ''}</div>${['short','paragraph','number','email','link'].includes(fl.type) ? `<input class="inp" placeholder="Placeholder" value="${esc(fl.placeholder||'')}" oninput="formFieldsDraft[${i}].placeholder=this.value" style="margin-top:6px">` : ''}${['choice','checkbox','dropdown'].includes(fl.type) ? `<div style="margin-top:6px"><div class="tiny muted" style="margin-bottom:4px">Options</div>${(fl.options||[]).map((o,j)=>`<div class="row" style="gap:6px;margin-bottom:4px"><input class="inp" value="${esc(o)}" oninput="formFieldsDraft[${i}].options[${j}]=this.value" style="flex:1"><button class="btn ghost sm" style="padding:2px 7px" onclick="removeFieldOption(${i},${j})">✕</button></div>`).join('')}<button class="btn sm" onclick="addFieldOption(${i})">+ Add option</button></div>` : ''}</div>`).join('') || `<div class="empty" style="padding:20px"><span class="big">📝</span>No questions yet.</div>`}</div><div class="divider"></div><div class="row wrap" style="gap:6px">${FIELD_TYPES.map(t => `<button class="btn sm" onclick="addFormField('${t.v}')">+ ${t.n}</button>`).join('')}</div>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveForm('${f?f.id:''}')">${f?'Save':'Create'}</button>`);
     }
-
     case 'formFill': {
       const f = DB.forms.find(x=>x.id===m.formId);
-      if (!f){ return modalShell('Form', '<div class="empty">Form not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`); }
+      if (!f) return modalShell('Form', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
       const existing = DB.form_responses.find(r => r.form_id === f.id && r.user_id === u.id);
       const prior = existing?.answers || {};
-      return modalShell(f.title, `
-        ${f.description ? `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="small muted" style="white-space:pre-wrap">${esc(f.description)}</div></div>` : ''}
-        ${existing ? `<div class="card" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);padding:10px;margin-bottom:14px"><div class="tiny" style="color:#7ee2a4">You already submitted. Changes will update your response.</div></div>` : ''}
-        ${(f.fields||[]).map(field => { const v = prior[field.id]; return `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:10px"><label class="f" style="margin-bottom:0"><span style="font-size:13px;color:var(--txt);font-weight:600">${esc(field.label)}${field.required?' <span class="req">*</span>':''}</span>${field.type === 'short' ? `<input class="inp" id="ff_${field.id}" value="${esc(v||'')}" placeholder="${esc(field.placeholder||'')}">` : ''}${field.type === 'paragraph' ? `<textarea class="inp" id="ff_${field.id}" placeholder="${esc(field.placeholder||'')}">${esc(v||'')}</textarea>` : ''}${field.type === 'number' ? `<input class="inp" id="ff_${field.id}" type="number" value="${esc(v||'')}">` : ''}${field.type === 'email' ? `<input class="inp" id="ff_${field.id}" type="email" value="${esc(v||'')}">` : ''}${field.type === 'link' ? `<input class="inp" id="ff_${field.id}" type="url" value="${esc(v||'')}" placeholder="https://…">` : ''}${field.type === 'date' ? `<input class="inp" id="ff_${field.id}" type="date" value="${esc(v||'')}">` : ''}${field.type === 'time' ? `<input class="inp" id="ff_${field.id}" type="time" value="${esc(v||'')}">` : ''}${field.type === 'dropdown' ? `<select class="inp" id="ff_${field.id}"><option value="">— Select —</option>${(field.options||[]).map(o => `<option ${v===o?'selected':''}>${esc(o)}</option>`).join('')}</select>` : ''}${field.type === 'choice' ? `<div style="margin-top:6px">${(field.options||[]).map(o => `<label class="row" style="gap:8px;margin-bottom:6px;cursor:pointer"><input type="radio" name="ff_${field.id}" value="${esc(o)}" ${v===o?'checked':''} id="ff_${field.id}_${esc(o)}" onchange="formFillAnswers['${field.id}']=this.value"> ${esc(o)}</label>`).join('')}</div>` : ''}${field.type === 'checkbox' ? `<div style="margin-top:6px">${(field.options||[]).map(o => `<label class="row" style="gap:8px;margin-bottom:6px;cursor:pointer"><input type="checkbox" data-cb="${field.id}" value="${esc(o)}" ${Array.isArray(v) && v.includes(o)?'checked':''}> ${esc(o)}</label>`).join('')}</div>` : ''}${field.type === 'rating' ? `<div class="row" style="gap:6px;margin-top:8px">${[1,2,3,4,5].map(n => `<button type="button" class="btn sm" style="${(formFillAnswers[field.id]||v)>=n?'background:var(--accent);border-color:var(--accent)':''}" onclick="formFillAnswers['${field.id}']=${n};render()">★ ${n}</button>`).join('')}</div>` : ''}</label></div>`; }).join('')}
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFormResponse('${f.id}')">${existing?'Update response':'Submit'}</button>`);
+      return modalShell(f.title, `${f.description ? `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="small muted" style="white-space:pre-wrap">${esc(f.description)}</div></div>` : ''}${existing ? `<div class="card" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);padding:10px;margin-bottom:14px"><div class="tiny" style="color:#7ee2a4">You already submitted. Changes will update your response.</div></div>` : ''}${(f.fields||[]).map(field => { const v = prior[field.id]; const taken = field.unique ? getTakenOptions(f.id, field.id) : {}; return `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:10px"><label class="f" style="margin-bottom:0"><span style="font-size:13px;color:var(--txt);font-weight:600">${esc(field.label)}${field.required?' <span class="req">*</span>':''}${field.unique ? '<span class="tag purple" style="margin-left:6px;font-size:10px">🔒 Unique</span>' : ''}</span>${field.type === 'short' ? `<input class="inp" id="ff_${field.id}" value="${esc(v||'')}" placeholder="${esc(field.placeholder||'')}">` : ''}${field.type === 'paragraph' ? `<textarea class="inp" id="ff_${field.id}" placeholder="${esc(field.placeholder||'')}">${esc(v||'')}</textarea>` : ''}${field.type === 'number' ? `<input class="inp" id="ff_${field.id}" type="number" value="${esc(v||'')}">` : ''}${field.type === 'email' ? `<input class="inp" id="ff_${field.id}" type="email" value="${esc(v||'')}">` : ''}${field.type === 'link' ? `<input class="inp" id="ff_${field.id}" type="url" value="${esc(v||'')}" placeholder="https://…">` : ''}${field.type === 'date' ? `<input class="inp" id="ff_${field.id}" type="date" value="${esc(v||'')}">` : ''}${field.type === 'time' ? `<input class="inp" id="ff_${field.id}" type="time" value="${esc(v||'')}">` : ''}${field.type === 'dropdown' ? `<select class="inp" id="ff_${field.id}"><option value="">— Select —</option>${(field.options||[]).map(o => { const isTakenByOther = field.unique && taken[o] && taken[o].userId !== u.id; return `<option ${v===o?'selected':''} ${isTakenByOther?'disabled':''}>${esc(o)}${isTakenByOther ? ' — 🔒 ' + esc(taken[o].name) : ''}</option>`; }).join('')}</select>` : ''}${field.type === 'choice' ? `<div style="margin-top:6px">${(field.options||[]).map(o => { const isTakenByOther = field.unique && taken[o] && taken[o].userId !== u.id; return `<label class="row" style="gap:8px;margin-bottom:6px;cursor:${isTakenByOther?'not-allowed':'pointer'};opacity:${isTakenByOther?'0.5':'1'}"><input type="radio" name="ff_${field.id}" value="${esc(o)}" ${v===o?'checked':''} ${isTakenByOther?'disabled':''} onchange="formFillAnswers['${field.id}']=this.value"><span>${esc(o)}</span>${isTakenByOther ? `<span class="tag red" style="font-size:10px">🔒 ${esc(taken[o].name)}</span>` : ''}</label>`; }).join('')}</div>` : ''}${field.type === 'checkbox' ? `<div style="margin-top:6px">${(field.options||[]).map(o => { const isTakenByOther = field.unique && taken[o] && taken[o].userId !== u.id; return `<label class="row" style="gap:8px;margin-bottom:6px;cursor:${isTakenByOther?'not-allowed':'pointer'};opacity:${isTakenByOther?'0.5':'1'}"><input type="checkbox" data-cb="${field.id}" value="${esc(o)}" ${Array.isArray(v) && v.includes(o)?'checked':''} ${isTakenByOther?'disabled':''}><span>${esc(o)}</span>${isTakenByOther ? `<span class="tag red" style="font-size:10px">🔒 ${esc(taken[o].name)}</span>` : ''}</label>`; }).join('')}</div>` : ''}${field.type === 'rating' ? `<div class="row" style="gap:6px;margin-top:8px">${[1,2,3,4,5].map(n => `<button type="button" class="btn sm" style="${(formFillAnswers[field.id]||v)>=n?'background:var(--accent);border-color:var(--accent)':''}" onclick="formFillAnswers['${field.id}']=${n};render()">★ ${n}</button>`).join('')}</div>` : ''}</label></div>`; }).join('')}`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFormResponse('${f.id}')">${existing?'Update':'Submit'}</button>`);
     }
-
     case 'formResponses': {
       const f = DB.forms.find(x=>x.id===m.formId);
-      if (!f){ return modalShell('Responses', '<div class="empty">Form not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`); }
+      if (!f) return modalShell('Responses', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
       const responses = DB.form_responses.filter(r => r.form_id === f.id);
       const fields = f.fields || [];
-      return modalShell(`${f.title} — Responses (${responses.length})`, `
-        ${responses.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Responder</th>${fields.map(x => `<th>${esc(x.label)}</th>`).join('')}<th></th></tr></thead><tbody>${responses.map(r => { const author = profileOf(r.user_id); return `<tr><td><div class="tiny"><b>${esc(author?.name||'Unknown')}</b></div><div class="tiny muted">${esc(author?.student_id||'')}</div></td>${fields.map(field => { const v = r.answers?.[field.id]; return `<td class="small">${esc(Array.isArray(v) ? v.join(', ') : (v || '—'))}</td>`; }).join('')}<td><button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="deleteFormResponse('${r.id}')">🗑</button></td></tr>`; }).join('')}</tbody></table></div>` : `<div class="empty"><span class="big">📭</span>No responses yet.</div>`}
-      `, `<button class="btn" onclick="exportFormResponses('${f.id}')">⬇ Export CSV</button><button class="btn primary" onclick="closeModal()">Close</button>`);
+      return modalShell(`${f.title} — Responses (${responses.length})`, `${responses.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Responder</th>${fields.map(x => `<th>${esc(x.label)}</th>`).join('')}<th></th></tr></thead><tbody>${responses.map(r => { const author = profileOf(r.user_id); return `<tr><td><div class="tiny"><b>${esc(author?.name||'Unknown')}</b></div><div class="tiny muted">${esc(author?.student_id||'')}</div></td>${fields.map(field => { const v = r.answers?.[field.id]; return `<td class="small">${esc(Array.isArray(v) ? v.join(', ') : (v || '—'))}</td>`; }).join('')}<td><button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="deleteFormResponse('${r.id}')">🗑</button></td></tr>`; }).join('')}</tbody></table></div>` : `<div class="empty"><span class="big">📭</span>No responses.</div>`}`, `<button class="btn" onclick="exportFormResponses('${f.id}')">⬇ CSV</button><button class="btn primary" onclick="closeModal()">Close</button>`);
     }
-
     case 'formPublish': {
       const f = DB.forms.find(x => x.id === m.formId);
-      if (!f) return modalShell('Publish', '<div class="empty">Form not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
+      if (!f) return modalShell('Publish', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
       const responses = DB.form_responses.filter(r => r.form_id === f.id);
-      return modalShell('Publish form results', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Choose what students and teachers will see.</div></div>
-        <div style="font-weight:600;font-size:14px;margin-bottom:8px">${esc(f.title)}</div>
-        <div class="small muted" style="margin-bottom:14px">${responses.length} response${responses.length!==1?'s':''} will be published</div>
-        <div class="divider"></div>
-        <div class="small" style="font-weight:600;margin-bottom:8px">Responder info</div>
-        <label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showName?'checked':''} onchange="formPublishDraft.showName=this.checked"><span>Show responder name</span></label>
-        <label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showId?'checked':''} onchange="formPublishDraft.showId=this.checked"><span>Show responder student ID</span></label>
-        <label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showTime?'checked':''} onchange="formPublishDraft.showTime=this.checked"><span>Show submission time</span></label>
-        <div class="divider"></div>
-        <div class="small" style="font-weight:600;margin-bottom:8px">Which answers to show</div>
-        <div class="stack" style="gap:6px">${(f.fields||[]).map(field => `<label class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.fields.includes(field.id)?'checked':''} onchange="togglePublishField('${field.id}')"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(field.label)}</div><div class="tiny muted">${FIELD_LABEL[field.type] || field.type}</div></div></label>`).join('')}</div>
-        <div class="card" style="background:rgba(91,140,255,.08);border-color:rgba(91,140,255,.3);padding:10px;margin-top:14px"><div class="tiny" style="color:#9dbaff">✓ Selected ${formPublishDraft.fields.length} of ${(f.fields||[]).length} fields.</div></div>
-      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveFormPublish()">📤 Publish</button>`);
+      return modalShell('Publish form results', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Choose what students/teachers will see.</div></div><div style="font-weight:600;font-size:14px;margin-bottom:8px">${esc(f.title)}</div><div class="small muted" style="margin-bottom:14px">${responses.length} response(s)</div><div class="divider"></div><div class="small" style="font-weight:600;margin-bottom:8px">Responder info</div><label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showName?'checked':''} onchange="formPublishDraft.showName=this.checked"><span>Show name</span></label><label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showId?'checked':''} onchange="formPublishDraft.showId=this.checked"><span>Show student ID</span></label><label class="row" style="gap:8px;margin-bottom:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.showTime?'checked':''} onchange="formPublishDraft.showTime=this.checked"><span>Show submission time</span></label><div class="divider"></div><div class="small" style="font-weight:600;margin-bottom:8px">Which answers to show</div><div class="stack" style="gap:6px">${(f.fields||[]).map(field => `<label class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px;cursor:pointer"><input type="checkbox" ${formPublishDraft.fields.includes(field.id)?'checked':''} onchange="togglePublishField('${field.id}')"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(field.label)}</div><div class="tiny muted">${FIELD_LABEL[field.type] || field.type}</div></div></label>`).join('')}</div><div class="card" style="background:rgba(91,140,255,.08);border-color:rgba(91,140,255,.3);padding:10px;margin-top:14px"><div class="tiny" style="color:#9dbaff">Selected ${formPublishDraft.fields.length} of ${(f.fields||[]).length} fields.</div></div>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveFormPublish()">📤 Publish</button>`);
     }
-
+    case 'pgroupCreate':
+    case 'pgroupEdit': {
+      const g = m.id ? DB.presentation_groups.find(x => x.id === m.id) : null;
+      if (!m._init){ if (g) pgroupDraft = { name: g.name, topic: g.topic || '', maxSize: g.max_size, members: [...(g.members || [])] }; m._init = true; }
+      const candidates = DB.profiles.filter(p => p.id !== u.id && p.role === 'student' && (p.dept || '').toUpperCase() === (u.dept || '').toUpperCase() && p.batch === u.batch && (p.section || '').toUpperCase() === (u.section || '').toUpperCase() && !getMyGroup(p));
+      return modalShell(g ? 'Edit group' : 'Create presentation group', `<div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">You'll be the <b style="color:#f7c76a">👑 group leader</b>.</div></div><label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="pg_name" value="${esc(pgroupDraft.name)}" placeholder="e.g. Team Alpha" data-fk="pg_name"></label><label class="f"><span>Presentation topic (optional)</span><input class="inp" id="pg_topic" value="${esc(pgroupDraft.topic)}" placeholder="e.g. AI in Healthcare" data-fk="pg_topic"></label><label class="f"><span>Max team size (incl. you)</span><input class="inp" type="number" id="pg_max" min="1" max="12" value="${pgroupDraft.maxSize}" data-fk="pg_max"></label><div class="divider"></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Add members (optional)</b><span class="tag" style="margin-left:auto">${pgroupDraft.members.length} selected</span></div>${candidates.length ? `<div style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">${candidates.map(c => `<label class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px;cursor:pointer"><input type="checkbox" ${pgroupDraft.members.includes(c.id)?'checked':''} onchange="togglePgroupDraftMember('${c.id}')"><div class="avatar" style="width:32px;height:32px;flex:0 0 32px;border-radius:9px;font-size:12px;background:${colorFor(c.id)}">${esc(initials(c.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div class="tiny muted">${esc(c.student_id)}</div></div></label>`).join('')}</div>` : `<div class="empty" style="padding:20px"><span class="big">👤</span>No available students.</div>`}<div class="card" style="background:rgba(91,140,255,.08);border-color:rgba(91,140,255,.3);padding:10px;margin-top:14px"><div class="tiny" style="color:#9dbaff">Total team size: <b>${pgroupDraft.members.length + 1}</b></div></div>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePgroup('${g?g.id:''}')">${g?'Save':'Create'}</button>`);
+    }
+    case 'pgroupDetail': {
+      const g = DB.presentation_groups.find(x => x.id === m.id);
+      if (!g) return modalShell('Group', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
+      const members = getGroupMembers(g);
+      const isLeader = g.leader_id === u.id;
+      const isMember = isLeader || (g.members || []).includes(u.id);
+      const requests = isLeader ? getGroupPendingRequests(g.id) : [];
+      const isFull = members.length >= g.max_size;
+      const pendingReq = DB.group_join_requests.find(r => r.group_id === g.id && r.user_id === u.id && r.status === 'pending');
+      return modalShell(g.name, `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : `<span class="tag amber">No topic</span>`}<span class="tag ${isFull?'red':'green'}">${members.length}/${g.max_size}</span>${isLeader ? `<span class="tag admin">👑 Leader</span>` : isMember ? `<span class="tag">Member</span>` : ''}</div></div><div class="row" style="margin-bottom:10px"><b style="font-size:14px">Members (${members.length})</b></div><div class="stack" style="gap:8px">${members.map(mm => { const isL = mm.id === g.leader_id; return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(mm.id)}">${esc(initials(mm.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(mm.name)} ${isL?'👑':''}</div><div class="tiny muted">${esc(mm.student_id)}</div></div>${isLeader && mm.id !== u.id ? `<button class="btn sm" onclick="if(confirm('Make ${esc(mm.name)} leader?')){transferLeadership('${g.id}','${mm.id}');}">Make leader</button><button class="btn sm danger" onclick="removeGroupMember('${g.id}','${mm.id}')">Remove</button>` : ''}</div>`; }).join('')}</div>${isLeader ? `<div class="divider"></div><label class="f"><span>Change topic</span><div class="row" style="gap:6px"><input class="inp" id="pgt_topic" value="${esc(g.topic||'')}" style="flex:1"><button class="btn primary" onclick="changeGroupTopic('${g.id}')">Save</button></div></label>` : ''}${requests.length ? `<div class="divider"></div><div class="row" style="margin-bottom:8px"><b style="font-size:14px">🔔 Requests (${requests.length})</b></div><div class="stack" style="gap:8px">${requests.map(r => { const reqUser = profileOf(r.user_id); return `<div class="row" style="gap:10px;padding:10px;background:var(--panel2);border-radius:8px"><div class="avatar" style="background:${colorFor(r.user_id)}">${esc(initials(reqUser?.name || '?'))}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${esc(reqUser?.name || 'Unknown')}</div><div class="tiny muted">${esc(reqUser?.student_id || '')}${r.message ? ' · ' + esc(r.message) : ''}</div></div><button class="btn sm primary" onclick="respondJoinRequest('${r.id}','accepted');closeModal();">Accept</button><button class="btn sm danger" onclick="respondJoinRequest('${r.id}','rejected');closeModal();">Reject</button></div>`; }).join('')}</div>` : ''}${!isMember && !isFull && !pendingReq && !getMyGroup(u) ? `<div class="divider"></div><button class="btn primary" style="width:100%" onclick="closeModal();openModal('pgroupJoin',{id:'${g.id}'})">Request to join</button>` : ''}${!isMember && pendingReq ? `<div class="divider"></div><div class="tag amber" style="display:block;text-align:center;padding:10px">Request pending</div>` : ''}${!isMember && isFull ? `<div class="divider"></div><div class="tag red" style="display:block;text-align:center;padding:10px">Group full</div>` : ''}`, `<button class="btn ghost" onclick="closeModal()">Close</button>${isLeader ? `<button class="btn danger" onclick="deletePgroup('${g.id}')">🗑 Delete group</button>` : ''}`);
+    }
+    case 'pgroupJoin': {
+      const g = DB.presentation_groups.find(x => x.id === m.id);
+      if (!g) return modalShell('Join', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
+      return modalShell('Request to join ' + g.name, `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : ''}<span class="tag">${getGroupMembers(g).length}/${g.max_size} members</span></div></div><label class="f"><span>Message to leader (optional)</span><textarea class="inp" id="pjr_msg" placeholder="e.g. Hi! I'd like to join…" style="min-height:100px"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="sendJoinRequest('${g.id}')">Send</button>`);
+    }
     case 'day': {
       const evs = DB.events.filter(e => e.date === m.date).sort(sortByDate);
-      return modalShell(fmtDate(m.date), `
-        ${evs.length ? `<div class="stack">${evs.map(e=>`<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${esc(e.start_time)}–${esc(e.end_time)} · ${esc(e.type)}${e.location?' · '+esc(e.location):''}</div>${e.description?`<div class="tiny muted" style="margin-top:3px">${esc(e.description)}</div>`:''}</div>${canManage(u)?`<button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="closeModal();openModal('event',{id:'${e.id}'})">✎</button>`:''}</div>`).join('')}</div>` : `<div class="empty" style="padding:26px"><span class="big">🗓</span>Nothing on this day.</div>`}
-      `, `${canManage(u)?`<button class="btn primary" onclick="const d='${m.date}';closeModal();openModal('event');setTimeout(()=>{const el=document.getElementById('e_date');if(el)el.value=d;},30)">+ Add event on this day</button>`:''}<button class="btn ghost" onclick="closeModal()">Close</button>`);
+      return modalShell(fmtDate(m.date), `${evs.length ? `<div class="stack">${evs.map(e=>`<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${esc(e.start_time)}–${esc(e.end_time)} · ${esc(e.type)}${e.location?' · '+esc(e.location):''}</div>${e.description?`<div class="tiny muted" style="margin-top:3px">${esc(e.description)}</div>`:''}</div>${canManage(u)?`<button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="closeModal();openModal('event',{id:'${e.id}'})">✎</button>`:''}</div>`).join('')}</div>` : `<div class="empty" style="padding:26px"><span class="big">🗓</span>Nothing on this day.</div>`}`, `${canManage(u)?`<button class="btn primary" onclick="const d='${m.date}';closeModal();openModal('event');setTimeout(()=>{const el=document.getElementById('e_date');if(el)el.value=d;},30)">+ Add event</button>`:''}<button class="btn ghost" onclick="closeModal()">Close</button>`);
     }
   }
   return '';
 }
 
-function addMemberRow(){ const p = DB.presentations.find(x=>x.id===S.modal.presentationId); const max = p?.max_team_size || 6; if (memberDraft.length >= max - 1){ toast('Team size limit reached', 'err'); return; } memberDraft.push({name:'',id:''}); render(); }
+/* =========================================================
+   SAVE HANDLERS
+   ========================================================= */
+function addMemberRow(){ const p = DB.presentations.find(x=>x.id===S.modal.presentationId); const max = p?.max_team_size || 6; if (memberDraft.length >= max - 1){ toast('Limit reached', 'err'); return; } memberDraft.push({name:'',id:''}); render(); }
 function removeMemberRow(i){ memberDraft.splice(i,1); render(); }
 function addExtraSection(){ extraSectionsDraft.push({dept:'',batch:'',section:''}); render(); }
 function removeExtraSection(i){ extraSectionsDraft.splice(i,1); render(); }
@@ -1349,10 +1339,7 @@ async function saveProfile(){
   const { error } = await sb.from('profiles').update(updates).eq('id', S.profile.id);
   if (error){ toast(error.message, 'err'); return; }
   Object.assign(S.profile, updates);
-  await fetchAll();
-  toast('Profile updated');
-  closeModal();
-  render();
+  await fetchAll(); toast('Profile updated'); closeModal(); render();
 }
 
 async function saveSectionConfig(dept,batch,section){
@@ -1389,8 +1376,7 @@ async function saveResource(id){
   if (id){ if (filePath) { data.file_path = filePath; data.file_name = fileName; } ({ error } = await sb.from('resources').update(data).eq('id', id)); }
   else { ({ error } = await sb.from('resources').insert({ ...data, file_path: filePath, file_name: fileName, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), uploaded_by: me.id })); }
   if (error){ toast(error.message, 'err'); return; }
-  toast(id ? 'Resource updated' : 'Resource uploaded');
-  closeModal();
+  toast(id ? 'Resource updated' : 'Resource uploaded'); closeModal();
 }
 
 async function saveNotice(id){
@@ -1419,7 +1405,7 @@ async function saveGroup(id){
   const name = $('#g_name').value.trim();
   const link = $('#g_link').value.trim();
   if (!name || !link){ toast('Name and link required', 'err'); return; }
-  if (!/^https?:\/\//i.test(link)){ toast('Link must start with http:// or https://', 'err'); return; }
+  if (!/^https?:\/\//i.test(link)){ toast('Link must start with http', 'err'); return; }
   const me = S.profile;
   const data = { name, link, platform: $('#g_platform').value, description: $('#g_desc').value.trim() };
   if (id){ const { error } = await sb.from('groups').update(data).eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Group updated'); }
@@ -1435,37 +1421,30 @@ async function savePresentation(){
   const { error } = await sb.from('presentations').insert({ title, deadline, course: $('#p_course').value.trim(), max_team_size: parseInt($('#p_max').value)||4, instructions: $('#p_instr').value.trim(), dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
   if (error){ toast(error.message, 'err'); return; }
   await notifyClass(me.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
-  toast('Presentation created');
-  closeModal();
+  toast('Presentation created'); closeModal();
 }
 
 async function submitFeedback(){
-  const subject = $('#fb_subj').value.trim();
-  const body = $('#fb_body').value.trim();
+  const subject = $('#fb_subj').value.trim(); const body = $('#fb_body').value.trim();
   if (!subject || !body){ toast('Subject and body required', 'err'); return; }
   const { error } = await sb.from('feedback').insert({ user_id: S.profile.id, subject, body });
   if (error){ toast(error.message, 'err'); return; }
-  toast('Feedback sent to admin');
-  closeModal();
+  toast('Feedback sent'); closeModal();
 }
 async function submitFeedbackReply(id){
   const reply = $('#fb_reply').value.trim();
   if (!reply){ toast('Reply required', 'err'); return; }
   const { error } = await sb.from('feedback').update({ reply, replied_by: S.profile.id, replied_at: new Date().toISOString() }).eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
-  toast('Reply sent');
-  closeModal();
+  toast('Reply sent'); closeModal();
 }
 async function submitHelpRequest(){
-  const title = $('#h_title').value.trim();
-  const body = $('#h_body').value.trim();
-  const target = $('#h_target').value;
+  const title = $('#h_title').value.trim(); const body = $('#h_body').value.trim(); const target = $('#h_target').value;
   if (!title || !body){ toast('Title and body required', 'err'); return; }
   const me = S.profile;
   const { error } = await sb.from('help_requests').insert({ user_id: me.id, title, body, target, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() });
   if (error){ toast(error.message, 'err'); return; }
-  toast('Help request posted');
-  closeModal();
+  toast('Help request posted'); closeModal();
 }
 
 async function syncToSheet(sub){
@@ -1475,12 +1454,10 @@ async function syncToSheet(sub){
   const basePayload = { submissionId: sub.id, presentation: p.title || '', course: p.course || '', dept: (p.dept || '').toUpperCase(), batch: p.batch || '', section: (p.section || '').toUpperCase(), submittedAt: sub.submitted_at || new Date().toISOString(), status: sub.updated_at && sub.updated_at !== sub.submitted_at ? 'Updated' : 'Submitted', submitterId: (S.profile && S.profile.student_id) || '', link: sub.link, teamName: sub.team_name || '', leaderName: sub.leader_name, leaderId: sub.leader_id, members: sub.members || [] };
   let sent = false;
   if (sectionCfg?.webhook_url && !sectionCfg.webhook_url.includes('PASTE_')){
-    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); sent = true; }
-    catch(e){ console.warn('Section sync failed', e); }
+    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); sent = true; } catch(e){}
   }
   if (adminCfg?.webhook_url && !adminCfg.webhook_url.includes('PASTE_')){
-    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); sent = true; }
-    catch(e){ console.warn('Admin sync failed', e); }
+    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); sent = true; } catch(e){}
   }
   return sent;
 }
@@ -1500,7 +1477,7 @@ async function submitPresentation(pid, existingId){
     const nm = (memberDraft[i].name||'').trim();
     const mid = (memberDraft[i].id||'').trim();
     if (!nm && !mid) continue;
-    if (!nm || !mid){ toast(`Member ${i+1}: both fields required`, 'err'); return; }
+    if (!nm || !mid){ toast(`Member ${i+1}: both required`, 'err'); return; }
     if (seen.has(mid)){ toast(`Duplicate ID: ${mid}`, 'err'); return; }
     seen.add(mid); members.push({ name: nm, id: mid });
   }
@@ -1511,11 +1488,12 @@ async function submitPresentation(pid, existingId){
   if (existingId){ const { data, error } = await sb.from('submissions').update(payload).eq('id', existingId).select().single(); if (error){ toast(error.message, 'err'); return; } saved = data; toast('Submission updated'); }
   else { payload.submitted_at = new Date().toISOString(); const { data, error } = await sb.from('submissions').insert(payload).select().single(); if (error){ toast(error.message, 'err'); return; } saved = data; await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id), 'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations'); toast('Submission saved'); }
   if (saved) syncToSheet(saved);
-  memberDraft = [];
-  submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
-  closeModal();
+  memberDraft = []; submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' }; closeModal();
 }
 
+/* =========================================================
+   BOOT
+   ========================================================= */
 (async function boot(){
   const { data: { session } } = await sb.auth.getSession();
   if (session){ S.user = session.user; await loadProfile(); }
@@ -1543,10 +1521,7 @@ async function loadProfile(){
         Object.assign(data, patch);
       }
       S.profile = data;
-      await fetchAll();
-      subscribeRealtime();
-      S.loading = false;
-      render();
+      await fetchAll(); subscribeRealtime(); S.loading = false; render();
       return;
     }
     await new Promise(r => setTimeout(r, 500));
@@ -1554,8 +1529,7 @@ async function loadProfile(){
   const meta = S.user.user_metadata || {};
   const { data, error } = await sb.from('profiles').insert({ id: S.user.id, name: meta.name || 'New User', student_id: meta.student_id || 'unknown_' + S.user.id.slice(0,8), email: S.user.email, dept: (meta.dept || 'CSE').toUpperCase(), batch: meta.batch || '—', section: (meta.section || '—').toUpperCase() }).select().maybeSingle();
   if (!error && data){ S.profile = data; await fetchAll(); subscribeRealtime(); }
-  S.loading = false;
-  render();
+  S.loading = false; render();
 }
 </script>
 </body>
