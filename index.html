@@ -6,48 +6,36 @@
 <title>UniSync — Class Collaboration</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b8cff'/><text x='50' y='68' font-size='58' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>U</text></svg>">
 <style>
-:root{
-  --bg:#0e1116; --panel:#151922; --panel2:#1b202b; --line:#262c38;
-  --txt:#e6eaf2; --muted:#8b95a7; --accent:#5b8cff; --accent2:#8b5cf6;
-  --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444; --radius:12px;
-}
+:root{--bg:#0e1116;--panel:#151922;--panel2:#1b202b;--line:#262c38;--txt:#e6eaf2;--muted:#8b95a7;--accent:#5b8cff;--accent2:#8b5cf6;--ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;--radius:12px}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--txt);font-size:14px;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--txt);font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}
 button,input,select,textarea{font-family:inherit;font-size:14px}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:#2c3342;border-radius:8px}
 ::-webkit-scrollbar-track{background:transparent}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:236px;flex:0 0 236px;background:var(--panel);border-right:1px solid var(--line);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar{width:236px;flex:0 0 236px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
 .brand{padding:18px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
-.brand .logo{width:32px;height:32px;border-radius:9px;flex:0 0 32px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
+.brand .logo{width:32px;height:32px;border-radius:9px;flex:0 0 32px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff;font-size:15px}
 .brand h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.2px}
 .brand small{display:block;color:var(--muted);font-size:11px;font-weight:400}
 .nav{padding:10px 8px;flex:1}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;
-  color:var(--muted);cursor:pointer;margin-bottom:2px;font-weight:500;user-select:none;border:none;background:none;width:100%;text-align:left}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:var(--muted);cursor:pointer;margin-bottom:2px;font-weight:500;user-select:none;border:none;background:none;width:100%;text-align:left}
 .nav-item:hover{background:var(--panel2);color:var(--txt)}
 .nav-item.active{background:linear-gradient(90deg,rgba(91,140,255,.18),rgba(139,92,246,.10));color:#fff}
 .nav-item .ico{width:18px;text-align:center;font-size:15px;flex:0 0 18px}
 .nav-sep{padding:14px 14px 6px;font-size:10.5px;letter-spacing:.9px;text-transform:uppercase;color:#5b6478;font-weight:700}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{height:58px;border-bottom:1px solid var(--line);background:rgba(14,17,22,.86);
-  backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
-.topbar .class-chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;
-  padding:5px 12px;font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.topbar{height:58px;border-bottom:1px solid var(--line);background:rgba(14,17,22,.86);backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
+.topbar .class-chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px;white-space:nowrap}
 .searchbox{flex:1;max-width:420px;position:relative}
-.searchbox input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
-  padding:8px 12px 8px 34px;color:var(--txt);outline:none}
+.searchbox input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px 8px 34px;color:var(--txt);outline:none}
 .searchbox input:focus{border-color:var(--accent)}
 .searchbox .si{position:absolute;left:11px;top:8px;color:var(--muted);font-size:13px}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.icon-btn{background:var(--panel2);border:1px solid var(--line);width:36px;height:36px;border-radius:10px;
-  color:var(--txt);cursor:pointer;position:relative;display:grid;place-items:center;font-size:15px}
+.icon-btn{background:var(--panel2);border:1px solid var(--line);width:36px;height:36px;border-radius:10px;color:var(--txt);cursor:pointer;position:relative;display:grid;place-items:center;font-size:15px}
 .icon-btn:hover{border-color:#39415a}
 .icon-btn .dot{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:10px;border-radius:999px;padding:1px 5px;font-weight:700}
 .avatar{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:#fff;font-size:13px;cursor:pointer;flex:0 0 36px}
@@ -56,8 +44,7 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .page-head h2{margin:0 0 3px;font-size:20px;font-weight:650;letter-spacing:-.2px}
 .page-head p{margin:0;color:var(--muted);font-size:13px}
 .page-head .actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-.btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px 14px;
-  border-radius:9px;cursor:pointer;font-weight:550;display:inline-flex;align-items:center;gap:7px;transition:.12s;white-space:nowrap}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:550;display:inline-flex;align-items:center;gap:7px;transition:.12s;white-space:nowrap}
 .btn:hover{border-color:#3a4256;background:#20263540}
 .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff}
 .btn.primary:hover{filter:brightness(1.08)}
@@ -81,55 +68,43 @@ button,input,select,textarea{font-family:inherit;font-size:14px}
 .empty{text-align:center;padding:44px 20px;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius);background:#12161d}
 .empty .big{font-size:30px;display:block;margin-bottom:8px;opacity:.6}
 .divider{height:1px;background:var(--line);margin:14px 0}
-.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
-  background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
 .tag.blue{background:rgba(91,140,255,.14);border-color:rgba(91,140,255,.35);color:#9dbaff}
 .tag.green{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.3);color:#7ee2a4}
 .tag.amber{background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.32);color:#f7c76a}
 .tag.red{background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.32);color:#ff9d9d}
 .tag.purple{background:rgba(139,92,246,.14);border-color:rgba(139,92,246,.35);color:#c3adff}
 .tag.admin{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#f7c76a}
+.tag.teacher{background:rgba(20,184,166,.14);border-color:rgba(20,184,166,.4);color:#5eead4}
 label.f{display:block;margin-bottom:12px}
 label.f > span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:550}
 label.f > span .req{color:var(--danger)}
-.inp,select.inp,textarea.inp{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;
-  padding:9px 11px;color:var(--txt);outline:none;transition:.12s}
+.inp,select.inp,textarea.inp{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;color:var(--txt);outline:none;transition:.12s}
 .inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,140,255,.12)}
 textarea.inp{resize:vertical;min-height:82px}
 select.inp{cursor:pointer}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:620px){.frow{grid-template-columns:1fr}}
 .err{color:#ff9d9d;font-size:12px;margin-top:5px}
-.overlay{position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(3px);
-  display:flex;align-items:flex-start;justify-content:center;padding:44px 16px;z-index:100;overflow-y:auto}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:620px;
-  box-shadow:0 24px 60px rgba(0,0,0,.55);animation:pop .16s ease-out}
+.overlay{position:fixed;inset:0;background:rgba(6,8,12,.72);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:44px 16px;z-index:100;overflow-y:auto}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:100%;max-width:620px;box-shadow:0 24px 60px rgba(0,0,0,.55);animation:pop .16s ease-out}
 @keyframes pop{from{transform:translateY(8px) scale(.99);opacity:0}to{transform:none;opacity:1}}
 .modal-head{display:flex;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
 .modal-head h3{margin:0;font-size:15.5px;font-weight:620}
 .modal-head .x{margin-left:auto;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
 .modal-body{padding:18px;max-height:66vh;overflow-y:auto}
 .modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:9px;justify-content:flex-end}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);
-  background:var(--panel2);border:1px solid var(--line);padding:11px 18px;border-radius:11px;
-  z-index:200;box-shadow:0 12px 32px rgba(0,0,0,.5);font-weight:550;animation:pop .18s}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);padding:11px 18px;border-radius:11px;z-index:200;box-shadow:0 12px 32px rgba(0,0,0,.5);font-weight:550;animation:pop .18s}
 .toast.ok{border-color:rgba(34,197,94,.45)}
 .toast.err{border-color:rgba(239,68,68,.45)}
-.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;
-  background:radial-gradient(900px 500px at 20% 0%,rgba(91,140,255,.14),transparent 60%),
-             radial-gradient(700px 500px at 90% 100%,rgba(139,92,246,.13),transparent 60%)}
-.auth{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;
-  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(900px 500px at 20% 0%,rgba(91,140,255,.14),transparent 60%),radial-gradient(700px 500px at 90% 100%,rgba(139,92,246,.13),transparent 60%)}
+.auth{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
 .auth h1{margin:0 0 4px;font-size:22px;font-weight:680;letter-spacing:-.3px}
 .auth p.sub{margin:0 0 20px;color:var(--muted);font-size:13px}
-.tabs{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:18px}
-.tabs button{flex:1;background:none;border:none;padding:8px 4px;border-radius:8px;color:var(--muted);cursor:pointer;font-weight:600;font-size:12.5px}
-.tabs button.active{background:var(--accent);color:#fff}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
 .stat .n{font-size:24px;font-weight:700;letter-spacing:-.5px}
 .stat .l{color:var(--muted);font-size:12px;margin-top:2px}
-.list-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;
-  background:var(--panel2);border:1px solid transparent;transition:.12s}
+.list-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;background:var(--panel2);border:1px solid transparent;transition:.12s}
 .list-item:hover{border-color:var(--line)}
 .list-item .lead{flex:1;min-width:0}
 .list-item .t{font-weight:580;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -137,77 +112,49 @@ select.inp{cursor:pointer}
 .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .cal-head div{text-align:center;font-size:11.5px;color:var(--muted);font-weight:600;padding:4px 0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal-cell{min-height:92px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px;
-  cursor:pointer;transition:.12s;overflow:hidden}
+.cal-cell{min-height:92px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px;cursor:pointer;transition:.12s;overflow:hidden}
 .cal-cell:hover{border-color:#39415a}
 .cal-cell.blank{background:transparent;border-color:transparent;cursor:default}
 .cal-cell.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(91,140,255,.35)}
 .cal-cell .dn{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:4px}
 .cal-cell.today .dn{color:var(--accent)}
-.cal-ev{font-size:10.5px;padding:2px 5px;border-radius:5px;margin-bottom:3px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:550}
+.cal-ev{font-size:10.5px;padding:2px 5px;border-radius:5px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:550}
 @media(max-width:760px){.cal-cell{min-height:64px;padding:5px}.cal-ev{font-size:9px}}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11.5px;text-transform:uppercase;
-  letter-spacing:.6px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+.tbl th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
 .tbl td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tbody tr:hover{background:#12161d}
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
-.stars span{cursor:pointer;color:#4a5266;font-size:15px;transition:.1s}
-.stars span.on{color:#f5b942}
-.stars span:hover{transform:scale(1.12)}
 .member-box{border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:10px;background:var(--panel2)}
 .member-box .mb-head{display:flex;align-items:center;margin-bottom:8px;font-size:12px;color:var(--muted);font-weight:600}
-@media(max-width:900px){
-  .layout{flex-direction:column}
-  .sidebar{width:100%;flex:none;height:auto;position:static;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line)}
-  .brand{border-bottom:none;border-right:1px solid var(--line);padding:12px 14px}
-  .brand h1,.brand small{display:none}
-  .nav{display:flex;padding:8px;gap:4px;flex:1}
-  .nav-sep{display:none}
-  .nav-item{white-space:nowrap;margin:0;padding:8px 11px}
-  .nav-item .lbl{display:none}
-  .nav-item .ico{font-size:17px}
-  .content{padding:16px}
-  .topbar .class-chip{font-size:11px;padding:4px 10px}
-}
-.file-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;
-  background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.14s}
+@media(max-width:900px){.layout{flex-direction:column}.sidebar{width:100%;flex:none;height:auto;position:static;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line)}.brand{border-bottom:none;border-right:1px solid var(--line);padding:12px 14px}.brand h1,.brand small{display:none}.nav{display:flex;padding:8px;gap:4px;flex:1}.nav-sep{display:none}.nav-item{white-space:nowrap;margin:0;padding:8px 11px}.nav-item .lbl{display:none}.nav-item .ico{font-size:17px}.content{padding:16px}.topbar .class-chip{font-size:11px;padding:4px 10px}}
+.file-card{display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.14s}
 .file-card:hover{border-color:#3a4256;transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.28)}
-.file-icon{width:48px;height:58px;flex:0 0 48px;border-radius:8px;position:relative;
-  background:linear-gradient(180deg,#ef4444,#b91c1c);color:#fff;display:grid;place-items:center;
-  font-weight:800;font-size:11px;letter-spacing:.4px;box-shadow:0 4px 12px rgba(239,68,68,.28)}
-.file-icon::after{content:'';position:absolute;top:0;right:0;width:14px;height:14px;
-  background:linear-gradient(225deg,rgba(255,255,255,.55) 50%,transparent 50%);border-bottom-left-radius:6px}
+.file-icon{width:48px;height:58px;flex:0 0 48px;border-radius:8px;position:relative;background:linear-gradient(180deg,#ef4444,#b91c1c);color:#fff;display:grid;place-items:center;font-weight:800;font-size:11px;letter-spacing:.4px;box-shadow:0 4px 12px rgba(239,68,68,.28)}
+.file-icon::after{content:'';position:absolute;top:0;right:0;width:14px;height:14px;background:linear-gradient(225deg,rgba(255,255,255,.55) 50%,transparent 50%);border-bottom-left-radius:6px}
 .file-icon svg{width:20px;height:20px;stroke-width:2.2}
 .file-body{flex:1;min-width:0}
-.file-name{font-weight:600;font-size:14px;color:var(--txt);margin-bottom:3px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-name{font-weight:600;font-size:14px;color:var(--txt);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .file-meta{font-size:11.5px;color:var(--muted)}
 .file-open{color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.group-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;
-  display:flex;flex-direction:column;gap:12px;transition:.14s}
+.group-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px;transition:.14s}
 .group-card:hover{border-color:#3a4256}
 .group-head{display:flex;align-items:center;gap:12px}
-.platform-badge{width:44px;height:44px;flex:0 0 44px;border-radius:12px;display:grid;place-items:center;
-  color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.platform-badge{width:44px;height:44px;flex:0 0 44px;border-radius:12px;display:grid;place-items:center;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.3)}
 .platform-badge svg{width:22px;height:22px}
 .group-name{font-weight:620;font-size:14.5px;margin-bottom:3px}
 .group-desc{font-size:12.5px;color:var(--muted);line-height:1.45}
 .group-foot{display:flex;align-items:center;gap:8px;padding-top:4px}
-.open-link{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;
-  color:#fff;font-weight:600;font-size:12.5px;text-decoration:none;transition:.12s;border:none;cursor:pointer}
+.open-link{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;color:#fff;font-weight:600;font-size:12.5px;text-decoration:none;transition:.12s;border:none;cursor:pointer}
 .open-link:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.code-block{background:#0b0e13;border:1px solid var(--line);border-radius:10px;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#9dbaff;white-space:pre;overflow-x:auto;line-height:1.55;max-height:520px;overflow-y:auto;margin:0}
 </style>
 </head>
 <body>
 <div id="app">
   <div style="display:grid;place-items:center;min-height:100vh">
-    <div style="text-align:center">
-      <div style="font-size:32px;margin-bottom:12px">⏳</div>
-      <div class="muted">Loading UniSync…</div>
-    </div>
+    <div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">⏳</div><div class="muted">Loading UniSync…</div></div>
   </div>
 </div>
 
@@ -216,9 +163,6 @@ select.inp{cursor:pointer}
 const SUPABASE_URL = 'https://jqnazghhbdppeltpfhop.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbmF6Z2hoYmRwcGVsdHBmaG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMjQ1NTksImV4cCI6MjEwNDgwMDU1OX0.Zmf1QeRSIRG2XAkBmspkGeC7hkGlBrO8qbt9IV8hQyA';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzhUXtO95ftrK7GtCxgEeDW0M3_1OlVOwYdDbI1BA2NL0QhrZxgM8EB5E9QBrvLIGl8/exec';
-const SHEET_SECRET = 'unisync-48g';
 
 const RESOURCE_TYPES = ['Notes','Slides','Question Bank','Previous Questions','Lab Report','Book','Syllabus','PDF (Drive)','Reference Link','Other'];
 const EVENT_TYPES = ['Class','Exam','Assignment','Quiz','Midterm','Final','Clearance','Seminar','Holiday','Other'];
@@ -235,6 +179,84 @@ const PLATFORM_META = {
 };
 const PDF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 
+const APPS_SCRIPT_CODE = `function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var MY_SECRET = 'YOUR_SECRET_HERE';
+    if (data.token !== MY_SECRET) {
+      return ContentService.createTextOutput(JSON.stringify({ok:false, error:'unauthorized'})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (data.action === 'deletePresentation') {
+      var tabName = sanitizeTabName(data.presentation || '');
+      var deletedTab = false;
+      if (tabName) {
+        var sheet = ss.getSheetByName(tabName);
+        if (sheet) { ss.deleteSheet(sheet); deletedTab = true; }
+      }
+      var master = ss.getSheetByName('Submissions');
+      var removedRows = 0;
+      if (master && data.presentation) {
+        var last = master.getLastRow();
+        if (last > 1) {
+          var values = master.getRange(2, 2, last - 1, 1).getValues();
+          for (var i = values.length - 1; i >= 0; i--) {
+            if (String(values[i][0]) === String(data.presentation)) { master.deleteRow(i + 2); removedRows++; }
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ok:true, deletedTab:deletedTab, removedRows:removedRows})).setMimeType(ContentService.MimeType.JSON);
+    }
+    var headers = ['Submission ID','Presentation','Course','Submitted At','Status','Submitter Student ID','Presentation Link','Team Name','Leader Name','Leader ID','Members','Dept','Batch','Section'];
+    var members = (data.members || []).map(function(m){ return m.name + ' (' + m.id + ')'; }).join(', ');
+    var row = [data.submissionId, data.presentation, data.course || '', data.submittedAt, data.status || 'Submitted', data.submitterId || '', data.link, data.teamName || '', data.leaderName, data.leaderId, members, data.dept || '', data.batch || '', data.section || ''];
+    var masterSheet = ss.getSheetByName('Submissions') || ss.insertSheet('Submissions');
+    upsertRow(masterSheet, headers, row, data.submissionId);
+    var tabName2 = sanitizeTabName(data.presentation || 'Uncategorized');
+    var perTab = ss.getSheetByName(tabName2) || ss.insertSheet(tabName2);
+    upsertRow(perTab, headers, row, data.submissionId);
+    if (data.scope === 'admin') {
+      var sectionName = sanitizeTabName((data.dept || '') + '-' + (data.batch || '') + '-' + (data.section || ''));
+      if (sectionName && sectionName !== '--') {
+        var sectionTab = ss.getSheetByName(sectionName) || ss.insertSheet(sectionName);
+        upsertRow(sectionTab, headers, row, data.submissionId);
+      }
+      if (data.course) {
+        var courseName = sanitizeTabName(data.course);
+        var courseTab = ss.getSheetByName(courseName) || ss.insertSheet(courseName);
+        upsertRow(courseTab, headers, row, data.submissionId);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false, error:String(err)})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function upsertRow(sheet, headers, row, submissionId) {
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    sheet.setFrozenRows(1);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  }
+  var last = sheet.getLastRow();
+  var found = -1;
+  if (last > 1) {
+    var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(submissionId)) { found = i + 2; break; }
+    }
+  }
+  if (found > -1) { sheet.getRange(found, 1, 1, row.length).setValues([row]); }
+  else { sheet.appendRow(row); }
+}
+
+function sanitizeTabName(name) {
+  var clean = String(name).replace(/[\\[\\]\\*\\/\\\\\\?:]/g, '-').replace(/\\s+/g, ' ').trim();
+  if (clean.length > 90) clean = clean.substring(0, 90);
+  return clean || 'Uncategorized';
+}`;
+
 const $  = (s, el=document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const initials = n => (n||'?').split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
@@ -248,23 +270,39 @@ const sortByDate = (a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_t
 const isDrivePdf = r => r && r.type === 'PDF (Drive)';
 const isAdmin = u => u && u.role === 'admin';
 const isCR = u => u && u.role === 'cr';
-const canManage = u => isAdmin(u) || isCR(u);
+const isTeacher = u => u && u.role === 'teacher';
+const canManage = u => isAdmin(u) || isCR(u) || isTeacher(u);
 const classLabel = u => `${(u?.dept||'—').toUpperCase()}-${u?.batch||'—'}-${(u?.section||'—').toUpperCase()}`;
+const sectionKey = (d,b,s) => `${(d||'').toUpperCase()}|${b||''}|${(s||'').toUpperCase()}`;
 
-let S = { route:'dashboard', user:null, profile:null, modal:null, toast:null, search:'', resFilter:{q:'',course:'',type:''}, noticeFilter:'All', calYear:null, calMonth:null, selectedPresentation:null, authTab:'student', authError:'', authMode:'login', loading:true };
-let DB = { profiles:[], resources:[], notices:[], notice_acks:[], events:[], groups:[], presentations:[], submissions:[], notifications:[], class_info:null };
+function meScopes(me){
+  if (!me) return [];
+  if (isAdmin(me)) return ['*'];
+  const list = [{ dept:(me.dept||'').toUpperCase(), batch: me.batch, section:(me.section||'').toUpperCase() }];
+  if (isTeacher(me) && Array.isArray(me.extra_sections)){
+    me.extra_sections.forEach(s => { if (s && s.dept && s.batch && s.section) list.push({ dept: s.dept.toUpperCase(), batch: s.batch, section: s.section.toUpperCase() }); });
+  }
+  return list;
+}
+function inScope(me, row){
+  if (isAdmin(me)) return true;
+  if (!row.batch && !row.section && !row.dept) return true;
+  const key = sectionKey(row.dept, row.batch, row.section);
+  return meScopes(me).some(s => sectionKey(s.dept, s.batch, s.section) === key);
+}
+
+let S = { route:'dashboard', user:null, profile:null, modal:null, toast:null, search:'', resFilter:{q:'',course:'',type:''}, noticeFilter:'All', calYear:null, calMonth:null, selectedPresentation:null, authMode:'login', authError:'', loading:true };
+let DB = { profiles:[], resources:[], notices:[], notice_acks:[], events:[], groups:[], presentations:[], submissions:[], notifications:[], class_info:null, section_configs:[], feedback:[], help_requests:[], help_replies:[], instructions:[] };
 let toastTimer = null;
 let channels = [];
 let memberDraft = [];
 let submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
+let extraSectionsDraft = [];
+let selectedConfigSection = null;
 
 async function fetchAll(){
   const me = S.profile;
-  const isGlobal = me && me.role === 'admin';
-  const dept = (me?.dept||'').toUpperCase();
-  const batch = me?.batch;
-  const section = (me?.section||'').toUpperCase();
-  const [p, r, n, a, e, g, pr, s, nt, ci] = await Promise.all([
+  const [p, r, n, a, e, g, pr, s, nt, ci, sc, fb, hr, hrep, instr] = await Promise.all([
     sb.from('profiles').select('*').order('name'),
     sb.from('resources').select('*').order('uploaded_at', {ascending:false}),
     sb.from('notices').select('*').order('created_at', {ascending:false}),
@@ -274,33 +312,35 @@ async function fetchAll(){
     sb.from('presentations').select('*').order('created_at', {ascending:false}),
     sb.from('submissions').select('*').order('submitted_at', {ascending:false}),
     sb.from('notifications').select('*').order('created_at', {ascending:false}),
-    sb.from('class_info').select('*').eq('id', 1).maybeSingle()
+    sb.from('class_info').select('*').eq('id', 1).maybeSingle(),
+    sb.from('section_configs').select('*'),
+    sb.from('feedback').select('*').order('created_at', {ascending:false}),
+    sb.from('help_requests').select('*').order('created_at', {ascending:false}),
+    sb.from('help_replies').select('*').order('created_at'),
+    sb.from('instructions').select('*').order('created_at', {ascending:false})
   ]);
-  const inScope = (row) => {
-    if (isGlobal) return true;
-    if (!row.batch && !row.section && !row.dept) return true;
-    return (row.dept||'').toUpperCase() === dept && row.batch === batch && (row.section||'').toUpperCase() === section;
-  };
-  if (p.data){
-    DB.profiles = p.data.filter(x => !x.disabled);
-    if (S.profile){ const fresh = DB.profiles.find(x => x.id === S.profile.id); if (fresh) S.profile = fresh; }
-  }
-  if (r.data) DB.resources = r.data.filter(inScope);
-  if (n.data) DB.notices = n.data.filter(inScope);
+  if (p.data){ DB.profiles = p.data.filter(x => !x.disabled); if (S.profile){ const fresh = DB.profiles.find(x => x.id === S.profile.id); if (fresh) S.profile = fresh; } }
+  if (r.data) DB.resources = r.data.filter(row => inScope(me, row));
+  if (n.data) DB.notices = n.data.filter(row => inScope(me, row));
   if (a.data) DB.notice_acks = a.data;
-  if (e.data) DB.events = e.data.filter(inScope);
-  if (g.data) DB.groups = g.data.filter(inScope);
-  if (pr.data) DB.presentations = pr.data.filter(inScope);
+  if (e.data) DB.events = e.data.filter(row => inScope(me, row));
+  if (g.data) DB.groups = g.data.filter(row => inScope(me, row));
+  if (pr.data) DB.presentations = pr.data.filter(row => inScope(me, row));
   if (s.data) DB.submissions = s.data;
   if (nt.data) DB.notifications = nt.data;
   if (ci.data) DB.class_info = ci.data;
+  if (sc.data) DB.section_configs = sc.data;
+  if (fb.data) DB.feedback = fb.data;
+  if (hr.data) DB.help_requests = hr.data;
+  if (hrep.data) DB.help_replies = hrep.data;
+  if (instr.data) DB.instructions = instr.data;
   if (!DB.class_info) DB.class_info = { name:'UniSync', dept:'CSE', batch:'—', section:'—', semester:'—' };
 }
 
 function subscribeRealtime(){
   channels.forEach(c => sb.removeChannel(c));
   channels = [];
-  const tables = ['profiles','resources','notices','notice_acks','events','groups','presentations','submissions','notifications','class_info'];
+  const tables = ['profiles','resources','notices','notice_acks','events','groups','presentations','submissions','notifications','class_info','section_configs','feedback','help_requests','help_replies','instructions'];
   tables.forEach(table => {
     const ch = sb.channel(`rt_${table}`)
       .on('postgres_changes', { event:'*', schema:'public', table }, async () => {
@@ -329,32 +369,25 @@ async function notify(userIds, title, body, link){
 }
 async function notifyClass(exceptId, title, body, link){
   const me = S.profile; if (!me) return;
-  const myDept = (me.dept||'').toUpperCase();
-  const mySec = (me.section||'').toUpperCase();
-  const ids = DB.profiles.filter(p => p.id !== exceptId && (p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec).map(p => p.id);
+  const scopes = meScopes(me);
+  const ids = DB.profiles.filter(p => {
+    if (p.id === exceptId) return false;
+    if (isAdmin(me)) return true;
+    return scopes.some(s => (p.dept||'').toUpperCase() === s.dept && p.batch === s.batch && (p.section||'').toUpperCase() === s.section);
+  }).map(p => p.id);
   await notify(ids, title, body, link);
 }
 
 function viewAuth(){
-  const t = S.authTab, mode = S.authMode;
-  const roleMeta = { student:{label:'Student',icon:'🎓',color:'var(--accent)',title:'Student Access'}, cr:{label:'CR',icon:'⭐',color:'#8b5cf6',title:'Class Representative'}, admin:{label:'Admin',icon:'🛡',color:'#f59e0b',title:'Administrator'} };
-  const meta = roleMeta[t];
+  const mode = S.authMode;
   return `
   <div class="auth-wrap"><div class="auth">
     <div class="row" style="margin-bottom:16px">
       <div class="logo" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:700;color:#fff">US</div>
       <div><h1 style="margin:0;font-size:19px">UniSync</h1><p class="sub" style="margin:0">Your class, synced.</p></div>
     </div>
-    <div class="tabs">
-      <button class="${t==='student'?'active':''}" onclick="setAuthTab('student')">Student</button>
-      <button class="${t==='cr'?'active':''}" onclick="setAuthTab('cr')">CR</button>
-      <button class="${t==='admin'?'active':''}" onclick="setAuthTab('admin')">Admin</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-      <div style="width:54px;height:54px;flex:0 0 54px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:${meta.color}22;border:1px solid ${meta.color}55">${meta.icon}</div>
-      <div><div style="font-weight:650;font-size:15px">${meta.title}</div><div class="small muted">${mode==='login'?'Sign in to continue':'Create your account'}</div></div>
-    </div>
     ${mode==='register' ? `
+      <div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Create your account</div><div class="small muted">New accounts start as students</div></div>
       <label class="f"><span>Full name <span class="req">*</span></span><input class="inp" id="li_name" placeholder="Your full name" data-fk="li_name"></label>
       <label class="f"><span>Student ID <span class="req">*</span></span><input class="inp" id="li_sid" placeholder="e.g. 2021001" data-fk="li_sid"></label>
       <div class="frow">
@@ -362,16 +395,17 @@ function viewAuth(){
         <label class="f"><span>Batch <span class="req">*</span></span><input class="inp" id="rg_batch" placeholder="e.g. 48" data-fk="rg_batch"></label>
       </div>
       <label class="f"><span>Section <span class="req">*</span></span><input class="inp" id="rg_section" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="rg_section"></label>
-    ` : ''}
+    ` : `
+      <div style="margin-bottom:14px;text-align:center"><div style="font-weight:650;font-size:15px">Sign in</div><div class="small muted">Any role can sign in here</div></div>
+    `}
     <label class="f"><span>Email <span class="req">*</span></span><input class="inp" id="li_email" type="email" placeholder="you@uni.edu" data-fk="li_email"></label>
     <label class="f"><span>Password <span class="req">*</span></span><input class="inp" id="li_pw" type="password" placeholder="••••••" data-fk="li_pw" onkeydown="if(event.key==='Enter')doAuth()"></label>
     ${S.authError ? `<div class="err" style="margin-bottom:10px">${esc(S.authError)}</div>` : ''}
     <button class="btn primary" style="width:100%;justify-content:center" onclick="doAuth()">${mode==='login'?'Sign in':'Create account'}</button>
-    ${t !== 'admin' ? `<div style="text-align:center;margin-top:16px"><a onclick="toggleAuthMode()" style="cursor:pointer;font-size:13px">${mode==='login'?'New here? Create an account →':'← Already have an account? Sign in'}</a></div>` : ''}
+    <div style="text-align:center;margin-top:16px"><a onclick="toggleAuthMode()" style="cursor:pointer;font-size:13px">${mode==='login'?'New here? Create an account →':'← Already have an account? Sign in'}</a></div>
   </div></div>`;
 }
 
-function setAuthTab(t){ S.authTab=t; S.authError=''; if(t==='admin')S.authMode='login'; render(); }
 function toggleAuthMode(){ S.authMode=S.authMode==='login'?'register':'login'; S.authError=''; render(); }
 
 async function doAuth(){
@@ -407,19 +441,28 @@ const NAV = [
   { id:'calendar',     ico:'🗓', label:'Calendar',     section:'Main' },
   { id:'presentations',ico:'🎤', label:'Presentations',section:'Class' },
   { id:'groups',       ico:'💬', label:'Groups',       section:'Class' },
-  { id:'members',      ico:'👥', label:'Members',      section:'Class' },
-  { id:'manage-crs',   ico:'🛡', label:'Manage CRs',   section:'Admin', adminOnly:true }
+  { id:'help',         ico:'🆘', label:'Help / Ask',   section:'Class' },
+  { id:'cr-directory', ico:'🎓', label:'CR Directory', section:'Class' },
+  { id:'instructions', ico:'📋', label:'Instructions', section:'Class', managerOnly:true },
+  { id:'members',      ico:'👥', label:'Members',      section:'Class', managerOnly:true },
+  { id:'feedback',     ico:'💬', label:'Feedback',     section:'More' },
+  { id:'manage-crs',   ico:'🛡', label:'Manage Users', section:'Admin', adminOnly:true }
 ];
 
 function unreadCount(){ if(!S.profile) return 0; return DB.notifications.filter(n=>n.user_id===S.profile.id && !n.read).length; }
 
 function viewSidebar(u){
-  const sections = ['Main','Class','Admin'];
+  const sections = ['Main','Class','More','Admin'];
   let html = `<aside class="sidebar">
     <div class="brand"><div class="logo">US</div><div><h1>UniSync</h1><small>${esc(classLabel(u))}</small></div></div>
     <nav class="nav">`;
   sections.forEach(sec => {
-    const items = NAV.filter(n => { if (n.section !== sec) return false; if (n.adminOnly) return isAdmin(u); return true; });
+    const items = NAV.filter(n => {
+      if (n.section !== sec) return false;
+      if (n.adminOnly) return isAdmin(u);
+      if (n.managerOnly) return canManage(u);
+      return true;
+    });
     if (!items.length) return;
     html += `<div class="nav-sep">${sec}</div>`;
     items.forEach(n => { html += `<button class="nav-item ${S.route===n.id?'active':''}" onclick="go('${n.id}')" title="${n.label}"><span class="ico">${n.ico}</span><span class="lbl">${n.label}</span></button>`; });
@@ -428,13 +471,18 @@ function viewSidebar(u){
   return html;
 }
 
-function roleBadge(u){ if(isAdmin(u))return '<span class="tag admin">Admin</span>'; if(isCR(u))return '<span class="tag purple">CR</span>'; return '<span class="tag">Student</span>'; }
+function roleBadge(u){
+  if(isAdmin(u)) return '<span class="tag admin">Admin</span>';
+  if(isTeacher(u)) return '<span class="tag teacher">Teacher</span>';
+  if(isCR(u)) return '<span class="tag purple">CR</span>';
+  return '<span class="tag">Student</span>';
+}
 
 function viewTopbar(u){
   const unread = unreadCount();
   const q = S.route === 'search' ? S.search : '';
   return `<header class="topbar">
-    <div class="class-chip">${esc(classLabel(u))}</div>
+    <div class="class-chip">${esc(classLabel(u))}${isTeacher(u) && u.extra_sections?.length ? ` +${u.extra_sections.length}` : ''}</div>
     <div class="searchbox"><span class="si">🔍</span><input id="globalSearch" placeholder="Search resources, notices, events, members…" value="${esc(q)}" data-fk="globalSearch" oninput="doSearch(this.value)"></div>
     <div class="topbar-right">
       ${roleBadge(u)}
@@ -457,10 +505,7 @@ function render(){
       if (body) modalInputState.__scrollTop = body.scrollTop;
     }
   }
-  if (S.loading){
-    app.innerHTML = `<div style="display:grid;place-items:center;min-height:100vh"><div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">⏳</div><div class="muted">Loading…</div></div></div>`;
-    return;
-  }
+  if (S.loading){ app.innerHTML = `<div style="display:grid;place-items:center;min-height:100vh"><div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">⏳</div><div class="muted">Loading…</div></div></div>`; return; }
   if (!S.profile){ app.innerHTML = viewAuth(); return; }
   const u = S.profile;
   const a = document.activeElement;
@@ -476,10 +521,7 @@ function render(){
     const body = document.querySelector('.modal .modal-body');
     if (body && modalInputState.__scrollTop != null) body.scrollTop = modalInputState.__scrollTop;
   }
-  if (fk){
-    const el = document.querySelector(`[data-fk="${fk}"]`);
-    if (el){ el.focus(); try { el.setSelectionRange(ss, se); } catch(e){} }
-  }
+  if (fk){ const el = document.querySelector(`[data-fk="${fk}"]`); if (el){ el.focus(); try { el.setSelectionRange(ss, se); } catch(e){} } }
 }
 
 function viewRoute(u){
@@ -490,8 +532,12 @@ function viewRoute(u){
     case 'calendar':      return viewCalendar(u);
     case 'presentations': return viewPresentations(u);
     case 'groups':        return viewGroups(u);
-    case 'members':       return viewMembers(u);
-    case 'manage-crs':    return isAdmin(u) ? viewManageCRs(u) : viewDashboard(u);
+    case 'members':       return canManage(u) ? viewMembers(u) : viewDashboard(u);
+    case 'cr-directory':  return viewCRDirectory(u);
+    case 'instructions':  return canManage(u) ? viewInstructions(u) : viewDashboard(u);
+    case 'feedback':      return viewFeedback(u);
+    case 'help':          return viewHelp(u);
+    case 'manage-crs':    return isAdmin(u) ? viewManageUsers(u) : viewDashboard(u);
     case 'notifications': return viewNotifications(u);
     case 'search':        return viewSearch(u);
     default:              return viewDashboard(u);
@@ -499,6 +545,7 @@ function viewRoute(u){
 }
 
 function nameOf(id){ const u = DB.profiles.find(x=>x.id===id); return u ? u.name : 'Unknown'; }
+function profileOf(id){ return DB.profiles.find(x=>x.id===id) || null; }
 
 function viewDashboard(u){
   const today = iso(0), in7 = iso(7);
@@ -510,19 +557,19 @@ function viewDashboard(u){
   const recentGroups = DB.groups.slice(0,3);
   const stat = (n,l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
   let greeting = isAdmin(u) ? 'You are the Administrator. You can see all sections.'
+    : isTeacher(u) ? `You are a Teacher with access to ${meScopes(u).length} section(s).`
     : isCR(u) ? `You are a CR for ${classLabel(u)}. Your posts go to your section only.`
     : `Showing content for ${classLabel(u)}.`;
   let stats;
-  if (isAdmin(u)){ stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.profiles.filter(x=>x.role==='student').length,'Students')}${stat(DB.profiles.filter(x=>x.role==='cr').length,'CRs')}${stat(DB.notices.length,'Notices')}${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}</div>`; }
-  else if (isCR(u)){ stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.notices.length,'Notices in section')}${stat(DB.resources.length,'Resources in section')}${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}${stat(DB.submissions.length,'Submissions')}</div>`; }
-  else { stats = `<div class="grid g4" style="margin-bottom:18px">${stat(todays.length,'Classes today')}${stat(upcoming.filter(e=>['Assignment','Quiz','Exam','Midterm','Final'].includes(e.type)).length,'Deadlines this week')}${stat(notices.length,'Active notices')}${stat(mySubs.length,'My submissions')}</div>`; }
+  if (isAdmin(u)) stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.profiles.filter(x=>x.role==='student').length,'Students')}${stat(DB.profiles.filter(x=>x.role==='cr').length,'CRs')}${stat(DB.profiles.filter(x=>x.role==='teacher').length,'Teachers')}${stat(DB.help_requests.filter(h=>!h.resolved).length,'Open help')}</div>`;
+  else if (canManage(u)) stats = `<div class="grid g4" style="margin-bottom:18px">${stat(DB.notices.length,'Notices')}${stat(DB.resources.length,'Resources')}${stat(DB.events.filter(e=>e.date>=today).length,'Upcoming events')}${stat(DB.submissions.length,'Submissions')}</div>`;
+  else stats = `<div class="grid g4" style="margin-bottom:18px">${stat(todays.length,'Classes today')}${stat(upcoming.filter(e=>['Assignment','Quiz','Exam','Midterm','Final'].includes(e.type)).length,'Deadlines this week')}${stat(notices.length,'Active notices')}${stat(mySubs.length,'My submissions')}</div>`;
   const evRow = e => { const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span></div>`; };
   return `
     <div class="page-head">
       <div><h2>Hello, ${esc(u.name.split(' ')[0])} 👋</h2><p>${greeting}</p></div>
       <div class="actions">
         ${canManage(u) ? `<button class="btn" onclick="openModal('event')">+ Event</button><button class="btn" onclick="openModal('notice')">+ Notice</button><button class="btn primary" onclick="openModal('presentation')">+ Presentation</button>` : `<button class="btn primary" onclick="go('presentations')">Submit presentation</button>`}
-        ${isAdmin(u) ? `<button class="btn" onclick="go('manage-crs')">Manage CRs</button>` : ''}
       </div>
     </div>
     ${stats}
@@ -552,7 +599,7 @@ function viewResources(u){
 }
 
 function resourceCard(r, u){
-  const canDelete = canManage(u) || r.uploaded_by === u.id;
+  const canEdit = canManage(u) || r.uploaded_by === u.id;
   if (isDrivePdf(r)){
     const cleanName = (r.title||'').replace(/\.pdf$/i,'');
     return `<div class="card" style="padding:12px">
@@ -561,14 +608,14 @@ function resourceCard(r, u){
         <div class="file-body"><div class="file-name">${esc(cleanName)}</div><div class="file-meta">PDF · Drive ${r.course?' · '+esc(r.course):''}</div><div class="file-meta" style="margin-top:3px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div></div>
         <div class="file-open">Open in Drive ↗</div>
       </div>
-      ${canDelete ? `<div class="row" style="margin-top:8px"><button class="btn danger sm" style="margin-left:auto" onclick="deleteResource('${r.id}')">Delete</button></div>` : ''}
+      ${canEdit ? `<div class="row" style="margin-top:8px;gap:6px"><button class="btn sm" style="margin-left:auto" onclick="openModal('resource',{id:'${r.id}'})">✎ Edit</button><button class="btn danger sm" onclick="deleteResource('${r.id}')">Delete</button></div>` : ''}
     </div>`;
   }
   return `<div class="card">
     <div style="font-weight:620;font-size:14.5px;margin-bottom:4px">${esc(r.title)}</div>
     <div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">${r.course?`<span class="tag blue">${esc(r.course)}</span>`:''}<span class="tag">${esc(r.type)}</span></div>
     <div class="tiny muted" style="margin-bottom:10px">by ${esc(nameOf(r.uploaded_by))} · ${fmtDate(r.uploaded_at?.slice(0,10))}</div>
-    <div class="row"><button class="btn primary sm" onclick="openResource('${r.id}')">Open</button>${canDelete ? `<button class="btn danger sm" style="margin-left:auto" onclick="deleteResource('${r.id}')">Delete</button>` : ''}</div>
+    <div class="row"><button class="btn primary sm" onclick="openResource('${r.id}')">Open</button>${canEdit ? `<button class="btn sm" style="margin-left:auto" onclick="openModal('resource',{id:'${r.id}'})">✎ Edit</button><button class="btn danger sm" onclick="deleteResource('${r.id}')">Delete</button>` : ''}</div>
   </div>`;
 }
 
@@ -640,7 +687,7 @@ function viewCalendar(u){
       <div class="cal-head">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div>${d}</div>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
     </div>
-    <div class="card"><b style="font-size:14.5px">Upcoming events</b><div class="stack" style="margin-top:12px">${upcoming.map(e=>{ const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span>${canManage(u)?`<button class="icon-btn" style="width:30px;height:30px;font-size:12px" onclick="deleteEvent('${e.id}')">🗑</button>`:''}</div>`; }).join('') || `<div class="empty"><span class="big">🗓</span>No upcoming events.</div>`}</div></div>`;
+    <div class="card"><b style="font-size:14.5px">Upcoming events</b><div class="stack" style="margin-top:12px">${upcoming.map(e=>{ const c = countdown(e.date); return `<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${fmtDate(e.date)} · ${esc(e.start_time)}–${esc(e.end_time)}${e.location?' · '+esc(e.location):''}</div></div><span class="tag ${c.cls}">${c.text}</span>${canManage(u)?`<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('event',{id:'${e.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteEvent('${e.id}')">🗑</button></div>`:''}</div>`; }).join('') || `<div class="empty"><span class="big">🗓</span>No upcoming events.</div>`}</div></div>`;
 }
 
 function calMove(delta){ let m = S.calMonth + delta, y = S.calYear; if (m < 0){ m = 11; y--; } if (m > 11){ m = 0; y++; } S.calMonth = m; S.calYear = y; render(); }
@@ -656,11 +703,7 @@ function viewGroups(u){
     ${list.length ? `<div class="grid g3">${list.map(g => {
       const meta = PLATFORM_META[g.platform] || PLATFORM_META.other;
       return `<div class="group-card">
-        <div class="group-head">
-          <div class="platform-badge" style="background:${meta.color}">${meta.svg}</div>
-          <div style="flex:1;min-width:0"><div class="group-name">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div>
-          ${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('group',{id:'${g.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteGroup('${g.id}')">🗑</button></div>` : ''}
-        </div>
+        <div class="group-head"><div class="platform-badge" style="background:${meta.color}">${meta.svg}</div><div style="flex:1;min-width:0"><div class="group-name">${esc(g.name)}</div><div class="tiny muted">${meta.name}</div></div>${canManage(u) ? `<div class="row" style="gap:4px"><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="openModal('group',{id:'${g.id}'})">✎</button><button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteGroup('${g.id}')">🗑</button></div>` : ''}</div>
         ${g.description ? `<div class="group-desc">${esc(g.description)}</div>` : ''}
         <div class="group-foot"><a class="open-link" href="${esc(g.link)}" target="_blank" rel="noopener" style="background:${meta.color}">${meta.svg.replace('width="22" height="22"','width="14" height="14"')} Open ${meta.name}</a></div>
       </div>`;
@@ -680,13 +723,14 @@ function viewPresentations(u){
   const closed = daysUntil(p.deadline) < 0;
   const coveredIds = new Set();
   subs.forEach(s => { coveredIds.add(s.leader_id); (s.members||[]).forEach(m => coveredIds.add(String(m.id).trim())); });
-  const myDept = (u.dept||'').toUpperCase();
-  const mySec = (u.section||'').toUpperCase();
-  const notSubmitted = DB.profiles.filter(x => x.role !== 'admin' && (x.dept||'').toUpperCase() === myDept && x.batch === u.batch && (x.section||'').toUpperCase() === mySec && !coveredIds.has(x.student_id));
+  const scopes = meScopes(u);
+  const notSubmitted = DB.profiles.filter(x => x.role !== 'admin' && scopes.some(s => (x.dept||'').toUpperCase() === s.dept && x.batch === s.batch && (x.section||'').toUpperCase() === s.section) && !coveredIds.has(x.student_id));
   const mySub = subs.find(s => s.leader_id === u.student_id || (s.members||[]).some(m => String(m.id).trim() === u.student_id));
+  const secKey = sectionKey(p.dept, p.batch, p.section);
+  const cfg = DB.section_configs.find(c => sectionKey(c.dept, c.batch, c.section) === secKey);
   return `
     <div class="page-head">
-      <div><h2>Presentation Submissions</h2><p>Submit your presentation link with team details.</p></div>
+      <div><h2>Presentation Submissions</h2><p>${cfg?.form_url ? `<a href="${esc(cfg.form_url)}" target="_blank" rel="noopener">Open Google Form ↗</a>` : 'Submit your presentation link with team details.'}</p></div>
       <div class="actions">
         ${DB.presentations.length > 1 ? `<select class="inp" style="min-width:220px" onchange="S.selectedPresentation=this.value;render()">${DB.presentations.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select>` : ''}
         ${canManage(u) ? `<button class="btn primary" onclick="openModal('presentation')">+ New</button>` : ''}
@@ -723,7 +767,7 @@ function viewPresentations(u){
         <div class="row wrap" style="margin-bottom:14px"><b style="font-size:14.5px">All submissions (${subs.length})</b><div class="row" style="margin-left:auto;gap:8px"><button class="btn sm" onclick="exportSubmissions('${p.id}')">⬇ Export CSV</button><button class="btn sm" onclick="remindNonSubmitters('${p.id}')">🔔 Remind ${notSubmitted.length}</button></div></div>
         ${subs.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Team</th><th>Leader</th><th>Members</th><th>Link</th><th>Submitted</th><th></th></tr></thead><tbody>${subs.map(s => `<tr><td>${esc(s.team_name||'—')}</td><td>${esc(s.leader_name)}<div class="tiny muted">${esc(s.leader_id)}</div></td><td>${(s.members||[]).map(m=>`<div class="tiny">${esc(m.name)} (${esc(m.id)})</div>`).join('')||'—'}</td><td><a href="${esc(s.link)}" target="_blank" rel="noopener" class="tiny">Open ↗</a></td><td class="tiny">${fmtDateTime(s.submitted_at)}</td><td><button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="deleteSubmission('${s.id}')">🗑</button></td></tr>`).join('')}</tbody></table></div>` : `<div class="empty"><span class="big">📭</span>No submissions.</div>`}
         <div class="divider"></div>
-        <b class="small">Not submitted in this section (${notSubmitted.length})</b>
+        <b class="small">Not submitted (${notSubmitted.length})</b>
         <div class="row wrap" style="margin-top:8px">${notSubmitted.map(m=>`<span class="tag">${esc(m.name)} · ${esc(m.student_id)}</span>`).join('') || `<span class="small muted">Everyone submitted 🎉</span>`}</div>
       </div>
     ` : ''}`;
@@ -733,23 +777,29 @@ async function deletePresentation(id){
   const p = DB.presentations.find(x=>x.id===id);
   if (!p) return;
   const subCount = DB.submissions.filter(s => s.presentation_id === id).length;
-  const msg = `Delete "${p.title}"?\n\nThis will permanently delete:\n• The presentation event\n• ${subCount} submission${subCount!==1?'s':''}\n• The tab in Google Sheet\n\nThis cannot be undone.`;
-  if (!confirm(msg)) return;
+  if (!confirm(`Delete "${p.title}"?\n\nThis will permanently delete the presentation and ${subCount} submission(s).`)) return;
   await sb.from('submissions').delete().eq('presentation_id', id);
   const { error } = await sb.from('presentations').delete().eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
-  syncDeleteToSheet(p.title);
+  syncDeleteToSheet(p);
   S.selectedPresentation = null;
   toast('Presentation deleted');
   render();
 }
 
-async function syncDeleteToSheet(presentationTitle){
-  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
-  try {
-    await fetch(SHEET_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ token: SHEET_SECRET, action: 'deletePresentation', presentation: presentationTitle }), keepalive: true });
-    return true;
-  } catch(e) { console.warn('Sheet delete failed', e); return false; }
+async function syncDeleteToSheet(p){
+  const sectionCfg = DB.section_configs.find(c => c.dept !== '*' && sectionKey(c.dept, c.batch, c.section) === sectionKey(p.dept, p.batch, p.section));
+  const adminCfg = DB.section_configs.find(c => c.dept === '*');
+  const base = { action: 'deletePresentation', presentation: p.title, dept: (p.dept || '').toUpperCase(), batch: p.batch || '', section: (p.section || '').toUpperCase() };
+  if (sectionCfg?.webhook_url && !sectionCfg.webhook_url.includes('PASTE_')){
+    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); }
+    catch(e){ console.warn('Section delete sync failed', e); }
+  }
+  if (adminCfg?.webhook_url && !adminCfg.webhook_url.includes('PASTE_')){
+    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...base, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); }
+    catch(e){ console.warn('Admin delete sync failed', e); }
+  }
+  return true;
 }
 
 async function deleteSubmission(id){
@@ -763,10 +813,8 @@ async function remindNonSubmitters(pid){
   const p = DB.presentations.find(x=>x.id===pid); if (!p) return;
   const covered = new Set();
   DB.submissions.filter(s=>s.presentation_id===pid).forEach(s=>{ covered.add(s.leader_id); (s.members||[]).forEach(m=>covered.add(String(m.id).trim())); });
-  const me = S.profile;
-  const myDept = (me.dept||'').toUpperCase();
-  const mySec = (me.section||'').toUpperCase();
-  const targets = DB.profiles.filter(x => x.role !== 'admin' && (x.dept||'').toUpperCase() === myDept && x.batch === me.batch && (x.section||'').toUpperCase() === mySec && !covered.has(x.student_id)).map(x=>x.id);
+  const scopes = meScopes(S.profile);
+  const targets = DB.profiles.filter(x => x.role !== 'admin' && scopes.some(s => (x.dept||'').toUpperCase() === s.dept && x.batch === s.batch && (x.section||'').toUpperCase() === s.section) && !covered.has(x.student_id)).map(x=>x.id);
   if (!targets.length){ toast('Everyone submitted'); return; }
   await notify(targets, 'Presentation reminder', `You haven't submitted for "${p.title}". Deadline: ${fmtDate(p.deadline)}.`, 'presentations');
   toast(`Reminder sent to ${targets.length} student(s)`);
@@ -790,19 +838,188 @@ function exportSubmissions(pid){
 
 function viewMembers(u){
   const me = S.profile;
-  const myDept = (me.dept||'').toUpperCase();
-  const mySec = (me.section||'').toUpperCase();
-  const visible = me.role === 'admin' ? DB.profiles : DB.profiles.filter(p => p.role === 'admin' || ((p.dept||'').toUpperCase() === myDept && p.batch === me.batch && (p.section||'').toUpperCase() === mySec));
-  const sorted = [...visible].sort((a,b) => { const rank = x => x.role === 'admin' ? 0 : x.role === 'cr' ? 1 : 2; return rank(a) - rank(b) || a.name.localeCompare(b.name); });
+  const myScopes = meScopes(me);
+  const visible = isAdmin(me) ? DB.profiles : DB.profiles.filter(p => {
+    if (p.role === 'admin') return true;
+    return myScopes.some(s => (p.dept||'').toUpperCase() === s.dept && p.batch === s.batch && (p.section||'').toUpperCase() === s.section);
+  });
+  const sorted = [...visible].sort((a,b) => { const rank = x => x.role==='admin'?0:x.role==='teacher'?1:x.role==='cr'?2:3; return rank(a) - rank(b) || a.name.localeCompare(b.name); });
   return `
-    <div class="page-head"><div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members in ${esc(classLabel(me))}</p></div>${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage CRs</button></div>` : ''}</div>
-    <div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)} · ${esc(m.email||'')}</div><div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div></div>${roleBadge(m)}</div></div>`).join('')}</div>`;
+    <div class="page-head"><div><h2>Class Members</h2><p>${visible.filter(x=>x.role!=='admin').length} members</p></div>${isAdmin(u) ? `<div class="actions"><button class="btn primary" onclick="go('manage-crs')">Manage Users</button></div>` : ''}</div>
+    <div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.student_id)}</div><div class="tiny muted" style="margin-top:3px">${esc(m.email||'')}</div><div class="tiny muted" style="margin-top:3px">${esc(classLabel(m))}</div></div>${roleBadge(m)}</div></div>`).join('')}</div>`;
 }
 
-function viewManageCRs(u){
+function viewCRDirectory(u){
+  const crs = DB.profiles.filter(p => (p.role === 'cr' || p.role === 'teacher'));
+  const sorted = [...crs].sort((a,b) => a.name.localeCompare(b.name));
+  return `
+    <div class="page-head"><div><h2>CR & Teacher Directory</h2><p>${sorted.length} class representatives across all sections.</p></div></div>
+    <div class="grid g3">${sorted.map(m => `<div class="card"><div class="row"><div class="avatar" style="background:${colorFor(m.id)}">${esc(initials(m.name))}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(m.name)}</div><div class="tiny muted">${esc(m.dept||'—').toUpperCase()} · Batch ${esc(m.batch||'—')} · Sec ${esc((m.section||'—').toUpperCase())}</div><div style="margin-top:6px">${roleBadge(m)}</div></div></div></div>`).join('') || `<div class="empty"><span class="big">🎓</span>No CRs yet.</div>`}</div>`;
+}
+
+function viewInstructions(u){
+  const canAdd = isAdmin(u) || isTeacher(u);
+  return `
+    <div class="page-head">
+      <div><h2>Instructions & Setup Guide</h2><p>Follow these steps to connect your Google Sheet to UniSync.</p></div>
+      ${canAdd ? `<div class="actions"><button class="btn primary" onclick="openModal('instruction')">+ Add instruction</button></div>` : ''}
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-left:3px solid var(--accent)">
+      <div style="font-weight:650;font-size:16px;margin-bottom:6px">📌 Overview</div>
+      <div class="small muted" style="line-height:1.6">
+        Each CR / Teacher needs their own Google Sheet for their section. Follow the steps below, then paste the webhook URL + secret into your <b>Profile → Presentation Sheet config</b>.
+        <br><br>
+        <b style="color:var(--accent)">If you are the Admin:</b> set the webhook URL + secret in <b>Profile → Global Sheet config</b> instead. Submissions from <b>every section</b> will be collected in your sheet, and the Apps Script will auto-create tabs per section (e.g. <b>SWE-48-G</b>) and per course (e.g. <b>CSE 2205</b>).
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="row" style="margin-bottom:12px"><b style="font-size:15px">📖 Setup Guide</b></div>
+      <ol style="line-height:1.9;padding-left:22px;color:#cfd6e4;margin:0">
+        <li>Open <a href="https://sheets.new" target="_blank" rel="noopener">sheets.new</a> to create a new Google Sheet. Name it e.g. <b>UniSync — SWE-48-G</b>.</li>
+        <li>In the Sheet, click <b>Extensions</b> → <b>Apps Script</b>.</li>
+        <li>Delete the default code, then <b>paste the code below</b>.</li>
+        <li>In the pasted code, change <b>YOUR_SECRET_HERE</b> to a secret phrase of your choice. <b>Write it down.</b></li>
+        <li>Press <b>Ctrl+S</b> to save. Name the project e.g. <b>UniSync Sheet Sync</b>.</li>
+        <li>Click <b>Deploy</b> → <b>New deployment</b>.</li>
+        <li>Click the ⚙️ gear → <b>Web app</b>.</li>
+        <li>Set: <b>Execute as:</b> Me, <b>Who has access:</b> Anyone.</li>
+        <li>Click <b>Deploy</b> → <b>Authorize access</b> → choose your Gmail.</li>
+        <li>Warning screen → click <b>Advanced</b> → <b>Go to "UniSync Sheet Sync" (unsafe)</b> → <b>Allow</b>.</li>
+        <li>Copy the <b>Web app URL</b> (ends with <b>/exec</b>).</li>
+        <li>In UniSync, open your <b>Profile</b> → paste the URL + your secret → <b>Save</b>.</li>
+      </ol>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="row" style="margin-bottom:12px">
+        <b style="font-size:15px">💻 Apps Script Code</b>
+        <button class="btn sm primary" style="margin-left:auto" onclick="copyAppsScript()">📋 Copy code</button>
+      </div>
+      <div class="tiny muted" style="margin-bottom:10px">
+        Paste this into <b>Extensions → Apps Script</b>. Change <code>YOUR_SECRET_HERE</code> before deploying.
+      </div>
+      <pre id="appscript-code" class="code-block">${esc(APPS_SCRIPT_CODE)}</pre>
+    </div>
+
+    ${DB.instructions.length ? `
+      <div class="card">
+        <b style="font-size:15px">📝 Additional instructions</b>
+        <div class="stack" style="margin-top:14px">
+          ${DB.instructions.map(n => {
+            const author = profileOf(n.created_by);
+            const canDelete = isAdmin(u) || (isTeacher(u) && n.created_by === u.id);
+            return `
+            <div class="card" style="background:var(--panel2);padding:14px">
+              <div class="row" style="align-items:flex-start;margin-bottom:6px">
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:640;font-size:15px">${esc(n.title)}</div>
+                  <div class="tiny muted" style="margin-top:3px">by ${esc(author?.name || 'Unknown')} · ${fmtDateTime(n.created_at)}</div>
+                </div>
+                ${canDelete ? `<button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteInstruction('${n.id}')">🗑</button>` : ''}
+              </div>
+              <div style="white-space:pre-wrap;line-height:1.65;color:#cfd6e4;margin-top:6px">${esc(n.body)}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    ` : ''}`;
+}
+
+async function copyAppsScript(){
+  try { await navigator.clipboard.writeText(APPS_SCRIPT_CODE); toast('Apps Script code copied!'); }
+  catch(e){ toast('Copy failed — select manually', 'err'); }
+}
+
+async function saveInstruction(id){
+  const title = $('#in_title').value.trim();
+  const body = $('#in_body').value.trim();
+  if (!title || !body){ toast('Title and body required', 'err'); return; }
+  if (id){ const { error } = await sb.from('instructions').update({ title, body }).eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Instruction updated'); }
+  else { const { error } = await sb.from('instructions').insert({ title, body, created_by: S.profile.id }); if (error){ toast(error.message, 'err'); return; } toast('Instruction added'); }
+  closeModal();
+}
+async function deleteInstruction(id){
+  if (!confirm('Delete this instruction?')) return;
+  const { error } = await sb.from('instructions').delete().eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Instruction deleted');
+}
+
+function viewFeedback(u){
+  const me = S.profile;
+  const mine = isAdmin(me) ? DB.feedback : DB.feedback.filter(f => f.user_id === me.id);
+  return `
+    <div class="page-head"><div><h2>Feedback</h2><p>${isAdmin(me) ? 'All feedback from users.' : 'Submit feedback and see admin replies.'}</p></div><div class="actions"><button class="btn primary" onclick="openModal('feedback')">+ Submit feedback</button></div></div>
+    <div class="stack">${mine.map(f => {
+      const author = profileOf(f.user_id);
+      return `<div class="card">
+        <div style="font-weight:640;font-size:15px;margin-bottom:5px">${esc(f.subject)}</div>
+        <div class="row wrap tiny muted" style="gap:6px;margin-bottom:8px">${author?`<span class="tag">${esc(author.name)}${author.dept?` · ${esc(author.dept.toUpperCase())}-${esc(author.batch||'')}-${esc((author.section||'').toUpperCase())}`:''}</span>`:''}<span>${fmtDateTime(f.created_at)}</span></div>
+        <div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(f.body)}</div>
+        ${f.reply ? `<div class="divider"></div><div style="background:var(--panel2);padding:10px;border-radius:8px"><div class="tiny muted" style="margin-bottom:4px">Admin reply · ${fmtDateTime(f.replied_at)}</div><div style="white-space:pre-wrap;line-height:1.55">${esc(f.reply)}</div></div>` : ''}
+        ${isAdmin(me) && !f.reply ? `<div class="divider"></div><button class="btn sm primary" onclick="openModal('replyFeedback',{id:'${f.id}'})">Reply</button>` : ''}
+      </div>`;
+    }).join('') || `<div class="empty"><span class="big">💬</span>No feedback yet.</div>`}</div>`;
+}
+
+function viewHelp(u){
+  const me = S.profile;
+  const myScopes = meScopes(me);
+  const visible = DB.help_requests.filter(h => {
+    if (isAdmin(me)) return true;
+    if (h.user_id === me.id) return true;
+    const sameScope = myScopes.some(s => (h.dept||'').toUpperCase() === s.dept && h.batch === s.batch && (h.section||'').toUpperCase() === s.section);
+    if (!sameScope) return false;
+    if (h.target === 'students') return me.role === 'student' || isCR(me) || isTeacher(me);
+    if (h.target === 'cr') return me.role === 'cr';
+    if (h.target === 'teacher') return me.role === 'teacher';
+    return false;
+  });
+  return `
+    <div class="page-head"><div><h2>Help / Ask</h2><p>Ask for help from specific groups.</p></div><div class="actions"><button class="btn primary" onclick="openModal('helpRequest')">+ New request</button></div></div>
+    <div class="stack">${visible.map(h => {
+      const author = profileOf(h.user_id);
+      const replies = DB.help_replies.filter(r => r.request_id === h.id);
+      return `<div class="card">
+        <div class="row" style="align-items:flex-start;margin-bottom:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:640;font-size:15px;margin-bottom:5px">${h.resolved?'✅ ':''}${esc(h.title)}</div>
+            <div class="row wrap tiny muted" style="gap:6px">
+              <span class="tag ${h.target==='cr'?'purple':h.target==='teacher'?'teacher':'blue'}">to: ${h.target==='cr'?'CR':h.target==='teacher'?'Teacher':'All Students'}</span>
+              <span class="tag">${esc((h.dept||'').toUpperCase())}-${esc(h.batch||'')}-${esc((h.section||'').toUpperCase())}</span>
+              ${author?`<span>by ${esc(author.name)}</span>`:''}
+              <span>${fmtDateTime(h.created_at)}</span>
+            </div>
+          </div>
+          ${h.user_id === me.id ? `<button class="btn sm ${h.resolved?'':'primary'}" onclick="toggleHelpResolved('${h.id}',${!h.resolved})">${h.resolved?'Reopen':'Mark resolved'}</button>` : ''}
+        </div>
+        <div style="white-space:pre-wrap;line-height:1.6;color:#cfd6e4">${esc(h.body)}</div>
+        <div class="divider"></div>
+        <div class="stack" style="gap:8px">${replies.map(r => { const rep = profileOf(r.user_id); return `<div style="background:var(--panel2);padding:10px;border-radius:8px"><div class="tiny muted" style="margin-bottom:4px">${esc(rep?.name||'User')} · ${fmtDateTime(r.created_at)}</div><div style="white-space:pre-wrap;line-height:1.55">${esc(r.body)}</div></div>`; }).join('') || `<div class="tiny muted">No replies yet.</div>`}</div>
+        <div class="divider"></div>
+        <div class="row" style="gap:6px"><input class="inp" id="hr_${h.id}" placeholder="Write a reply…" style="flex:1" onkeydown="if(event.key==='Enter')submitHelpReply('${h.id}')"><button class="btn primary sm" onclick="submitHelpReply('${h.id}')">Reply</button></div>
+      </div>`;
+    }).join('') || `<div class="empty"><span class="big">🆘</span>No help requests for you right now.</div>`}</div>`;
+}
+
+async function submitHelpReply(hid){
+  const el = document.getElementById('hr_'+hid);
+  const body = (el?.value||'').trim();
+  if (!body) return;
+  const { error } = await sb.from('help_replies').insert({ request_id: hid, user_id: S.profile.id, body });
+  if (error){ toast(error.message, 'err'); return; }
+  if (el) el.value = '';
+  toast('Reply posted');
+}
+async function toggleHelpResolved(hid, val){ await sb.from('help_requests').update({ resolved: val }).eq('id', hid); toast(val ? 'Marked resolved' : 'Reopened'); }
+
+function viewManageUsers(u){
   if (!isAdmin(u)) return `<div class="empty">Admins only.</div>`;
   const students = DB.profiles.filter(x => x.role === 'student');
   const crs = DB.profiles.filter(x => x.role === 'cr');
+  const teachers = DB.profiles.filter(x => x.role === 'teacher');
   const admins = DB.profiles.filter(x => x.role === 'admin');
   const rowFor = m => `
     <tr>
@@ -811,25 +1028,41 @@ function viewManageCRs(u){
       <td class="small">${esc(classLabel(m))}</td>
       <td>${roleBadge(m)}</td>
       <td style="text-align:right;white-space:nowrap">
-        ${m.role === 'student' ? `<button class="btn sm primary" onclick="appointCR('${m.id}')">Appoint as CR</button>` : ''}
-        ${m.role === 'cr' ? `<button class="btn sm" onclick="demoteCR('${m.id}')">Demote to Student</button>` : ''}
-        ${m.role !== 'admin' ? `<button class="btn sm danger" style="margin-left:6px" onclick="removeMember('${m.id}')">Remove</button>` : ''}
+        ${m.role !== 'admin' ? `
+          <select class="inp" style="width:auto;display:inline-block;padding:4px 8px;font-size:12px" onchange="changeRole('${m.id}', this.value)">
+            <option value="student" ${m.role==='student'?'selected':''}>Student</option>
+            <option value="cr" ${m.role==='cr'?'selected':''}>CR</option>
+            <option value="teacher" ${m.role==='teacher'?'selected':''}>Teacher</option>
+          </select>
+          <button class="btn sm danger" style="margin-left:6px" onclick="removeMember('${m.id}')">Remove</button>
+        ` : ''}
       </td>
     </tr>`;
   return `
-    <div class="page-head"><div><h2>Manage Class Representatives</h2><p>Only the admin can appoint, demote or remove members.</p></div></div>
-    <div class="grid g3" style="margin-bottom:18px">${`<div class="stat"><div class="n">${students.length}</div><div class="l">Students</div></div><div class="stat"><div class="n">${crs.length}</div><div class="l">Class Representatives</div></div><div class="stat"><div class="n">${admins.length}</div><div class="l">Administrators</div></div>`}</div>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead><tbody>${[...admins, ...crs, ...students].map(rowFor).join('')}</tbody></table></div>`;
+    <div class="page-head"><div><h2>Manage Users</h2><p>Appoint CRs / Teachers or remove members.</p></div></div>
+    <div class="grid g4" style="margin-bottom:18px">
+      <div class="stat"><div class="n">${students.length}</div><div class="l">Students</div></div>
+      <div class="stat"><div class="n">${crs.length}</div><div class="l">CRs</div></div>
+      <div class="stat"><div class="n">${teachers.length}</div><div class="l">Teachers</div></div>
+      <div class="stat"><div class="n">${admins.length}</div><div class="l">Admins</div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Member</th><th>Student ID</th><th>Class</th><th>Role</th><th style="text-align:right">Actions</th></tr></thead><tbody>${[...admins, ...teachers, ...crs, ...students].map(rowFor).join('')}</tbody></table></div>`;
 }
 
-async function appointCR(id){ if (!confirm('Appoint as Class Representative?')) return; await sb.from('profiles').update({ role: 'cr' }).eq('id', id); await notify(id, 'You are now a CR', 'Your posts will go to your own section only.', 'dashboard'); toast('CR appointed'); }
-async function demoteCR(id){ if (!confirm('Demote back to Student?')) return; await sb.from('profiles').update({ role: 'student' }).eq('id', id); await notify(id, 'Role changed', 'You are now a Student.', 'dashboard'); toast('CR demoted'); }
-
+async function changeRole(id, role){
+  const m = DB.profiles.find(x=>x.id===id);
+  if (!m) return;
+  if (!confirm(`Change ${m.name}'s role to ${role}?`)) return;
+  const { error } = await sb.from('profiles').update({ role }).eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+  await notify(id, 'Your role changed', `You are now a ${role}.`, 'dashboard');
+  toast('Role updated');
+}
 async function removeMember(id){
   const m = DB.profiles.find(x=>x.id===id);
   if (!m) return;
   if (m.role === 'admin'){ toast('Cannot remove admin', 'err'); return; }
-  if (!confirm(`Remove ${m.name} from UniSync?\n\nThey will be logged out and won't be able to sign in again. Their content (notices, resources) will remain.`)) return;
+  if (!confirm(`Remove ${m.name} from UniSync?`)) return;
   const { error } = await sb.from('profiles').update({ disabled: true }).eq('id', id);
   if (error){ toast(error.message, 'err'); return; }
   toast('Member removed');
@@ -852,9 +1085,8 @@ function viewSearch(u){
   const res = DB.resources.filter(r => [r.title,r.course,r.topic,r.teacher].join(' ').toLowerCase().includes(q));
   const not = DB.notices.filter(n => (n.title + ' ' + n.body).toLowerCase().includes(q));
   const evs = DB.events.filter(e => [e.title,e.course,e.location,e.type].join(' ').toLowerCase().includes(q));
-  const myDept = (u.dept||'').toUpperCase();
-  const mySec = (u.section||'').toUpperCase();
-  const mem = DB.profiles.filter(m => isAdmin(u) || ((m.dept||'').toUpperCase() === myDept && m.batch === u.batch && (m.section||'').toUpperCase() === mySec)).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
+  const myScopes = meScopes(u);
+  const mem = DB.profiles.filter(m => isAdmin(u) || myScopes.some(s => (m.dept||'').toUpperCase() === s.dept && m.batch === s.batch && (m.section||'').toUpperCase() === s.section)).filter(m => (m.name + ' ' + m.student_id).toLowerCase().includes(q));
   const grs = DB.groups.filter(g => (g.name + ' ' + (g.description||'')).toLowerCase().includes(q));
   const total = res.length + not.length + evs.length + mem.length + grs.length;
   const block = (title, items, renderer) => items.length ? `<div class="card" style="margin-bottom:14px"><b style="font-size:14px">${title} <span class="muted">(${items.length})</span></b><div class="stack" style="margin-top:10px">${items.map(renderer).join('')}</div></div>` : '';
@@ -875,27 +1107,82 @@ function modalShell(title, bodyHtml, footHtml){
 function viewModal(u){
   const m = S.modal;
   switch(m.type){
-    case 'profile': return modalShell('My profile', `
-      <div class="row" style="margin-bottom:16px"><div class="avatar" style="width:54px;height:54px;border-radius:14px;font-size:20px;background:${colorFor(u.id)}">${esc(initials(u.name))}</div><div><div style="font-weight:650;font-size:16px">${esc(u.name)}</div><div class="small muted">${esc(u.student_id)} · ${esc(u.email||'')}</div><div style="margin-top:5px">${roleBadge(u)}</div></div></div>
-      <div class="frow"><label class="f"><span>Full name</span><input class="inp" id="pf_name" value="${esc(u.name)}" data-fk="pf_name"></label><label class="f"><span>Email</span><input class="inp" id="pf_email" value="${esc(u.email||'')}" data-fk="pf_email"></label></div>
-      <div class="frow"><label class="f"><span>Department</span><input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept"></label><label class="f"><span>Batch</span><input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch"></label></div>
-      <label class="f"><span>Section</span><input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section"></label>
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px"><div class="tiny muted">Changing your department, batch or section switches your view to that group's content.</div></div>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveProfile()">Save changes</button>`);
+    case 'profile': {
+      const isT = isTeacher(u);
+      const isA = isAdmin(u);
+      if (!m._init){ extraSectionsDraft = JSON.parse(JSON.stringify(u.extra_sections || [])); m._init = true; }
+      const cfgSection = selectedConfigSection || { dept: u.dept||'', batch: u.batch||'', section: u.section||'' };
+      const cfg = DB.section_configs.find(c => c.dept !== '*' && sectionKey(c.dept,c.batch,c.section) === sectionKey(cfgSection.dept,cfgSection.batch,cfgSection.section)) || {};
+      const adminCfg = DB.section_configs.find(c => c.dept === '*') || {};
+      const scopes = meScopes(u).filter(s => s.dept && s.batch && s.section);
+      return modalShell('My profile', `
+        <div class="row" style="margin-bottom:16px">
+          <div class="avatar" style="width:54px;height:54px;border-radius:14px;font-size:20px;background:${colorFor(u.id)}">${esc(initials(u.name))}</div>
+          <div><div style="font-weight:650;font-size:16px">${esc(u.name)}</div><div class="small muted">${esc(u.student_id)} · ${esc(u.email||'')}</div><div style="margin-top:5px">${roleBadge(u)}</div></div>
+        </div>
+        <div class="frow"><label class="f"><span>Full name</span><input class="inp" id="pf_name" value="${esc(u.name)}" data-fk="pf_name"></label><label class="f"><span>Email</span><input class="inp" id="pf_email" value="${esc(u.email||'')}" data-fk="pf_email"></label></div>
+        <div class="frow">
+          <label class="f"><span>Department</span><input class="inp" id="pf_dept" value="${esc(u.dept||'')}" placeholder="e.g. SWE" style="text-transform:uppercase" data-fk="pf_dept"></label>
+          <label class="f"><span>Batch</span><input class="inp" id="pf_batch" value="${esc(u.batch||'')}" placeholder="e.g. 48" data-fk="pf_batch"></label>
+        </div>
+        <label class="f"><span>Primary section</span><input class="inp" id="pf_section" value="${esc(u.section||'')}" placeholder="e.g. G" maxlength="3" style="text-transform:uppercase" data-fk="pf_section"></label>
+        ${isT ? `
+          <div class="divider"></div>
+          <div class="row" style="margin-bottom:10px"><b style="font-size:14px">Additional sections (Teacher)</b></div>
+          <div id="extraSectionsList">
+            ${extraSectionsDraft.map((s,i)=>`<div class="member-box"><div class="mb-head">Section ${i+1}<button class="btn ghost sm" style="margin-left:auto;padding:2px 7px" onclick="removeExtraSection(${i})">Remove</button></div>
+              <div class="frow" style="gap:8px"><input class="inp" placeholder="Dept" value="${esc(s.dept||'')}" oninput="extraSectionsDraft[${i}].dept=this.value.toUpperCase()"><input class="inp" placeholder="Batch" value="${esc(s.batch||'')}" oninput="extraSectionsDraft[${i}].batch=this.value"><input class="inp" placeholder="Section" value="${esc(s.section||'')}" oninput="extraSectionsDraft[${i}].section=this.value.toUpperCase()"></div>
+            </div>`).join('') || `<div class="small muted" style="padding:8px 0">No extra sections.</div>`}
+          </div>
+          <button class="btn sm" onclick="addExtraSection()">+ Add section</button>
+        ` : ''}
+        ${isA ? `
+          <div class="divider"></div>
+          <div style="font-weight:600;font-size:14px;margin-bottom:6px">🌐 Global Sheet config (Admin)</div>
+          <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:12px">
+            <div class="tiny muted">Submissions from <b>ALL sections</b> will go to your Google Sheet. The Apps Script auto-creates:<br>• <b>Submissions</b> (master) • <b>Per-presentation</b> tabs • <b>Per-section</b> tabs (e.g. SWE-48-G) • <b>Per-course</b> tabs (e.g. CSE 2205)</div>
+          </div>
+          <label class="f"><span>Global Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(adminCfg.webhook_url||'')}" placeholder="https://script.google.com/macros/s/…/exec" data-fk="cf_url"></label>
+          <label class="f"><span>Global Secret</span><input class="inp" id="cf_secret" value="${esc(adminCfg.webhook_secret||'')}" placeholder="your-secret-phrase" data-fk="cf_secret"></label>
+          <button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('*','*','*')">Save global config</button>
+        ` : ''}
+        ${!isA && canManage(u) ? `
+          <div class="divider"></div>
+          <div style="font-weight:600;font-size:14px;margin-bottom:10px">Presentation Sheet config</div>
+          <label class="f"><span>Section</span>
+            <select class="inp" id="cf_scope" onchange="selectConfigScope(this.value)">
+              ${scopes.map(s => { const v = sectionKey(s.dept,s.batch,s.section); const sel = sectionKey(cfgSection.dept,cfgSection.batch,cfgSection.section)===v?'selected':''; return `<option value="${v}" ${sel}>${esc(s.dept)}-${esc(s.batch)}-${esc(s.section)}</option>`; }).join('')}
+            </select>
+          </label>
+          <label class="f"><span>Google Form URL (optional)</span><input class="inp" id="cf_form" value="${esc(cfg.form_url||'')}" placeholder="https://docs.google.com/forms/…" data-fk="cf_form"></label>
+          <label class="f"><span>Apps Script Webhook URL</span><input class="inp" id="cf_url" value="${esc(cfg.webhook_url||'')}" placeholder="https://script.google.com/macros/s/…/exec" data-fk="cf_url"></label>
+          <label class="f"><span>Secret</span><input class="inp" id="cf_secret" value="${esc(cfg.webhook_secret||'')}" placeholder="your-secret-phrase" data-fk="cf_secret"></label>
+          <button class="btn primary" style="margin-bottom:12px" onclick="saveSectionConfig('${cfgSection.dept}','${cfgSection.batch}','${cfgSection.section}')">Save section config</button>
+        ` : ''}
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveProfile()">Save changes</button>`);
+    }
 
-    case 'resource': return modalShell('Upload resource', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="r_title" placeholder="e.g. Data Structures Notes" data-fk="r_title"></label>
-      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="r_course" placeholder="CSE 2201" data-fk="r_course"></label><label class="f"><span>Type</span><select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${t==='PDF (Drive)'?'selected':''}>${t}</option>`).join('')}</select></label></div>
-      <label class="f"><span>Link (Google Drive / Docs / any URL)</span><input class="inp" id="r_link" placeholder="https://drive.google.com/…" data-fk="r_link"></label>
-      <label class="f"><span>Or upload a file (max 5 MB)</span><input class="inp" type="file" id="r_file"></label>
-      <label class="f"><span>Tags (comma separated)</span><input class="inp" id="r_tags" placeholder="midterm, important" data-fk="r_tags"></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResource()">Upload</button>`);
+    case 'resource': {
+      const r = m.id ? DB.resources.find(x=>x.id===m.id) : null;
+      return modalShell(r ? 'Edit resource' : 'Upload resource', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="r_title" value="${esc(r?.title||'')}" data-fk="r_title"></label>
+        <div class="frow">
+          <label class="f"><span>Course</span><input class="inp" id="r_course" value="${esc(r?.course||'')}" data-fk="r_course"></label>
+          <label class="f"><span>Type</span><select class="inp" id="r_type">${RESOURCE_TYPES.map(t=>`<option ${((r?.type||'PDF (Drive)')===t)?'selected':''}>${t}</option>`).join('')}</select></label>
+        </div>
+        <label class="f"><span>Topic</span><input class="inp" id="r_topic" value="${esc(r?.topic||'')}" data-fk="r_topic"></label>
+        <label class="f"><span>Teacher</span><input class="inp" id="r_teacher" value="${esc(r?.teacher||'')}" data-fk="r_teacher"></label>
+        <label class="f"><span>Link (Drive/Docs/URL)</span><input class="inp" id="r_link" value="${esc(r?.link||'')}" data-fk="r_link"></label>
+        ${!r ? `<label class="f"><span>Or upload a file (max 5 MB)</span><input class="inp" type="file" id="r_file"></label>` : `<div class="tiny muted" style="margin-bottom:10px">Existing file: ${esc(r.file_name||'—')}</div>`}
+        <label class="f"><span>Tags (comma separated)</span><input class="inp" id="r_tags" value="${esc((r?.tags||[]).join(', '))}" data-fk="r_tags"></label>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResource('${r?r.id:''}')">${r?'Save changes':'Upload'}</button>`);
+    }
 
     case 'notice': {
       const n = m.id ? DB.notices.find(x=>x.id===m.id) : null;
       return modalShell(n ? 'Edit notice' : 'New notice', `
-        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b> only.</div></div>
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
         <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="n_title" value="${esc(n?.title||'')}" data-fk="n_title"></label>
         <label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="n_body" style="min-height:130px" data-fk="n_body">${esc(n?.body||'')}</textarea></label>
         <div class="frow"><label class="f"><span>Category</span><select class="inp" id="n_cat">${NOTICE_CATS.map(c=>`<option ${n?.category===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="f"><span>Priority</span><select class="inp" id="n_pri">${PRIORITIES.map(p=>`<option ${n?.priority===p?'selected':''}>${p}</option>`).join('')}</select></label></div>
@@ -903,22 +1190,34 @@ function viewModal(u){
       `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveNotice('${n?n.id:''}')">${n?'Save changes':'Publish'}</button>`);
     }
 
-    case 'event': return modalShell('Add event', `
-      <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="e_title" placeholder="Data Structures Midterm" data-fk="e_title"></label>
-      <div class="frow"><label class="f"><span>Type</span><select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></label><label class="f"><span>Course</span><input class="inp" id="e_course" placeholder="CSE 2201" data-fk="e_course"></label></div>
-      <div class="frow"><label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${iso(0)}"></label><label class="f"><span>Location</span><input class="inp" id="e_loc" placeholder="Room 402" data-fk="e_loc"></label></div>
-      <div class="frow"><label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="09:00"></label><label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="10:00"></label></div>
-      <label class="f"><span>Description</span><textarea class="inp" id="e_desc" data-fk="e_desc"></textarea></label>
-    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEvent()">Add event</button>`);
+    case 'event': {
+      const e = m.id ? DB.events.find(x=>x.id===m.id) : null;
+      return modalShell(e ? 'Edit event' : 'Add event', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
+        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="e_title" value="${esc(e?.title||'')}" placeholder="Data Structures Midterm" data-fk="e_title"></label>
+        <div class="frow">
+          <label class="f"><span>Type</span><select class="inp" id="e_type">${EVENT_TYPES.map(t=>`<option ${e?.type===t?'selected':''}>${t}</option>`).join('')}</select></label>
+          <label class="f"><span>Course</span><input class="inp" id="e_course" value="${esc(e?.course||'')}" data-fk="e_course"></label>
+        </div>
+        <div class="frow">
+          <label class="f"><span>Date <span class="req">*</span></span><input class="inp" type="date" id="e_date" value="${esc(e?.date||iso(0))}"></label>
+          <label class="f"><span>Location</span><input class="inp" id="e_loc" value="${esc(e?.location||'')}" data-fk="e_loc"></label>
+        </div>
+        <div class="frow">
+          <label class="f"><span>Start</span><input class="inp" type="time" id="e_st" value="${esc(e?.start_time||'09:00')}"></label>
+          <label class="f"><span>End</span><input class="inp" type="time" id="e_et" value="${esc(e?.end_time||'10:00')}"></label>
+        </div>
+        <label class="f"><span>Description</span><textarea class="inp" id="e_desc" data-fk="e_desc">${esc(e?.description||'')}</textarea></label>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEvent('${e?e.id:''}')">${e?'Save changes':'Add event'}</button>`);
+    }
 
     case 'group': {
       const g = m.id ? DB.groups.find(x=>x.id===m.id) : null;
       return modalShell(g ? 'Edit group' : 'Add group', `
         <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
-        <label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="g_name" value="${esc(g?.name||'')}" placeholder="e.g. SWE-48-G WhatsApp" data-fk="g_name"></label>
+        <label class="f"><span>Group name <span class="req">*</span></span><input class="inp" id="g_name" value="${esc(g?.name||'')}" data-fk="g_name"></label>
         <label class="f"><span>Platform</span><select class="inp" id="g_platform">${GROUP_PLATFORMS.map(p => `<option value="${p}" ${g?.platform===p?'selected':''}>${PLATFORM_META[p].name}</option>`).join('')}</select></label>
-        <label class="f"><span>Group link <span class="req">*</span></span><input class="inp" id="g_link" value="${esc(g?.link||'')}" placeholder="https://chat.whatsapp.com/…" data-fk="g_link"></label>
+        <label class="f"><span>Group link <span class="req">*</span></span><input class="inp" id="g_link" value="${esc(g?.link||'')}" data-fk="g_link"></label>
         <label class="f"><span>Description</span><textarea class="inp" id="g_desc" data-fk="g_desc">${esc(g?.description||'')}</textarea></label>
       `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveGroup('${g?g.id:''}')">${g?'Save changes':'Add'}</button>`);
     }
@@ -926,7 +1225,7 @@ function viewModal(u){
     case 'presentation': return modalShell('New presentation event', `
       <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Posting to <b style="color:var(--accent)">${esc(classLabel(u))}</b></div></div>
       <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="p_title" placeholder="Database Project Presentation" data-fk="p_title"></label>
-      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="p_course" placeholder="CSE 2205" data-fk="p_course"></label><label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label></div>
+      <div class="frow"><label class="f"><span>Course</span><input class="inp" id="p_course" data-fk="p_course"></label><label class="f"><span>Deadline</span><input class="inp" type="date" id="p_deadline" value="${iso(7)}"></label></div>
       <label class="f"><span>Max team size</span><input class="inp" type="number" id="p_max" min="1" max="12" value="4"></label>
       <label class="f"><span>Instructions</span><textarea class="inp" id="p_instr" data-fk="p_instr"></textarea></label>
     `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="savePresentation()">Create</button>`);
@@ -942,7 +1241,7 @@ function viewModal(u){
       const max = p?.max_team_size || 6;
       return modalShell(existing ? 'Update submission' : 'Submit presentation', `
         <div class="card" style="background:var(--panel2);margin-bottom:16px;padding:12px"><div style="font-weight:600;font-size:13.5px">${esc(p?.title||'Presentation')}</div><div class="tiny muted">Deadline ${fmtDate(p?.deadline)}</div></div>
-        <label class="f"><span>Presentation link <span class="req">*</span></span><input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" placeholder="https://…" data-fk="sb_link" oninput="submissionDraft.link=this.value"></label>
+        <label class="f"><span>Presentation link <span class="req">*</span></span><input class="inp" id="sb_link" value="${esc(submissionDraft.link)}" data-fk="sb_link" oninput="submissionDraft.link=this.value"></label>
         <label class="f"><span>Team name</span><input class="inp" id="sb_team" value="${esc(submissionDraft.teamName)}" data-fk="sb_team" oninput="submissionDraft.teamName=this.value"></label>
         <div class="frow"><label class="f"><span>Leader name <span class="req">*</span></span><input class="inp" id="sb_ln" value="${esc(submissionDraft.leaderName)}" data-fk="sb_ln" oninput="submissionDraft.leaderName=this.value"></label><label class="f"><span>Leader ID <span class="req">*</span></span><input class="inp" id="sb_li" value="${esc(submissionDraft.leaderId)}" data-fk="sb_li" oninput="submissionDraft.leaderId=this.value"></label></div>
         <div class="divider"></div>
@@ -951,18 +1250,61 @@ function viewModal(u){
         <button class="btn sm" onclick="addMemberRow()">+ Add member</button>
       `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitPresentation('${m.presentationId}','${m.submissionId||''}')">${existing?'Update':'Submit'}</button>`);
     }
+
+    case 'feedback': return modalShell('Submit feedback', `
+      <label class="f"><span>Subject <span class="req">*</span></span><input class="inp" id="fb_subj" data-fk="fb_subj"></label>
+      <label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="fb_body" style="min-height:120px" data-fk="fb_body"></textarea></label>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedback()">Send to admin</button>`);
+
+    case 'replyFeedback': {
+      const f = DB.feedback.find(x=>x.id===m.id);
+      return modalShell('Reply to feedback', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div style="font-weight:600;font-size:13.5px">${esc(f?.subject||'')}</div><div class="tiny muted" style="margin-top:4px;white-space:pre-wrap">${esc(f?.body||'')}</div></div>
+        <label class="f"><span>Your reply <span class="req">*</span></span><textarea class="inp" id="fb_reply" style="min-height:130px" data-fk="fb_reply"></textarea></label>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitFeedbackReply('${m.id}')">Send reply</button>`);
+    }
+
+    case 'instruction': {
+      const n = m.id ? DB.instructions.find(x=>x.id===m.id) : null;
+      return modalShell(n ? 'Edit instruction' : 'Add instruction', `
+        <div class="card" style="background:var(--panel2);padding:10px;margin-bottom:14px"><div class="tiny muted">Only visible to CRs, Teachers and Admins.</div></div>
+        <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="in_title" value="${esc(n?.title||'')}" data-fk="in_title"></label>
+        <label class="f"><span>Body <span class="req">*</span></span><textarea class="inp" id="in_body" style="min-height:160px" data-fk="in_body">${esc(n?.body||'')}</textarea></label>
+      `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveInstruction('${n?n.id:''}')">${n?'Save changes':'Add'}</button>`);
+    }
+
+    case 'helpRequest': return modalShell('New help request', `
+      <label class="f"><span>Target audience <span class="req">*</span></span>
+        <select class="inp" id="h_target">
+          <option value="students">All students in my section</option>
+          <option value="cr">CR of my section</option>
+          <option value="teacher">Teacher of my section</option>
+        </select>
+      </label>
+      <label class="f"><span>Title <span class="req">*</span></span><input class="inp" id="h_title" data-fk="h_title"></label>
+      <label class="f"><span>Details <span class="req">*</span></span><textarea class="inp" id="h_body" style="min-height:120px" data-fk="h_body"></textarea></label>
+    `, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitHelpRequest()">Post request</button>`);
+
+    case 'day': {
+      const evs = DB.events.filter(e => e.date === m.date).sort(sortByDate);
+      return modalShell(fmtDate(m.date), `
+        ${evs.length ? `<div class="stack">${evs.map(e=>`
+          <div class="list-item">
+            <div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div>
+            <div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${esc(e.start_time)}–${esc(e.end_time)} · ${esc(e.type)}${e.location?' · '+esc(e.location):''}</div>${e.description?`<div class="tiny muted" style="margin-top:3px">${esc(e.description)}</div>`:''}</div>
+            ${canManage(u)?`<button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="closeModal();openModal('event',{id:'${e.id}'})">✎</button>`:''}
+          </div>`).join('')}</div>` : `<div class="empty" style="padding:26px"><span class="big">🗓</span>Nothing on this day.</div>`}
+      `, `${canManage(u)?`<button class="btn primary" onclick="const d='${m.date}';closeModal();openModal('event');setTimeout(()=>{const el=document.getElementById('e_date');if(el)el.value=d;},30)">+ Add event on this day</button>`:''}<button class="btn ghost" onclick="closeModal()">Close</button>`);
+    }
   }
   return '';
 }
 
-function addMemberRow(){
-  const p = DB.presentations.find(x => x.id === S.modal.presentationId);
-  const max = p?.max_team_size || 6;
-  if (memberDraft.length >= max - 1){ toast('Team size limit reached', 'err'); return; }
-  memberDraft.push({ name:'', id:'' });
-  render();
-}
+function addMemberRow(){ const p = DB.presentations.find(x=>x.id===S.modal.presentationId); const max = p?.max_team_size || 6; if (memberDraft.length >= max - 1){ toast('Team size limit reached', 'err'); return; } memberDraft.push({name:'',id:''}); render(); }
 function removeMemberRow(i){ memberDraft.splice(i,1); render(); }
+function addExtraSection(){ extraSectionsDraft.push({dept:'',batch:'',section:''}); render(); }
+function removeExtraSection(i){ extraSectionsDraft.splice(i,1); render(); }
+function selectConfigScope(v){ const [d,b,s] = v.split('|'); selectedConfigSection = { dept:d, batch:b, section:s }; render(); }
 
 async function saveProfile(){
   const name = $('#pf_name').value.trim();
@@ -975,6 +1317,10 @@ async function saveProfile(){
   if (dept) updates.dept = dept;
   if (batch) updates.batch = batch;
   if (section) updates.section = section;
+  if (isTeacher(S.profile)){
+    const cleaned = extraSectionsDraft.filter(s => s.dept && s.batch && s.section).map(s => ({ dept:s.dept.toUpperCase(), batch:s.batch, section:s.section.toUpperCase() }));
+    updates.extra_sections = cleaned;
+  }
   const { error } = await sb.from('profiles').update(updates).eq('id', S.profile.id);
   if (error){ toast(error.message, 'err'); return; }
   Object.assign(S.profile, updates);
@@ -984,13 +1330,26 @@ async function saveProfile(){
   render();
 }
 
-async function saveResource(){
+async function saveSectionConfig(dept,batch,section){
+  const form_url = ($('#cf_form')?.value || '').trim();
+  const webhook_url = ($('#cf_url')?.value || '').trim();
+  const webhook_secret = ($('#cf_secret')?.value || '').trim();
+  const existing = DB.section_configs.find(c => sectionKey(c.dept,c.batch,c.section) === sectionKey(dept,batch,section));
+  const payload = { dept, batch, section, form_url, webhook_url, webhook_secret, updated_by: S.profile.id, updated_at: new Date().toISOString() };
+  let error;
+  if (existing){ ({ error } = await sb.from('section_configs').update(payload).eq('id', existing.id)); }
+  else { ({ error } = await sb.from('section_configs').insert(payload)); }
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Config saved');
+}
+
+async function saveResource(id){
   const title = $('#r_title').value.trim();
   const link = $('#r_link').value.trim();
   const fileInput = $('#r_file');
-  const file = fileInput.files && fileInput.files[0];
+  const file = fileInput?.files && fileInput.files[0];
   if (!title){ toast('Title required', 'err'); return; }
-  if (!link && !file){ toast('Provide a link or file', 'err'); return; }
+  if (!id && !link && !file){ toast('Provide a link or file', 'err'); return; }
   let filePath = null, fileName = null;
   if (file){
     if (file.size > 5 * 1024 * 1024){ toast('File too large (max 5 MB)', 'err'); return; }
@@ -1000,14 +1359,12 @@ async function saveResource(){
     filePath = path; fileName = file.name;
   }
   const me = S.profile;
-  const { error } = await sb.from('resources').insert({
-    title, course: $('#r_course').value.trim(), type: $('#r_type').value,
-    link: link || null, file_path: filePath, file_name: fileName,
-    tags: $('#r_tags').value.split(',').map(t=>t.trim()).filter(Boolean),
-    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), uploaded_by: me.id
-  });
+  const data = { title, course: $('#r_course').value.trim(), type: $('#r_type').value, topic: $('#r_topic')?.value.trim()||'', teacher: $('#r_teacher')?.value.trim()||'', link: link || null, tags: $('#r_tags').value.split(',').map(t=>t.trim()).filter(Boolean) };
+  let error;
+  if (id){ if (filePath) { data.file_path = filePath; data.file_name = fileName; } ({ error } = await sb.from('resources').update(data).eq('id', id)); }
+  else { ({ error } = await sb.from('resources').insert({ ...data, file_path: filePath, file_name: fileName, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), uploaded_by: me.id })); }
   if (error){ toast(error.message, 'err'); return; }
-  toast('Resource uploaded');
+  toast(id ? 'Resource updated' : 'Resource uploaded');
   closeModal();
 }
 
@@ -1017,32 +1374,19 @@ async function saveNotice(id){
   if (!title || !body){ toast('Title and body required', 'err'); return; }
   const me = S.profile;
   const data = { title, body, category: $('#n_cat').value, priority: $('#n_pri').value, expires_at: $('#n_exp').value || null, pinned: $('#n_pin').value === 'yes' };
-  if (id){
-    const { error } = await sb.from('notices').update(data).eq('id', id);
-    if (error){ toast(error.message, 'err'); return; }
-    toast('Notice updated');
-  } else {
-    const { error } = await sb.from('notices').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
-    if (error){ toast(error.message, 'err'); return; }
-    await notifyClass(me.id, 'New notice', title, 'notices');
-    toast('Notice published');
-  }
+  if (id){ const { error } = await sb.from('notices').update(data).eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Notice updated'); }
+  else { const { error } = await sb.from('notices').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New notice', title, 'notices'); toast('Notice published'); }
   closeModal();
 }
 
-async function saveEvent(){
+async function saveEvent(id){
   const title = $('#e_title').value.trim();
   const date = $('#e_date').value;
   if (!title || !date){ toast('Title and date required', 'err'); return; }
   const me = S.profile;
-  const { error } = await sb.from('events').insert({
-    title, date, type: $('#e_type').value, course: $('#e_course').value.trim(), location: $('#e_loc').value.trim(),
-    start_time: $('#e_st').value || '09:00', end_time: $('#e_et').value || '10:00', description: $('#e_desc').value.trim(),
-    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id
-  });
-  if (error){ toast(error.message, 'err'); return; }
-  await notifyClass(me.id, 'New event scheduled', `${title} — ${fmtDate(date)}`, 'calendar');
-  toast('Event added');
+  const data = { title, date, type: $('#e_type').value, course: $('#e_course').value.trim(), location: $('#e_loc').value.trim(), start_time: $('#e_st').value || '09:00', end_time: $('#e_et').value || '10:00', description: $('#e_desc').value.trim() };
+  if (id){ const { error } = await sb.from('events').update(data).eq('id', id); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'Event updated', `${title} — ${fmtDate(date)}`, 'calendar'); toast('Event updated'); }
+  else { const { error } = await sb.from('events').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New event', `${title} — ${fmtDate(date)}`, 'calendar'); toast('Event added'); }
   closeModal();
 }
 
@@ -1053,16 +1397,8 @@ async function saveGroup(id){
   if (!/^https?:\/\//i.test(link)){ toast('Link must start with http:// or https://', 'err'); return; }
   const me = S.profile;
   const data = { name, link, platform: $('#g_platform').value, description: $('#g_desc').value.trim() };
-  if (id){
-    const { error } = await sb.from('groups').update(data).eq('id', id);
-    if (error){ toast(error.message, 'err'); return; }
-    toast('Group updated');
-  } else {
-    const { error } = await sb.from('groups').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
-    if (error){ toast(error.message, 'err'); return; }
-    await notifyClass(me.id, 'New class group added', name, 'groups');
-    toast('Group added');
-  }
+  if (id){ const { error } = await sb.from('groups').update(data).eq('id', id); if (error){ toast(error.message, 'err'); return; } toast('Group updated'); }
+  else { const { error } = await sb.from('groups').insert({ ...data, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id }); if (error){ toast(error.message, 'err'); return; } await notifyClass(me.id, 'New class group added', name, 'groups'); toast('Group added'); }
   closeModal();
 }
 
@@ -1071,39 +1407,73 @@ async function savePresentation(){
   const deadline = $('#p_deadline').value;
   if (!title || !deadline){ toast('Title and deadline required', 'err'); return; }
   const me = S.profile;
-  const { error } = await sb.from('presentations').insert({
-    title, deadline, course: $('#p_course').value.trim(), max_team_size: parseInt($('#p_max').value) || 4, instructions: $('#p_instr').value.trim(),
-    dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id
-  });
+  const { error } = await sb.from('presentations').insert({ title, deadline, course: $('#p_course').value.trim(), max_team_size: parseInt($('#p_max').value)||4, instructions: $('#p_instr').value.trim(), dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase(), created_by: me.id });
   if (error){ toast(error.message, 'err'); return; }
   await notifyClass(me.id, 'New presentation open', `${title} — deadline ${fmtDate(deadline)}`, 'presentations');
   toast('Presentation created');
   closeModal();
 }
 
+async function submitFeedback(){
+  const subject = $('#fb_subj').value.trim();
+  const body = $('#fb_body').value.trim();
+  if (!subject || !body){ toast('Subject and body required', 'err'); return; }
+  const { error } = await sb.from('feedback').insert({ user_id: S.profile.id, subject, body });
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Feedback sent to admin');
+  closeModal();
+}
+async function submitFeedbackReply(id){
+  const reply = $('#fb_reply').value.trim();
+  if (!reply){ toast('Reply required', 'err'); return; }
+  const { error } = await sb.from('feedback').update({ reply, replied_by: S.profile.id, replied_at: new Date().toISOString() }).eq('id', id);
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Reply sent');
+  closeModal();
+}
+async function submitHelpRequest(){
+  const title = $('#h_title').value.trim();
+  const body = $('#h_body').value.trim();
+  const target = $('#h_target').value;
+  if (!title || !body){ toast('Title and body required', 'err'); return; }
+  const me = S.profile;
+  const { error } = await sb.from('help_requests').insert({ user_id: me.id, title, body, target, dept: (me.dept||'').toUpperCase(), batch: me.batch, section: (me.section||'').toUpperCase() });
+  if (error){ toast(error.message, 'err'); return; }
+  toast('Help request posted');
+  closeModal();
+}
+
 async function syncToSheet(sub){
-  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL.includes('PASTE_')) return false;
   const p = DB.presentations.find(x => x.id === sub.presentation_id) || {};
-  const payload = {
-    token: SHEET_SECRET, submissionId: sub.id, presentation: p.title || '', course: p.course || '',
+  const sectionCfg = DB.section_configs.find(c => c.dept !== '*' && sectionKey(c.dept, c.batch, c.section) === sectionKey(p.dept, p.batch, p.section));
+  const adminCfg = DB.section_configs.find(c => c.dept === '*');
+  const basePayload = {
+    submissionId: sub.id, presentation: p.title || '', course: p.course || '',
+    dept: (p.dept || '').toUpperCase(), batch: p.batch || '', section: (p.section || '').toUpperCase(),
     submittedAt: sub.submitted_at || new Date().toISOString(),
     status: sub.updated_at && sub.updated_at !== sub.submitted_at ? 'Updated' : 'Submitted',
     submitterId: (S.profile && S.profile.student_id) || '', link: sub.link, teamName: sub.team_name || '',
     leaderName: sub.leader_name, leaderId: sub.leader_id, members: sub.members || []
   };
-  try {
-    await fetch(SHEET_WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), keepalive: true });
-    return true;
-  } catch(e) { console.warn('Sheet sync failed', e); return false; }
+  let sent = false;
+  if (sectionCfg?.webhook_url && !sectionCfg.webhook_url.includes('PASTE_')){
+    try { await fetch(sectionCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: sectionCfg.webhook_secret || '', scope: 'section' }), keepalive: true }); sent = true; }
+    catch(e){ console.warn('Section sync failed', e); }
+  }
+  if (adminCfg?.webhook_url && !adminCfg.webhook_url.includes('PASTE_')){
+    try { await fetch(adminCfg.webhook_url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ ...basePayload, token: adminCfg.webhook_secret || '', scope: 'admin' }), keepalive: true }); sent = true; }
+    catch(e){ console.warn('Admin sync failed', e); }
+  }
+  return sent;
 }
 
 async function submitPresentation(pid, existingId){
   const p = DB.presentations.find(x => x.id === pid);
   if (!p){ toast('Presentation not found', 'err'); return; }
-  const link = (submissionDraft.link || '').trim();
-  const teamName = (submissionDraft.teamName || '').trim();
-  const leaderName = (submissionDraft.leaderName || '').trim();
-  const leaderId = (submissionDraft.leaderId || '').trim();
+  const link = (submissionDraft.link||'').trim();
+  const teamName = (submissionDraft.teamName||'').trim();
+  const leaderName = (submissionDraft.leaderName||'').trim();
+  const leaderId = (submissionDraft.leaderId||'').trim();
   if (!link || !/^https?:\/\/\S+\.\S+/i.test(link)){ toast('Enter a valid URL', 'err'); return; }
   if (!leaderName || !leaderId){ toast('Leader name and ID required', 'err'); return; }
   const members = [];
@@ -1114,25 +1484,14 @@ async function submitPresentation(pid, existingId){
     if (!nm && !mid) continue;
     if (!nm || !mid){ toast(`Member ${i+1}: both fields required`, 'err'); return; }
     if (seen.has(mid)){ toast(`Duplicate ID: ${mid}`, 'err'); return; }
-    seen.add(mid);
-    members.push({ name: nm, id: mid });
+    seen.add(mid); members.push({ name: nm, id: mid });
   }
   const max = p.max_team_size || 6;
   if (members.length + 1 > max){ toast(`Team size limit is ${max}`, 'err'); return; }
-  const payload = { presentation_id: pid, link, team_name: teamName || null, leader_name: leaderName, leader_id: leaderId, members, submitted_by: S.profile.id, updated_at: new Date().toISOString() };
+  const payload = { presentation_id: pid, link, team_name: teamName||null, leader_name: leaderName, leader_id: leaderId, members, submitted_by: S.profile.id, updated_at: new Date().toISOString() };
   let saved = null;
-  if (existingId){
-    const { data, error } = await sb.from('submissions').update(payload).eq('id', existingId).select().single();
-    if (error){ toast(error.message, 'err'); return; }
-    saved = data; toast('Submission updated');
-  } else {
-    payload.submitted_at = new Date().toISOString();
-    const { data, error } = await sb.from('submissions').insert(payload).select().single();
-    if (error){ toast(error.message, 'err'); return; }
-    saved = data;
-    await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id), 'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations');
-    toast('Submission saved');
-  }
+  if (existingId){ const { data, error } = await sb.from('submissions').update(payload).eq('id', existingId).select().single(); if (error){ toast(error.message, 'err'); return; } saved = data; toast('Submission updated'); }
+  else { payload.submitted_at = new Date().toISOString(); const { data, error } = await sb.from('submissions').insert(payload).select().single(); if (error){ toast(error.message, 'err'); return; } saved = data; await notify(DB.profiles.filter(x=>x.role==='cr'||x.role==='admin').map(x=>x.id), 'New presentation submission', `${leaderName} submitted for "${p.title}".`, 'presentations'); toast('Submission saved'); }
   if (saved) syncToSheet(saved);
   memberDraft = [];
   submissionDraft = { link:'', teamName:'', leaderName:'', leaderId:'' };
@@ -1157,10 +1516,13 @@ async function loadProfile(){
   for (let i=0; i<5; i++){
     const { data } = await sb.from('profiles').select('*').eq('id', S.user.id).maybeSingle();
     if (data){
-      if (data.disabled){
-        await sb.auth.signOut();
-        toast('Your account has been removed by admin', 'err');
-        return;
+      if (data.disabled){ await sb.auth.signOut(); toast('Your account has been removed by admin', 'err'); return; }
+      const meta = S.user.user_metadata || {};
+      const needsSync = (!data.dept || data.dept === 'CSE') && meta.dept && meta.dept !== 'CSE';
+      if (needsSync){
+        const patch = { dept: (meta.dept||'').toUpperCase(), batch: meta.batch || data.batch, section: (meta.section||'').toUpperCase() };
+        await sb.from('profiles').update(patch).eq('id', S.user.id);
+        Object.assign(data, patch);
       }
       S.profile = data;
       await fetchAll();
