@@ -1541,10 +1541,29 @@ function viewModal(u){
       if (!g) return modalShell('Join', '<div class="empty">Not found</div>', `<button class="btn ghost" onclick="closeModal()">Close</button>`);
       return modalShell('Request to join ' + g.name, `<div class="card" style="background:var(--panel2);padding:12px;margin-bottom:14px"><div class="row wrap" style="gap:8px">${g.topic ? `<span class="tag blue">📌 ${esc(g.topic)}</span>` : ''}<span class="tag">${getGroupMembers(g).length}/${g.max_size} members</span></div></div><label class="f"><span>Message to leader (optional)</span><textarea class="inp" id="pjr_msg" placeholder="e.g. Hi! I'd like to join…" style="min-height:100px"></textarea></label>`, `<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="sendJoinRequest('${g.id}')">Send</button>`);
     }
-    case 'day': {
-      const evs = DB.events.filter(e => e.date === m.date).sort(sortByDate);
-      return modalShell(fmtDate(m.date), `${evs.length ? `<div class="stack">${evs.map(e=>`<div class="list-item"><div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div><div class="lead"><div class="t">${esc(e.title)}</div><div class="tiny muted">${esc(e.start_time)}–${esc(e.end_time)} · ${esc(e.type)}${e.location?' · '+esc(e.location):''}</div>${e.description?`<div class="tiny muted" style="margin-top:3px">${esc(e.description)}</div>`:''}</div>${canManage(u)?`<button class="icon-btn" style="width:28px;height:28px;font-size:11px" onclick="closeModal();openModal('event',{id:'${e.id}'})">✎</button>`:''}</div>`).join('')}</div>` : `<div class="empty" style="padding:26px"><span class="big">🗓</span>Nothing on this day.</div>`}`, `${canManage(u)?`<button class="btn primary" onclick="const d='${m.date}';closeModal();openModal('event');setTimeout(()=>{const el=document.getElementById('e_date');if(el)el.value=d;},30)">+ Add event</button>`:''}<button class="btn ghost" onclick="closeModal()">Close</button>`);
-    }
+   case 'day': {
+  const evs = DB.events.filter(e => e.date === m.date).sort(sortByDate);
+  const canEdit = canManage(u);
+  return modalShell(fmtDate(m.date), `
+    ${evs.length ? `<div class="stack">${evs.map(e=>`
+      <div class="list-item">
+        <div class="dotc" style="background:${EVENT_COLORS[e.type]||'#888'}"></div>
+        <div class="lead">
+          <div class="t">${esc(e.title)}</div>
+          <div class="tiny muted">${esc(e.start_time)}–${esc(e.end_time)} · ${esc(e.type)}${e.location?' · '+esc(e.location):''}</div>
+          ${e.description?`<div class="tiny muted" style="margin-top:3px">${esc(e.description)}</div>`:''}
+        </div>
+        ${canEdit?`<div class="row" style="gap:4px">
+          <button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Edit" onclick="closeModal();openModal('event',{id:'${e.id}'})">✎</button>
+          <button class="icon-btn" style="width:30px;height:30px;font-size:12px" title="Delete" onclick="deleteEvent('${e.id}');closeModal();">🗑</button>
+        </div>`:''}
+      </div>
+    `).join('')}</div>` : `<div class="empty" style="padding:26px"><span class="big">🗓</span>Nothing on this day.</div>`}
+  `, `
+    ${canEdit?`<button class="btn primary" onclick="const d='${m.date}';closeModal();openModal('event');setTimeout(()=>{const el=document.getElementById('e_date');if(el)el.value=d;},30)">+ Add event</button>`:''}
+    <button class="btn ghost" onclick="closeModal()">Close</button>
+  `);
+}
   }
   return '';
 }
